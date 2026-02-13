@@ -231,7 +231,22 @@ def run_analysis_tests(mock_data_path: str, output_path: str):
 
 
 if __name__ == "__main__":
-    mock_data_path = "eu-call-finder/mock_data/sample_calls.json"
-    output_path = "eu-call-finder/mock_data/test_results.json"
+    import sys
+
+    # Allow command line argument to specify which mock data file to use
+    if len(sys.argv) > 1:
+        mock_data_file = sys.argv[1]
+        output_file = (
+            "test_results_"
+            + mock_data_file.replace("sample_calls_", "").replace(".json", "")
+            + ".json"
+        )
+    else:
+        # Default to latest version
+        mock_data_file = "sample_calls_v2.json"
+        output_file = "test_results_v2.json"
+
+    mock_data_path = f"mock_data/{mock_data_file}"
+    output_path = f"mock_data/{output_file}"
 
     run_analysis_tests(mock_data_path, output_path)

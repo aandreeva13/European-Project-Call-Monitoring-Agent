@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "test_run_at": "2026-02-13T12:14:29.888122",
+    "test_run_at": "2026-02-13T13:53:54.111549",
     "mock_data_file": "eu-call-finder/mock_data/sample_calls.json",
     "total_calls_analyzed": 12,
     "company_name": "NexGen AI Solutions"
@@ -22,16 +22,16 @@
         "average_score": 6.38,
         "max_score": 8.3,
         "portals_covered": [
-          "DIGITAL (HORIZON-CL4-2026-05)",
-          "DIGITAL (HORIZON-CL4-2027-04)",
           "DIGITAL (HORIZON-CL4-2026-04)",
-          "BG16RFOP002-1.015",
-          "DIGITAL (HORIZON-CL4-2026-HUMAN)",
-          "EIC Advanced Innovation Challenge (HORIZON-EIC-2026-AIC)",
+          "DIGITAL (HORIZON-CL4-2026-05)",
           "COST Open Call",
-          "FOOD (HORIZON-CL5-2026)",
+          "BG-RRP-3.008",
+          "DIGITAL (HORIZON-CL4-2027-04)",
+          "BG16RFOP002-1.015",
           "SPACE (HORIZON-CL6-2026)",
-          "BG-RRP-3.008"
+          "DIGITAL (HORIZON-CL4-2026-HUMAN)",
+          "FOOD (HORIZON-CL5-2026)",
+          "EIC Advanced Innovation Challenge (HORIZON-EIC-2026-AIC)"
         ],
         "portal_coverage": 333.3
       }
@@ -102,9 +102,9 @@
           ],
           "keyword_hits": [
             "trustworthy ai",
-            "machine learning",
+            "cybersecurity",
             "artificial intelligence",
-            "cybersecurity"
+            "machine learning"
           ],
           "relevant_past_projects": [
             {
@@ -530,9 +530,9 @@
             }
           ],
           "keyword_hits": [
-            "ai agents",
             "trustworthy ai",
-            "machine learning"
+            "machine learning",
+            "ai agents"
           ],
           "relevant_past_projects": [
             {
@@ -612,8 +612,8 @@
             }
           ],
           "keyword_hits": [
-            "automation",
-            "cloud"
+            "cloud",
+            "automation"
           ],
           "relevant_past_projects": [
             {
@@ -681,10 +681,10 @@
           "match_summary": "Weak match. Limited alignment with your expertise.",
           "domain_matches": [],
           "keyword_hits": [
-            "automation",
-            "cloud",
+            "cybersecurity",
             "digital transformation",
-            "cybersecurity"
+            "cloud",
+            "automation"
           ],
           "relevant_past_projects": [
             {

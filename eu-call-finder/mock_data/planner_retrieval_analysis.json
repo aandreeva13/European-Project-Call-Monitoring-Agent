@@ -1,0 +1,520 @@
+{
+  "metadata": {
+    "test_run_at": "2026-02-13T14:07:23.007722",
+    "planner_file": "eu-call-finder\\mock_data\\planner_output.json",
+    "retrieval_file": "eu-call-finder\\mock_data\\sample_calls_v2.json",
+    "total_calls_analyzed": 13
+  },
+  "summary": {
+    "avg_standard_score": 7.09,
+    "avg_planner_alignment": 5.54,
+    "avg_combined_score": 6.62,
+    "high_alignment_count": 4,
+    "low_alignment_count": 3,
+    "top_recommendation": "BG-RRP-2026-DIGITAL-089"
+  },
+  "planner_intent": {
+    "objective": "Find EU funding opportunities for AI and cybersecurity SME from Bulgaria",
+    "priority_domains": [
+      "Artificial Intelligence",
+      "Cybersecurity",
+      "Digital Transformation"
+    ],
+    "expected_calls": 20,
+    "actual_calls": 13
+  },
+  "ranked_results": [
+    {
+      "call_id": "BG-RRP-2026-DIGITAL-089",
+      "title": "Дигитална трансформация и внедряване на информационни системи",
+      "standard_score": 8.4,
+      "planner_alignment_score": 10,
+      "combined_score": 8.9,
+      "eligibility_passed": true,
+      "planner_validation": {
+        "planner_intent_match": {
+          "score": 10,
+          "matched_priority_domains": [
+            "digital transformation",
+            "it",
+            "cybersecurity"
+          ],
+          "must_have_keywords_found": 0,
+          "nice_to_have_keywords_found": 1,
+          "exclusion_violations": [],
+          "program_alignment": false,
+          "deadline_fit": "good",
+          "days_until_deadline": 90
+        },
+        "alignment_summary": "Mixed alignment. Positives: Strong domain alignment (3 priority domains); Deadline timing is ideal. Issues: Poor keyword alignment"
+      },
+      "analysis": {
+        "total": 8.4,
+        "domain_match": 9.0,
+        "keyword_match": 9.5,
+        "eligibility_fit": 10.0,
+        "budget_feasibility": 7.0,
+        "strategic_value": 5.0,
+        "deadline_comfort": 7.5,
+        "recommendation": {
+          "action": "apply",
+          "label": "КАНДИДАТСТВАЙТЕ",
+          "color": "green"
+        }
+      },
+      "rank": 1
+    },
+    {
+      "call_id": "HORIZON-CL4-2026-HUMAN-01-03",
+      "title": "Trustworthy AI for cybersecurity of critical infrastructure",
+      "standard_score": 8.2,
+      "planner_alignment_score": 10,
+      "combined_score": 8.7,
+      "eligibility_passed": false,
+      "planner_validation": {
+        "planner_intent_match": {
+          "score": 10,
+          "matched_priority_domains": [
+            "artificial intelligence",
+            "cybersecurity"
+          ],
+          "must_have_keywords_found": 4,
+          "nice_to_have_keywords_found": 1,
+          "exclusion_violations": [],
+          "program_alignment": true,
+          "deadline_fit": "good",
+          "days_until_deadline": 216
+        },
+        "alignment_summary": "Excellent alignment. Strong domain alignment (2 priority domains); Excellent keyword match (4 must-have keywords); Matches target programs; Deadline timing is ideal"
+      },
+      "analysis": {
+        "total": 8.2,
+        "domain_match": 8.5,
+        "keyword_match": 9.5,
+        "eligibility_fit": 9.4,
+        "budget_feasibility": 5.5,
+        "strategic_value": 6.5,
+        "deadline_comfort": 8.5,
+        "recommendation": {
+          "action": "apply",
+          "label": "КАНДИДАТСТВАЙТЕ",
+          "color": "green"
+        }
+      },
+      "rank": 2
+    },
+    {
+      "call_id": "HORIZON-EIC-2026-ACCEL-02",
+      "title": "EIC Accelerator - AI-Powered Cybersecurity Solutions for SMEs",
+      "standard_score": 8.1,
+      "planner_alignment_score": 10,
+      "combined_score": 8.7,
+      "eligibility_passed": true,
+      "planner_validation": {
+        "planner_intent_match": {
+          "score": 10,
+          "matched_priority_domains": [
+            "artificial intelligence",
+            "cybersecurity"
+          ],
+          "must_have_keywords_found": 2,
+          "nice_to_have_keywords_found": 1,
+          "exclusion_violations": [],
+          "program_alignment": true,
+          "deadline_fit": "too_soon",
+          "days_until_deadline": 19
+        },
+        "alignment_summary": "Mixed alignment. Positives: Strong domain alignment (2 priority domains); Good keyword match (2 must-have keywords); Matches target programs. Issues: Deadline too soon - may not have time to prepare"
+      },
+      "analysis": {
+        "total": 8.1,
+        "domain_match": 8.5,
+        "keyword_match": 9.5,
+        "eligibility_fit": 10.0,
+        "budget_feasibility": 7.0,
+        "strategic_value": 6.5,
+        "deadline_comfort": 4.5,
+        "recommendation": {
+          "action": "apply",
+          "label": "КАНДИДАТСТВАЙТЕ",
+          "color": "green"
+        }
+      },
+      "rank": 3
+    },
+    {
+      "call_id": "HORIZON-CL4-2026-HUMAN-04",
+      "title": "Advanced NLP and Language Technologies for European Digital Sovereignty",
+      "standard_score": 7.4,
+      "planner_alignment_score": 9,
+      "combined_score": 7.9,
+      "eligibility_passed": false,
+      "planner_validation": {
+        "planner_intent_match": {
+          "score": 9,
+          "matched_priority_domains": [
+            "artificial intelligence"
+          ],
+          "must_have_keywords_found": 3,
+          "nice_to_have_keywords_found": 0,
+          "exclusion_violations": [],
+          "program_alignment": true,
+          "deadline_fit": "good",
+          "days_until_deadline": 126
+        },
+        "alignment_summary": "Excellent alignment. Partial domain alignment (1 priority domain); Excellent keyword match (3 must-have keywords); Matches target programs; Deadline timing is ideal"
+      },
+      "analysis": {
+        "total": 7.4,
+        "domain_match": 6.8,
+        "keyword_match": 9.5,
+        "eligibility_fit": 9.4,
+        "budget_feasibility": 5.5,
+        "strategic_value": 5.0,
+        "deadline_comfort": 7.5,
+        "recommendation": {
+          "action": "consider",
+          "label": "ОБМИСЛЕТЕ",
+          "color": "yellow"
+        }
+      },
+      "rank": 4
+    },
+    {
+      "call_id": "COST-2026-AI-08",
+      "title": "COST Action: European Network for Trustworthy AI",
+      "standard_score": 7.6,
+      "planner_alignment_score": 6,
+      "combined_score": 7.1,
+      "eligibility_passed": true,
+      "planner_validation": {
+        "planner_intent_match": {
+          "score": 6,
+          "matched_priority_domains": [
+            "artificial intelligence"
+          ],
+          "must_have_keywords_found": 1,
+          "nice_to_have_keywords_found": 1,
+          "exclusion_violations": [],
+          "program_alignment": false,
+          "deadline_fit": "good",
+          "days_until_deadline": 70
+        },
+        "alignment_summary": "Excellent alignment. Partial domain alignment (1 priority domain); Good keyword match (1 must-have keywords); Deadline timing is ideal"
+      },
+      "analysis": {
+        "total": 7.6,
+        "domain_match": 7.0,
+        "keyword_match": 8.5,
+        "eligibility_fit": 10.0,
+        "budget_feasibility": 7.0,
+        "strategic_value": 5.0,
+        "deadline_comfort": 6.5,
+        "recommendation": {
+          "action": "consider",
+          "label": "ОБМИСЛЕТЕ",
+          "color": "yellow"
+        }
+      },
+      "rank": 5
+    },
+    {
+      "call_id": "ISUN-2027-INNOV-012",
+      "title": "ИСУН 2027: Иновации в областта на изкуствения интелект",
+      "standard_score": 7.8,
+      "planner_alignment_score": 5,
+      "combined_score": 7.0,
+      "eligibility_passed": true,
+      "planner_validation": {
+        "planner_intent_match": {
+          "score": 5,
+          "matched_priority_domains": [
+            "artificial intelligence"
+          ],
+          "must_have_keywords_found": 1,
+          "nice_to_have_keywords_found": 0,
+          "exclusion_violations": [],
+          "program_alignment": false,
+          "deadline_fit": "too_far",
+          "days_until_deadline": 593
+        },
+        "alignment_summary": "Excellent alignment. Partial domain alignment (1 priority domain); Good keyword match (1 must-have keywords); Long-term opportunity - good for planning"
+      },
+      "analysis": {
+        "total": 7.8,
+        "domain_match": 7.0,
+        "keyword_match": 8.5,
+        "eligibility_fit": 10.0,
+        "budget_feasibility": 7.0,
+        "strategic_value": 5.0,
+        "deadline_comfort": 9.0,
+        "recommendation": {
+          "action": "consider",
+          "label": "ОБМИСЛЕТЕ",
+          "color": "yellow"
+        }
+      },
+      "rank": 6
+    },
+    {
+      "call_id": "HORIZON-CL4-2026-DIGITAL-EMERGING-25",
+      "title": "Apply AI: Agentic AI Systems for Enterprise Automation",
+      "standard_score": 7.2,
+      "planner_alignment_score": 6,
+      "combined_score": 6.8,
+      "eligibility_passed": false,
+      "planner_validation": {
+        "planner_intent_match": {
+          "score": 6,
+          "matched_priority_domains": [
+            "artificial intelligence"
+          ],
+          "must_have_keywords_found": 1,
+          "nice_to_have_keywords_found": 1,
+          "exclusion_violations": [],
+          "program_alignment": true,
+          "deadline_fit": "good",
+          "days_until_deadline": 151
+        },
+        "alignment_summary": "Excellent alignment. Partial domain alignment (1 priority domain); Good keyword match (1 must-have keywords); Matches target programs; Deadline timing is ideal"
+      },
+      "analysis": {
+        "total": 7.2,
+        "domain_match": 6.8,
+        "keyword_match": 9.5,
+        "eligibility_fit": 9.4,
+        "budget_feasibility": 4.0,
+        "strategic_value": 5.0,
+        "deadline_comfort": 7.5,
+        "recommendation": {
+          "action": "consider",
+          "label": "ОБМИСЛЕТЕ",
+          "color": "yellow"
+        }
+      },
+      "rank": 7
+    },
+    {
+      "call_id": "HORIZON-CL4-2026-DATA-03",
+      "title": "Cloud-Native AI Infrastructure and MLOps Platforms",
+      "standard_score": 7.2,
+      "planner_alignment_score": 4,
+      "combined_score": 6.2,
+      "eligibility_passed": false,
+      "planner_validation": {
+        "planner_intent_match": {
+          "score": 4,
+          "matched_priority_domains": [],
+          "must_have_keywords_found": 1,
+          "nice_to_have_keywords_found": 2,
+          "exclusion_violations": [],
+          "program_alignment": true,
+          "deadline_fit": "good",
+          "days_until_deadline": 93
+        },
+        "alignment_summary": "Mixed alignment. Positives: Good keyword match (1 must-have keywords); Matches target programs; Deadline timing is ideal. Issues: Weak domain alignment - doesn't match priority domains"
+      },
+      "analysis": {
+        "total": 7.2,
+        "domain_match": 6.8,
+        "keyword_match": 9.5,
+        "eligibility_fit": 9.4,
+        "budget_feasibility": 4.0,
+        "strategic_value": 5.0,
+        "deadline_comfort": 7.5,
+        "recommendation": {
+          "action": "consider",
+          "label": "ОБМИСЛЕТЕ",
+          "color": "yellow"
+        }
+      },
+      "rank": 8
+    },
+    {
+      "call_id": "HORIZON-CL4-2027-QUANTUM-01",
+      "title": "Quantum Computing for AI and Machine Learning Optimization",
+      "standard_score": 7.0,
+      "planner_alignment_score": 4,
+      "combined_score": 6.1,
+      "eligibility_passed": false,
+      "planner_validation": {
+        "planner_intent_match": {
+          "score": 4,
+          "matched_priority_domains": [],
+          "must_have_keywords_found": 2,
+          "nice_to_have_keywords_found": 0,
+          "exclusion_violations": [],
+          "program_alignment": true,
+          "deadline_fit": "too_far",
+          "days_until_deadline": 394
+        },
+        "alignment_summary": "Mixed alignment. Positives: Good keyword match (2 must-have keywords); Matches target programs; Long-term opportunity - good for planning. Issues: Weak domain alignment - doesn't match priority domains"
+      },
+      "analysis": {
+        "total": 7.0,
+        "domain_match": 6.5,
+        "keyword_match": 8.5,
+        "eligibility_fit": 7.7,
+        "budget_feasibility": 5.5,
+        "strategic_value": 5.0,
+        "deadline_comfort": 9.0,
+        "recommendation": {
+          "action": "consider",
+          "label": "ОБМИСЛЕТЕ",
+          "color": "yellow"
+        }
+      },
+      "rank": 9
+    },
+    {
+      "call_id": "DIGITAL-2026-HEALTH-05",
+      "title": "AI for Healthcare: Medical Imaging and Diagnostic Systems",
+      "standard_score": 6.0,
+      "planner_alignment_score": 4,
+      "combined_score": 5.4,
+      "eligibility_passed": false,
+      "planner_validation": {
+        "planner_intent_match": {
+          "score": 4,
+          "matched_priority_domains": [],
+          "must_have_keywords_found": 2,
+          "nice_to_have_keywords_found": 0,
+          "exclusion_violations": [],
+          "program_alignment": true,
+          "deadline_fit": "too_soon",
+          "days_until_deadline": 14
+        },
+        "alignment_summary": "Mixed alignment. Positives: Good keyword match (2 must-have keywords); Matches target programs. Issues: Weak domain alignment - doesn't match priority domains; Deadline too soon - may not have time to prepare"
+      },
+      "analysis": {
+        "total": 6.0,
+        "domain_match": 2.0,
+        "keyword_match": 9.5,
+        "eligibility_fit": 9.4,
+        "budget_feasibility": 5.5,
+        "strategic_value": 8.0,
+        "deadline_comfort": 4.5,
+        "recommendation": {
+          "action": "consider",
+          "label": "ОБМИСЛЕТЕ",
+          "color": "yellow"
+        }
+      },
+      "rank": 10
+    },
+    {
+      "call_id": "LIFE-2026-CLIMATE-08",
+      "title": "Digital Solutions for Climate Adaptation and Environmental Monitoring",
+      "standard_score": 6.3,
+      "planner_alignment_score": 2,
+      "combined_score": 5.0,
+      "eligibility_passed": true,
+      "planner_validation": {
+        "planner_intent_match": {
+          "score": 2,
+          "matched_priority_domains": [],
+          "must_have_keywords_found": 1,
+          "nice_to_have_keywords_found": 0,
+          "exclusion_violations": [],
+          "program_alignment": false,
+          "deadline_fit": "good",
+          "days_until_deadline": 260
+        },
+        "alignment_summary": "Mixed alignment. Positives: Good keyword match (1 must-have keywords); Deadline timing is ideal. Issues: Weak domain alignment - doesn't match priority domains"
+      },
+      "analysis": {
+        "total": 6.3,
+        "domain_match": 2.0,
+        "keyword_match": 9.5,
+        "eligibility_fit": 9.4,
+        "budget_feasibility": 7.0,
+        "strategic_value": 5.0,
+        "deadline_comfort": 8.5,
+        "recommendation": {
+          "action": "consider",
+          "label": "ОБМИСЛЕТЕ",
+          "color": "yellow"
+        }
+      },
+      "rank": 11
+    },
+    {
+      "call_id": "HORIZON-CL5-2026-AGRI-01",
+      "title": "AI and Robotics for Precision Agriculture - Sustainable Farming",
+      "standard_score": 5.6,
+      "planner_alignment_score": 2,
+      "combined_score": 4.5,
+      "eligibility_passed": false,
+      "planner_validation": {
+        "planner_intent_match": {
+          "score": 2,
+          "matched_priority_domains": [],
+          "must_have_keywords_found": 1,
+          "nice_to_have_keywords_found": 0,
+          "exclusion_violations": [
+            "agriculture",
+            "agriculture"
+          ],
+          "program_alignment": true,
+          "deadline_fit": "good",
+          "days_until_deadline": 182
+        },
+        "alignment_summary": "Mixed alignment. Positives: Good keyword match (1 must-have keywords); Matches target programs; Deadline timing is ideal. Issues: Weak domain alignment - doesn't match priority domains; Contains excluded sectors: agriculture"
+      },
+      "analysis": {
+        "total": 5.6,
+        "domain_match": 2.0,
+        "keyword_match": 8.5,
+        "eligibility_fit": 8.9,
+        "budget_feasibility": 4.0,
+        "strategic_value": 5.0,
+        "deadline_comfort": 8.5,
+        "recommendation": {
+          "action": "monitor",
+          "label": "НАБЛЮДАВАЙТЕ",
+          "color": "blue"
+        }
+      },
+      "rank": 12
+    },
+    {
+      "call_id": "HORIZON-CL6-2026-SPACE-02",
+      "title": "Space-Based Maritime Monitoring and Surveillance Systems",
+      "standard_score": 5.4,
+      "planner_alignment_score": 0,
+      "combined_score": 3.8,
+      "eligibility_passed": false,
+      "planner_validation": {
+        "planner_intent_match": {
+          "score": 0,
+          "matched_priority_domains": [],
+          "must_have_keywords_found": 0,
+          "nice_to_have_keywords_found": 0,
+          "exclusion_violations": [
+            "maritime",
+            "maritime"
+          ],
+          "program_alignment": true,
+          "deadline_fit": "good",
+          "days_until_deadline": 213
+        },
+        "alignment_summary": "Mixed alignment. Positives: Matches target programs; Deadline timing is ideal. Issues: Weak domain alignment - doesn't match priority domains; Poor keyword alignment; Contains excluded sectors: maritime"
+      },
+      "analysis": {
+        "total": 5.4,
+        "domain_match": 2.0,
+        "keyword_match": 7.0,
+        "eligibility_fit": 8.9,
+        "budget_feasibility": 4.0,
+        "strategic_value": 5.0,
+        "deadline_comfort": 8.5,
+        "recommendation": {
+          "action": "monitor",
+          "label": "НАБЛЮДАВАЙТЕ",
+          "color": "blue"
+        }
+      },
+      "rank": 13
+    }
+  ]
+}

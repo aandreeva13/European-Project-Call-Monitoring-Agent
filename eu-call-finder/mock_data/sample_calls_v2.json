@@ -1,0 +1,652 @@
+{
+  "metadata": {
+    "generated_at": "2026-02-13T14:00:00Z",
+    "description": "Extended mock data with diverse scenarios for thorough analysis testing",
+    "version": "2.0",
+    "test_scenarios": [
+      "Perfect AI/Cybersecurity match",
+      "Budget mismatch but good domain fit",
+      "Urgent deadline (<30 days)",
+      "Excluded keywords (agriculture)",
+      "Single applicant suitable",
+      "Large consortium required",
+      "NLP specialist match",
+      "Cloud infrastructure focus",
+      "Digital transformation national",
+      "Horizon Europe cluster match"
+    ]
+  },
+  "company_profile": {
+    "name": "NexGen AI Solutions",
+    "type": "SME",
+    "employees": 45,
+    "country": "Bulgaria",
+    "city": "Sofia",
+    "domains": [
+      {
+        "name": "Artificial Intelligence",
+        "sub_domains": ["Machine Learning", "NLP", "Computer Vision", "Agentic AI", "Deep Learning"],
+        "level": "advanced"
+      },
+      {
+        "name": "Cybersecurity",
+        "sub_domains": ["Threat Detection", "SOC Operations", "NIS2 Compliance", "Penetration Testing"],
+        "level": "expert"
+      },
+      {
+        "name": "Cloud Computing",
+        "sub_domains": ["AWS", "Azure", "GCP", "Kubernetes", "DevOps"],
+        "level": "advanced"
+      }
+    ],
+    "keywords": {
+      "include": ["artificial intelligence", "AI", "machine learning", "ML", "deep learning", "neural networks", "NLP", "natural language processing", "cybersecurity", "security", "cloud", "automation", "digital transformation", "LLM", "large language models", "agentic AI", "trustworthy AI"],
+      "exclude": ["agriculture only", "maritime only", "space only", "fisheries", "forestry"]
+    },
+    "past_eu_projects": [
+      {
+        "name": "AI4Manufacturing",
+        "program": "Horizon 2020",
+        "role": "partner",
+        "year": 2023
+      },
+      {
+        "name": "CyberSME",
+        "program": "DIGITAL Europe",
+        "role": "work_package_leader",
+        "year": 2024
+      },
+      {
+        "name": "SecureCloudBG",
+        "program": "EUFunds Bulgaria",
+        "role": "coordinator",
+        "year": 2022
+      }
+    ],
+    "search_params": {
+      "portals": ["ftop", "eufunds_bg", "isun", "eic", "cordis"],
+      "budget_range": {
+        "min": 50000,
+        "max": 500000,
+        "currency": "EUR"
+      },
+      "preferred_role": "partner",
+      "min_score": 5.0,
+      "max_results": 30
+    }
+  },
+  "calls": [
+    {
+      "id": "HORIZON-CL4-2026-HUMAN-01-03",
+      "title": "Trustworthy AI for cybersecurity of critical infrastructure",
+      "url": "https://ec.europa.eu/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL4-2026-HUMAN-01-03",
+      "status": "Open",
+      "general_info": {
+        "programme": "Horizon Europe (HORIZON)",
+        "call": "DIGITAL (HORIZON-CL4-2026-HUMAN)",
+        "action_type": "HORIZON-RIA HORIZON Research and Innovation Actions",
+        "deadline_model": "single-stage",
+        "dates": {
+          "opening": "11 February 2026",
+          "deadline": "18 September 2026 17:00:00 Brussels time"
+        }
+      },
+      "content": {
+        "description": "Expected Outcome: Development of trustworthy AI systems for cybersecurity of critical infrastructure. Projects should address AI-based threat detection, anomaly detection, and automated response systems. Required expertise in machine learning, cybersecurity frameworks, and NIS2 compliance. SMEs are particularly encouraged to participate. This is a perfect match for companies with AI and cybersecurity expertise.",
+        "destination": "Digital and Emerging Technologies",
+        "conditions": "Eligible countries: EU Member States and Associated Countries. Legal entities established in China are not eligible. Minimum 3 partners from 3 different countries required. TRL 4-7.",
+        "budget_overview": "Topic Budget: 30 000 000 EUR. Contributions: 3 000 000 to 5 000 000 EUR per project. Funding rate: 70% for SMEs, 100% for non-profit."
+      },
+      "partners": [],
+      "required_domains": ["Artificial Intelligence", "Cybersecurity", "Critical Infrastructure Protection"],
+      "keywords": ["artificial intelligence", "AI", "cybersecurity", "trustworthy AI", "NIS2", "critical infrastructure", "machine learning", "threat detection", "anomaly detection", "automated response"],
+      "budget_per_project": {
+        "min": 3000000,
+        "max": 5000000,
+        "currency": "EUR"
+      },
+      "funding_rate": "70% SME, 100% non-profit",
+      "duration_months": "36-48",
+      "consortium": {
+        "min_partners": 3,
+        "min_countries": 3
+      },
+      "trl": "4-7",
+      "eligibility": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": false,
+        "trl_ok": true,
+        "sme_encouraged": true
+      }
+    },
+    {
+      "id": "HORIZON-EIC-2026-ACCEL-02",
+      "title": "EIC Accelerator - AI-Powered Cybersecurity Solutions for SMEs",
+      "url": "https://eic.ec.europa.eu/eic-funding-opportunities/eic-accelerator",
+      "status": "Open",
+      "general_info": {
+        "programme": "EIC Accelerator",
+        "call": "EIC Accelerator 2026",
+        "action_type": "HORIZON-EIC HORIZON EIC Grants",
+        "deadline_model": "single-stage",
+        "dates": {
+          "opening": "01 January 2026",
+          "deadline": "05 March 2026 17:00:00 Brussels time"
+        }
+      },
+      "content": {
+        "description": "Supporting innovative SMEs developing AI-powered cybersecurity solutions. This call targets market-ready solutions with high commercial potential. Perfect for Bulgarian AI companies with proven track record. Single applicant allowed. Focus on threat intelligence, automated incident response, and security automation.",
+        "destination": "EIC Accelerator",
+        "conditions": "Open to single SMEs and startups. Large companies not eligible as single entity. Must demonstrate market traction.",
+        "budget_overview": "Topic Budget: 50 000 000 EUR. Contributions: 0.5 to 2.5 MEUR blended finance per project."
+      },
+      "partners": [],
+      "required_domains": ["Artificial Intelligence", "Cybersecurity"],
+      "keywords": ["AI", "cybersecurity", "SME", "automation", "threat intelligence", "incident response"],
+      "budget_per_project": {
+        "min": 500000,
+        "max": 2500000,
+        "currency": "EUR"
+      },
+      "funding_rate": "70% blended finance",
+      "duration_months": "18-24",
+      "consortium": {
+        "min_partners": 1,
+        "min_countries": 1
+      },
+      "trl": "6-9",
+      "eligibility": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": true,
+        "trl_ok": true,
+        "sme_encouraged": true
+      }
+    },
+    {
+      "id": "HORIZON-CL4-2026-HUMAN-04",
+      "title": "Advanced NLP and Language Technologies for European Digital Sovereignty",
+      "url": "https://ec.europa.eu/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL4-2026-HUMAN-04",
+      "status": "Open",
+      "general_info": {
+        "programme": "Horizon Europe (HORIZON)",
+        "call": "DIGITAL (HORIZON-CL4-2026-HUMAN)",
+        "action_type": "HORIZON-RIA HORIZON Research and Innovation Actions",
+        "deadline_model": "single-stage",
+        "dates": {
+          "opening": "15 January 2026",
+          "deadline": "20 June 2026 17:00:00 Brussels time"
+        }
+      },
+      "content": {
+        "description": "Development of next-generation NLP technologies including large language models, machine translation, and multilingual text analysis. Projects should address under-resourced languages and support European digital sovereignty in language AI.",
+        "destination": "Digital and Emerging Technologies",
+        "conditions": "Consortium of 3-5 partners from different countries required. SMEs encouraged.",
+        "budget_overview": "Topic Budget: 25 000 000 EUR. Contributions: 3 to 6 MEUR per project."
+      },
+      "partners": [],
+      "required_domains": ["NLP", "Artificial Intelligence", "Language Technology"],
+      "keywords": ["NLP", "natural language processing", "machine learning", "LLM", "machine translation", "multilingual", "AI"],
+      "budget_per_project": {
+        "min": 3000000,
+        "max": 6000000,
+        "currency": "EUR"
+      },
+      "funding_rate": "100%",
+      "duration_months": "36",
+      "consortium": {
+        "min_partners": 3,
+        "min_countries": 3
+      },
+      "trl": "4-7",
+      "eligibility": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": false,
+        "trl_ok": true,
+        "sme_encouraged": true
+      }
+    },
+    {
+      "id": "HORIZON-CL5-2026-AGRI-01",
+      "title": "AI and Robotics for Precision Agriculture - Sustainable Farming",
+      "url": "https://ec.europa.eu/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL5-2026-AGRI-01",
+      "status": "Open",
+      "general_info": {
+        "programme": "Horizon Europe (HORIZON)",
+        "call": "FOOD (HORIZON-CL5-2026)",
+        "action_type": "HORIZON-RIA HORIZON Research and Innovation Actions",
+        "deadline_model": "single-stage",
+        "dates": {
+          "opening": "01 March 2026",
+          "deadline": "15 August 2026 17:00:00 Brussels time"
+        }
+      },
+      "content": {
+        "description": "Development of AI and robotics solutions exclusively for agriculture only sector. Focus on crop monitoring, automated harvesting, and precision farming. Agriculture expertise required. Not suitable for IT companies without agricultural focus.",
+        "destination": "Agriculture and Food Security",
+        "conditions": "Minimum 4 partners required. Demonstrated agriculture sector experience preferred.",
+        "budget_overview": "Topic Budget: 20 000 000 EUR. Contributions: 4 to 6 MEUR per project."
+      },
+      "partners": [],
+      "required_domains": ["Agriculture", "AI", "Robotics"],
+      "keywords": ["agriculture only", "farming", "crops", "AI", "robotics", "precision agriculture", "harvesting"],
+      "budget_per_project": {
+        "min": 4000000,
+        "max": 6000000,
+        "currency": "EUR"
+      },
+      "funding_rate": "70%",
+      "duration_months": "36",
+      "consortium": {
+        "min_partners": 4,
+        "min_countries": 3
+      },
+      "trl": "5-7",
+      "eligibility": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": false,
+        "trl_ok": true,
+        "sme_encouraged": false
+      }
+    },
+    {
+      "id": "HORIZON-CL4-2026-DATA-03",
+      "title": "Cloud-Native AI Infrastructure and MLOps Platforms",
+      "url": "https://ec.europa.eu/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL4-2026-DATA-03",
+      "status": "Open",
+      "general_info": {
+        "programme": "Horizon Europe (HORIZON)",
+        "call": "DIGITAL (HORIZON-CL4-2026-DATA)",
+        "action_type": "HORIZON-IA HORIZON Innovation Actions",
+        "deadline_model": "single-stage",
+        "dates": {
+          "opening": "01 February 2026",
+          "deadline": "18 May 2026 17:00:00 Brussels time"
+        }
+      },
+      "content": {
+        "description": "Development of cloud-native infrastructure for AI workloads, including MLOps platforms, automated deployment pipelines, and scalable model serving. Focus on Kubernetes, containerization, and cloud-native architectures. Perfect for companies with cloud and DevOps expertise.",
+        "destination": "Digital and Emerging Technologies",
+        "conditions": "SME participation encouraged. Consortium of 3+ partners.",
+        "budget_overview": "Topic Budget: 40 000 000 EUR. Contributions: 5 to 12 MEUR per project."
+      },
+      "partners": [],
+      "required_domains": ["Cloud Computing", "AI", "DevOps", "MLOps"],
+      "keywords": ["cloud", "AI", "Kubernetes", "MLOps", "automation", "DevOps", "containerization", "scalable"],
+      "budget_per_project": {
+        "min": 5000000,
+        "max": 12000000,
+        "currency": "EUR"
+      },
+      "funding_rate": "70% SME, 100% research",
+      "duration_months": "36",
+      "consortium": {
+        "min_partners": 3,
+        "min_countries": 2
+      },
+      "trl": "6-8",
+      "eligibility": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": false,
+        "trl_ok": true,
+        "sme_encouraged": true
+      }
+    },
+    {
+      "id": "DIGITAL-2026-HEALTH-05",
+      "title": "AI for Healthcare: Medical Imaging and Diagnostic Systems",
+      "url": "https://ec.europa.eu/funding-tenders/opportunities/portal/screen/opportunities/topic-details/DIGITAL-2026-HEALTH-05",
+      "status": "Open",
+      "general_info": {
+        "programme": "DIGITAL Europe",
+        "call": "HEALTH (DIGITAL-2026-HEALTH)",
+        "action_type": "HORIZON-IA HORIZON Innovation Actions",
+        "deadline_model": "single-stage",
+        "dates": {
+          "opening": "15 December 2025",
+          "deadline": "28 February 2026 17:00:00 Brussels time"
+        }
+      },
+      "content": {
+        "description": "Deployment of AI solutions for medical imaging, diagnostic support systems, and healthcare automation. Requires compliance with medical device regulations and healthcare standards. Very short deadline - proposals due in less than 30 days.",
+        "destination": "Digital Health",
+        "conditions": "Medical/healthcare expertise strongly preferred. Regulatory compliance required.",
+        "budget_overview": "Topic Budget: 15 000 000 EUR. Contributions: 2 to 5 MEUR per project."
+      },
+      "partners": [],
+      "required_domains": ["AI", "Healthcare", "Medical Imaging"],
+      "keywords": ["AI", "healthcare", "medical imaging", "diagnostics", "machine learning"],
+      "budget_per_project": {
+        "min": 2000000,
+        "max": 5000000,
+        "currency": "EUR"
+      },
+      "funding_rate": "70%",
+      "duration_months": "24-36",
+      "consortium": {
+        "min_partners": 3,
+        "min_countries": 2
+      },
+      "trl": "7-9",
+      "eligibility": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": false,
+        "trl_ok": true,
+        "sme_encouraged": true
+      }
+    },
+    {
+      "id": "BG-RRP-2026-DIGITAL-089",
+      "title": "Дигитална трансформация и внедряване на информационни системи",
+      "url": "https://eufunds.bg/opportunities/BG-RRP-2026-DIGITAL-089",
+      "status": "Open",
+      "general_info": {
+        "programme": "Национален план за възстановяване и устойчивост",
+        "call": "BG-RRP-2026-DIGITAL-089",
+        "action_type": "Grant",
+        "deadline_model": "single-stage",
+        "dates": {
+          "opening": "01 February 2026",
+          "deadline": "15 May 2026 17:00:00 Sofia time"
+        }
+      },
+      "content": {
+        "description": "Подкрепа за български МСП за дигитална трансформация, внедряване на ERP системи, CRM, облачни услуги и киберсигурност. Подходящо за IT компании, които искат да подобрят своята дигитална инфраструктура. До 70% безвъзмездна помощ.",
+        "destination": "Дигитализация на бизнеса",
+        "conditions": "Само за малки и средни предприятия регистрирани в България. Минимум 1 година стаж.",
+        "budget_overview": "Общ бюджет: 80 000 000 BGN. Размер на безвъзмездната помощ: 50 000 - 300 000 BGN. Интензитет на финансиране: 70%."
+      },
+      "partners": [],
+      "required_domains": ["Digital Transformation", "IT", "Cloud", "Cybersecurity"],
+      "keywords": ["дигитализация", "ERP", "CRM", "cloud", "киберсигурност", "IT", "България", "МСП"],
+      "budget_per_project": {
+        "min": 50000,
+        "max": 300000,
+        "currency": "BGN"
+      },
+      "funding_rate": "70%",
+      "duration_months": "12-18",
+      "consortium": {
+        "min_partners": 1,
+        "min_countries": 1
+      },
+      "trl": "7-9",
+      "eligibility": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": true,
+        "trl_ok": true,
+        "sme_encouraged": true
+      }
+    },
+    {
+      "id": "ISUN-2027-INNOV-012",
+      "title": "ИСУН 2027: Иновации в областта на изкуствения интелект",
+      "url": "https://eumis2020.government.bg/bg/s/Procedure/Info/ISUN-2027-INNOV-012",
+      "status": "Forthcoming",
+      "general_info": {
+        "programme": "Оперативна програма Иновации и конкурентоспособност 2021-2027",
+        "call": "BG16RFOP002-2.001",
+        "action_type": "Grant",
+        "deadline_model": "single-stage",
+        "dates": {
+          "opening": "Expected Q2 2027",
+          "deadline": "30 September 2027 17:00:00 Sofia time"
+        }
+      },
+      "content": {
+        "description": "Нова процедура за подкрепа на иновативни проекти в областта на изкуствения интелект и дигиталните технологии. Подходяща за български компании с AI експертиза. Дълъг срок за подготовка - 13+ месеца.",
+        "destination": "Иновации",
+        "conditions": "Само за МСП от България. Изисква се доказан опит в съответната област.",
+        "budget_overview": "Общ бюджет: 100 000 000 BGN. Максимален размер на помощта: 500 000 BGN."
+      },
+      "partners": [],
+      "required_domains": ["Artificial Intelligence", "Innovation", "Digital Technology"],
+      "keywords": ["изкуствен интелект", "AI", "иновации", "дигитални технологии", "МСП", "България"],
+      "budget_per_project": {
+        "min": 100000,
+        "max": 500000,
+        "currency": "BGN"
+      },
+      "funding_rate": "70%",
+      "duration_months": "18-24",
+      "consortium": {
+        "min_partners": 1,
+        "min_countries": 1
+      },
+      "trl": "6-9",
+      "eligibility": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": true,
+        "trl_ok": true,
+        "sme_encouraged": true
+      }
+    },
+    {
+      "id": "COST-2026-AI-08",
+      "title": "COST Action: European Network for Trustworthy AI",
+      "url": "https://www.cost.eu/actions/open-call/",
+      "status": "Open",
+      "general_info": {
+        "programme": "COST Programme",
+        "call": "COST Open Call 2026",
+        "action_type": "COST Action",
+        "deadline_model": "single-stage",
+        "dates": {
+          "opening": "N/A",
+          "deadline": "25 April 2026 12:00:00 Brussels time"
+        }
+      },
+      "content": {
+        "description": "Networking opportunity for European researchers and practitioners in trustworthy AI. COST Actions support research networks, workshops, and short-term scientific missions. Perfect for building consortium for future Horizon proposals.",
+        "destination": "Research Networking",
+        "conditions": "Minimum 7 institutions from 5 different COST member countries required.",
+        "budget_overview": "Topic Budget: 130 000 EUR per year for 4 years. Network funding."
+      },
+      "partners": [],
+      "required_domains": ["Artificial Intelligence", "Trustworthy AI", "Research Networking"],
+      "keywords": ["AI", "trustworthy AI", "networking", "research", "Europe", "ethics"],
+      "budget_per_project": {
+        "min": 400000,
+        "max": 520000,
+        "currency": "EUR"
+      },
+      "funding_rate": "100%",
+      "duration_months": "48",
+      "consortium": {
+        "min_partners": 7,
+        "min_countries": 5
+      },
+      "trl": "N/A",
+      "eligibility": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": true,
+        "trl_ok": true,
+        "sme_encouraged": false
+      }
+    },
+    {
+      "id": "HORIZON-CL4-2026-DIGITAL-EMERGING-25",
+      "title": "Apply AI: Agentic AI Systems for Enterprise Automation",
+      "url": "https://ec.europa.eu/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL4-2026-DIGITAL-EMERGING-25",
+      "status": "Open",
+      "general_info": {
+        "programme": "Horizon Europe (HORIZON)",
+        "call": "DIGITAL (HORIZON-CL4-2026-DIGITAL-EMERGING)",
+        "action_type": "HORIZON-IA HORIZON Innovation Actions",
+        "deadline_model": "single-stage",
+        "dates": {
+          "opening": "01 February 2026",
+          "deadline": "15 July 2026 17:00:00 Brussels time"
+        }
+      },
+      "content": {
+        "description": "Development of agentic AI systems for enterprise process automation. Focus on autonomous agents, multi-agent systems, and intelligent automation workflows. Perfect match for companies with agentic AI expertise.",
+        "destination": "Digital and Emerging Technologies",
+        "conditions": "SME participation encouraged. Consortium of 3+ partners.",
+        "budget_overview": "Topic Budget: 35 000 000 EUR. Contributions: 5 to 10 MEUR per project."
+      },
+      "partners": [],
+      "required_domains": ["Agentic AI", "Artificial Intelligence", "Automation"],
+      "keywords": ["agentic AI", "autonomous agents", "AI", "automation", "enterprise", "workflows", "LLM"],
+      "budget_per_project": {
+        "min": 5000000,
+        "max": 10000000,
+        "currency": "EUR"
+      },
+      "funding_rate": "70%",
+      "duration_months": "36",
+      "consortium": {
+        "min_partners": 3,
+        "min_countries": 3
+      },
+      "trl": "5-8",
+      "eligibility": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": false,
+        "trl_ok": true,
+        "sme_encouraged": true
+      }
+    },
+    {
+      "id": "HORIZON-CL6-2026-SPACE-02",
+      "title": "Space-Based Maritime Monitoring and Surveillance Systems",
+      "url": "https://ec.europa.eu/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL6-2026-SPACE-02",
+      "status": "Open",
+      "general_info": {
+        "programme": "Horizon Europe (HORIZON)",
+        "call": "SPACE (HORIZON-CL6-2026)",
+        "action_type": "HORIZON-RIA HORIZON Research and Innovation Actions",
+        "deadline_model": "single-stage",
+        "dates": {
+          "opening": "15 March 2026",
+          "deadline": "15 September 2026 17:00:00 Brussels time"
+        }
+      },
+      "content": {
+        "description": "Development of space-based monitoring systems exclusively for maritime only applications. Satellite tracking of shipping routes, ocean protection, and maritime security. Requires specialized maritime domain knowledge.",
+        "destination": "Space",
+        "conditions": "Consortium of min 5 partners. Maritime sector experience required.",
+        "budget_overview": "Topic Budget: 25 000 000 EUR. Contributions: 4 to 6 MEUR per project."
+      },
+      "partners": [],
+      "required_domains": ["Space", "Maritime", "Satellite Technology"],
+      "keywords": ["maritime only", "space", "satellite", "shipping", "ocean", "maritime security"],
+      "budget_per_project": {
+        "min": 4000000,
+        "max": 6000000,
+        "currency": "EUR"
+      },
+      "funding_rate": "70%",
+      "duration_months": "36",
+      "consortium": {
+        "min_partners": 5,
+        "min_countries": 3
+      },
+      "trl": "5-8",
+      "eligibility": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": false,
+        "trl_ok": true,
+        "sme_encouraged": false
+      }
+    },
+    {
+      "id": "LIFE-2026-CLIMATE-08",
+      "title": "Digital Solutions for Climate Adaptation and Environmental Monitoring",
+      "url": "https://ec.europa.eu/funding-tenders/opportunities/portal/screen/opportunities/topic-details/LIFE-2026-CLIMATE-08",
+      "status": "Open",
+      "general_info": {
+        "programme": "LIFE Programme",
+        "call": "LIFE Climate Action",
+        "action_type": "LIFE Standard Action Project",
+        "deadline_model": "single-stage",
+        "dates": {
+          "opening": "01 April 2026",
+          "deadline": "01 November 2026 16:00:00 Brussels time"
+        }
+      },
+      "content": {
+        "description": "Deployment of digital technologies for climate adaptation, environmental monitoring, and sustainability. Focus on IoT sensors, data analytics platforms, and AI for environmental protection.",
+        "destination": "Climate Action",
+        "conditions": "Open to all EU countries. NGOs, SMEs, and public authorities eligible.",
+        "budget_overview": "Topic Budget: 50 000 000 EUR. Contributions: 1 to 5 MEUR per project."
+      },
+      "partners": [],
+      "required_domains": ["Digital Technology", "Environment", "Climate"],
+      "keywords": ["digital", "AI", "IoT", "environment", "climate", "sustainability", "monitoring"],
+      "budget_per_project": {
+        "min": 1000000,
+        "max": 5000000,
+        "currency": "EUR"
+      },
+      "funding_rate": "60%",
+      "duration_months": "36-60",
+      "consortium": {
+        "min_partners": 2,
+        "min_countries": 2
+      },
+      "trl": "6-9",
+      "eligibility": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": false,
+        "trl_ok": true,
+        "sme_encouraged": true
+      }
+    },
+    {
+      "id": "HORIZON-CL4-2027-QUANTUM-01",
+      "title": "Quantum Computing for AI and Machine Learning Optimization",
+      "url": "https://ec.europa.eu/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL4-2027-QUANTUM-01",
+      "status": "Forthcoming",
+      "general_info": {
+        "programme": "Horizon Europe (HORIZON)",
+        "call": "QUANTUM (HORIZON-CL4-2027)",
+        "action_type": "HORIZON-RIA HORIZON Research and Innovation Actions",
+        "deadline_model": "single-stage",
+        "dates": {
+          "opening": "Expected October 2026",
+          "deadline": "15 March 2027 17:00:00 Brussels time"
+        }
+      },
+      "content": {
+        "description": "Exploration of quantum computing applications for AI and machine learning optimization. Very long-term research focus. Requires quantum computing expertise.",
+        "destination": "Quantum Technologies",
+        "conditions": "Research-intensive topic. Consortium of academic and industrial partners.",
+        "budget_overview": "Topic Budget: 40 000 000 EUR. Contributions: 3 to 8 MEUR per project."
+      },
+      "partners": [],
+      "required_domains": ["Quantum Computing", "AI", "Machine Learning"],
+      "keywords": ["quantum", "AI", "machine learning", "optimization", "research"],
+      "budget_per_project": {
+        "min": 3000000,
+        "max": 8000000,
+        "currency": "EUR"
+      },
+      "funding_rate": "100%",
+      "duration_months": "36-48",
+      "consortium": {
+        "min_partners": 4,
+        "min_countries": 3
+      },
+      "trl": "2-5",
+      "eligibility": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": false,
+        "trl_ok": false,
+        "sme_encouraged": true
+      }
+    }
+  ]
+}

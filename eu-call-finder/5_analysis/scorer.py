@@ -1,26 +1,50 @@
-def score_call(call_data: dict, company_profile: dict) -> dict:
+from typing import Dict, Optional
+
+
+def score_call(
+    call_data: dict, company_profile: dict, llm_insights: Optional[dict] = None
+) -> dict:
     """
     Score a call based on 6 criteria with weighted scoring (1-10 scale).
+
+    If llm_insights provided (LLM-first approach), uses LLM analysis for:
+    - Domain Match (30%)
+    - Keyword Match (15%)
+    - Strategic Value (10%)
+
+    Otherwise falls back to rule-based scoring.
+
     Weights: Domain Match (30%), Keyword Match (15%), Eligibility (20%),
              Budget (15%), Strategic Value (10%), Deadline (10%)
     """
 
-    # Domain Match (30%): Strong matches with expertise level bonus
-    domain_score = _score_domain_match(call_data, company_profile)
+    # Check if we have LLM insights (LLM-first approach)
+    use_llm = llm_insights is not None and llm_insights.get("analysis_method") == "llm"
 
-    # Keyword Match (15%): With semantic equivalence and synonym matching
-    keyword_score = _score_keyword_match(call_data, company_profile)
+    if use_llm and llm_insights is not None:
+        # Use LLM insights for nuanced scoring
+        domain_score = _score_domain_match_from_llm(llm_insights)
+        keyword_score = _score_keyword_match_from_llm(llm_insights)
+        strategic_score = _score_strategic_value_from_llm(
+            call_data, company_profile, llm_insights
+        )
 
-    # Eligibility Fit (20%): Weighted by importance of each check
+        # Apply LLM confidence boost
+        confidence = llm_insights.get("llm_confidence", "medium")
+        confidence_multiplier = {"high": 1.0, "medium": 0.95, "low": 0.90}.get(
+            confidence, 0.95
+        )
+        domain_score = min(10.0, domain_score * confidence_multiplier)
+        keyword_score = min(10.0, keyword_score * confidence_multiplier)
+    else:
+        # Fall back to rule-based scoring
+        domain_score = _score_domain_match(call_data, company_profile)
+        keyword_score = _score_keyword_match(call_data, company_profile)
+        strategic_score = _score_strategic_value(call_data, company_profile)
+
+    # These are always rule-based (hard constraints)
     eligibility_score = _score_eligibility(call_data, company_profile)
-
-    # Budget Feasibility (15%): Graduated scale based on distance from range
     budget_score = _score_budget_feasibility(call_data, company_profile)
-
-    # Strategic Value (10%): Enhanced program matching with fallback
-    strategic_score = _score_strategic_value(call_data, company_profile)
-
-    # Deadline Comfort (10%): With urgency bonus for close deadlines
     deadline_score = _score_deadline_comfort(call_data)
 
     # Calculate weighted total
@@ -34,7 +58,7 @@ def score_call(call_data: dict, company_profile: dict) -> dict:
         1,
     )
 
-    return {
+    result = {
         "total": total,
         "domain_match": domain_score,
         "keyword_match": keyword_score,
@@ -43,7 +67,100 @@ def score_call(call_data: dict, company_profile: dict) -> dict:
         "strategic_value": strategic_score,
         "deadline_comfort": deadline_score,
         "recommendation": _get_recommendation(total),
+        "scoring_method": "llm_enhanced" if use_llm else "rule_based",
     }
+
+    # Include LLM reasoning if available
+    if use_llm and llm_insights is not None and "llm_reasoning" in llm_insights:
+        result["llm_reasoning"] = llm_insights["llm_reasoning"]
+
+    return result
+
+
+# LLM-BASED SCORING FUNCTIONS
+
+
+def _score_domain_match_from_llm(llm_insights: dict) -> float:
+    """Extract domain match score from LLM analysis."""
+    domain_matches = llm_insights.get("domain_matches", [])
+
+    if not domain_matches:
+        return 3.0  # Neutral if no domain info
+
+    # Count match strengths
+    strong = sum(1 for m in domain_matches if m.get("strength") == "strong")
+    moderate = sum(1 for m in domain_matches if m.get("strength") == "moderate")
+    weak = sum(1 for m in domain_matches if m.get("strength") == "weak")
+
+    # Calculate weighted score
+    score = (strong * 9.0 + moderate * 6.5 + weak * 4.0) / max(len(domain_matches), 1)
+
+    # Boost for multiple strong matches
+    if strong >= 2:
+        score = min(10.0, score + 1.0)
+
+    return min(10.0, max(1.0, round(score, 1)))
+
+
+def _score_keyword_match_from_llm(llm_insights: dict) -> float:
+    """Extract keyword match score from LLM analysis."""
+    keyword_hits = llm_insights.get("keyword_hits", [])
+    match_summary = llm_insights.get("match_summary", "").lower()
+
+    hit_count = len(keyword_hits)
+
+    # Base score on hit count
+    if hit_count >= 6:
+        score = 9.5
+    elif hit_count >= 4:
+        score = 8.5
+    elif hit_count >= 3:
+        score = 7.0
+    elif hit_count == 2:
+        score = 5.5
+    elif hit_count == 1:
+        score = 4.0
+    else:
+        score = 2.5
+
+    # Boost for excellence indicators in summary
+    excellence_words = ["excellent", "perfect", "outstanding", "ideal"]
+    if any(word in match_summary for word in excellence_words):
+        score = min(10.0, score + 0.5)
+
+    return score
+
+
+def _score_strategic_value_from_llm(
+    call_data: dict, company_profile: dict, llm_insights: dict
+) -> float:
+    """Extract strategic value from LLM insights and past projects."""
+    relevant_projects = llm_insights.get("relevant_past_projects", [])
+
+    if not relevant_projects:
+        # Fall back to rule-based
+        return _score_strategic_value(call_data, company_profile)
+
+    # Score based on project relevance
+    high_relevance = sum(1 for p in relevant_projects if p.get("relevance") == "high")
+    medium_relevance = sum(
+        1 for p in relevant_projects if p.get("relevance") == "medium"
+    )
+
+    score = high_relevance * 3.0 + medium_relevance * 1.5
+
+    # Normalize to 1-10 scale
+    if score >= 6:
+        return 9.0
+    elif score >= 4:
+        return 8.0
+    elif score >= 2:
+        return 7.0
+    else:
+        return 6.0
+
+
+# RULE-BASED SCORING FUNCTIONS (Fallback)
 
 
 def _score_domain_match(call_data: dict, company_profile: dict) -> float:
@@ -65,7 +182,7 @@ def _score_domain_match(call_data: dict, company_profile: dict) -> float:
             rd_lower = rd.lower()
             match_score = 0
 
-            # Direct domain match
+            # Direct domain name match
             if cd_name in rd_lower or rd_lower in cd_name:
                 match_score = (
                     8.0
@@ -100,6 +217,51 @@ def _score_domain_match(call_data: dict, company_profile: dict) -> float:
         avg_score = min(10.0, avg_score + 1.0)
 
     return min(10.0, round(avg_score, 1))
+
+
+def _score_keyword_match(call_data: dict, company_profile: dict) -> float:
+    """Score based on keyword matching between company and call."""
+    company_keywords = company_profile.get("keywords", {}).get("include", [])
+    call_text = ""
+
+    # Build call text from various fields
+    content = call_data.get("content", {})
+    call_text += content.get("description", "") + " "
+    call_text += call_data.get("title", "") + " "
+    call_text += " ".join(call_data.get("keywords", []))
+
+    call_text_lower = call_text.lower()
+
+    if not company_keywords:
+        return 5.0  # Neutral if no keywords defined
+
+    matches = 0
+    total_keywords = len(company_keywords)
+
+    for keyword in company_keywords:
+        keyword_lower = keyword.lower()
+        # Check exact match
+        if keyword_lower in call_text_lower:
+            matches += 1
+        else:
+            # Check expanded variations
+            variations = _expand_keyword(keyword_lower)
+            if any(var in call_text_lower for var in variations):
+                matches += 0.8  # Slightly lower score for variation match
+
+    # Calculate score based on match ratio
+    match_ratio = matches / total_keywords if total_keywords > 0 else 0
+
+    if match_ratio >= 0.7:
+        return 9.5
+    elif match_ratio >= 0.5:
+        return 8.0
+    elif match_ratio >= 0.3:
+        return 6.5
+    elif match_ratio >= 0.1:
+        return 4.5
+    else:
+        return 3.0
 
 
 def _expand_keyword(keyword: str) -> set:
@@ -149,314 +311,157 @@ def _expand_keyword(keyword: str) -> set:
             "gpt",
         },
         "large language model": {"llm", "large language model", "foundation model"},
-        "generative ai": {"generative ai", "genai", "llm", "foundation models"},
-        # Cybersecurity variations
-        "cybersecurity": {
-            "cybersecurity",
-            "cyber security",
-            "information security",
-            "infosec",
-            "it security",
-            "network security",
-        },
-        "security": {"security", "cybersecurity", "information security", "protection"},
-        "threat detection": {
-            "threat detection",
-            "threat intelligence",
-            "intrusion detection",
-            "security monitoring",
-        },
-        "cloud": {
-            "cloud",
-            "cloud computing",
-            "aws",
-            "azure",
-            "gcp",
-            "iaas",
-            "paas",
-            "saas",
-        },
-        "automation": {
-            "automation",
-            "automated",
-            "robotic process automation",
-            "rpa",
-            "orchestration",
-        },
-        "digital transformation": {
-            "digital transformation",
-            "digitization",
-            "digitalization",
-            "industry 4.0",
-        },
+        "generative ai": {"generative ai", "gen ai", "ai generation"},
     }
 
-    # Return equivalents if keyword is in map, else just the keyword
     return equivalents.get(keyword, {keyword})
 
 
-def _score_keyword_match(call_data: dict, company_profile: dict) -> float:
-    """Score based on keyword overlap with semantic matching."""
-    company_keywords = company_profile.get("keywords", {}).get("include", [])
-    call_keywords = call_data.get("keywords", [])
-    call_text = (
-        call_data.get("content", {}).get("description", "")
-        + " "
-        + call_data.get("title", "")
-    ).lower()
-
-    if not company_keywords:
-        return 3.0
-
-    # Expand company keywords to include semantic equivalents
-    expanded_company_kw = set()
-    for kw in company_keywords:
-        expanded_company_kw.update(_expand_keyword(kw))
-
-    # Check matches against call keywords and description
-    matches = set()
-    for kw in expanded_company_kw:
-        # Check in explicit keywords
-        for ck in call_keywords:
-            if kw in ck.lower() or ck.lower() in kw:
-                matches.add(kw)
-                break
-
-        # Check in call text (description/title)
-        if kw in call_text:
-            matches.add(kw)
-
-    # Score based on match count
-    match_count = len(matches)
-
-    if match_count >= 6:
-        return 9.5
-    elif match_count >= 4:
-        return 8.5
-    elif match_count >= 3:
-        return 7.0
-    elif match_count == 2:
-        return 5.5
-    elif match_count == 1:
-        return 4.0
-    else:
-        return 2.5
-
-
-def _score_eligibility(call_data: dict, company_profile: dict) -> float:
-    """Score based on eligibility checks with weighted importance."""
-    eligibility = call_data.get("eligibility", {})
-
-    # Weighted checks (country and type are critical, budget/TRL are adjustable)
-    checks = [
-        (eligibility.get("country_ok", False), 3.0),  # Critical
-        (eligibility.get("type_ok", False), 2.5),  # Critical
-        (eligibility.get("trl_ok", False), 1.5),  # Moderate
-        (eligibility.get("budget_ok", False), 1.0),  # Can be worked around
-    ]
-
-    score = sum(weight for passed, weight in checks if passed)
-    max_score = sum(weight for _, weight in checks)
-
-    # Normalize to 1-10 scale
-    normalized = 1.0 + (score / max_score) * 9.0
-
-    # SME encouraged bonus
-    if eligibility.get("sme_encouraged", False):
-        normalized = min(10.0, normalized + 0.5)
-
-    return round(normalized, 1)
-
-
-def _score_budget_feasibility(call_data: dict, company_profile: dict) -> float:
-    """Score based on budget range fit with graduated penalty, adjusted for program type."""
-    search_params = company_profile.get("search_params", {})
-    budget_range = search_params.get("budget_range", {})
-    call_budget = call_data.get("budget_per_project", {})
-
-    if not budget_range or not call_budget:
-        return 6.0
-
-    # Get budget values
-    min_pref = budget_range.get("min", 0)
-    max_pref = budget_range.get("max", float("inf"))
-    min_call = call_budget.get("min", 0)
-    max_call = call_budget.get("max", float("inf"))
-
-    # Convert BGN to EUR roughly (1 EUR ≈ 1.95 BGN)
-    call_currency = call_budget.get("currency", "EUR")
-    if call_currency.upper() in ["BGN", "ЛВ", "ЛЕВА"]:
-        min_call = min_call / 1.95 if min_call else 0
-        max_call = max_call / 1.95 if max_call else float("inf")
-
-    # Adjust expectations for Horizon Europe / large EU programs
-    # These naturally have higher budgets, so be more lenient
-    general_info = call_data.get("general_info", {})
-    programme = general_info.get("programme", "").lower()
-    is_horizon = "horizon" in programme or "eic" in programme
-
-    # Multiplier for Horizon programs (less penalty for high budgets)
-    horizon_multiplier = 1.5 if is_horizon else 1.0
-
-    # Calculate overlap
-    overlap_min = max(min_pref, min_call)
-    overlap_max = min(max_pref, max_call)
-
-    # Perfect overlap
-    if overlap_max >= overlap_min:
-        overlap_size = overlap_max - overlap_min
-        preferred_range = max_pref - min_pref
-        overlap_ratio = overlap_size / preferred_range if preferred_range > 0 else 1.0
-
-        if overlap_ratio >= 0.8:
-            return 9.0
-        elif overlap_ratio >= 0.5:
-            return 8.0
-        else:
-            return 7.0
-
-    # Partial overlap - Call budget higher than preferred
-    if min_call > max_pref:
-        ratio = min_call / max_pref if max_pref > 0 else float("inf")
-        adjusted_ratio = ratio / horizon_multiplier  # Horizon gets discount
-
-        if adjusted_ratio <= 2.0:
-            return 7.0  # Within 2x (or 3x for Horizon) - still good
-        elif adjusted_ratio <= 4.0:
-            return 5.5  # 3-4x - challenging but possible
-        elif adjusted_ratio <= 8.0:
-            return 4.0  # 4-8x - difficult, need consortium
-        elif adjusted_ratio <= 15.0:
-            return 2.5  # 8-15x - very difficult as SME partner
-        else:
-            return 1.5  # Way too high
-
-    # Call budget lower than preferred
-    elif max_call < min_pref:
-        ratio = min_pref / max_call if max_call > 0 else float("inf")
-
-        if ratio <= 2.0:
-            return 7.0
-        elif ratio <= 4.0:
-            return 5.0
-        else:
-            return 3.5
-
-    return 5.0
-
-
 def _score_strategic_value(call_data: dict, company_profile: dict) -> float:
-    """Score based on strategic alignment with past projects and sector fit."""
+    """Score based on strategic alignment with company goals."""
+    # Check past projects alignment
     past_projects = company_profile.get("past_eu_projects", [])
     call_program = call_data.get("general_info", {}).get("programme", "")
 
-    # Check program experience
-    if past_projects:
-        program_matches = sum(
-            1 for p in past_projects if call_program in p.get("program", "")
-        )
+    if not past_projects:
+        return 5.0  # Neutral
 
-        if program_matches >= 2:
-            return 9.5
-        elif program_matches == 1:
-            return 8.0
+    # Check if company has worked in similar program
+    program_matches = sum(
+        1 for p in past_projects if call_program in p.get("program", "")
+    )
 
-    # Check sector/domain alignment without past project requirement
-    company_domains = [d["name"].lower() for d in company_profile.get("domains", [])]
-    call_title = call_data.get("title", "").lower()
-
-    domain_in_title = sum(1 for d in company_domains if d in call_title)
-
-    if domain_in_title >= 2:
-        return 7.5
-    elif domain_in_title == 1:
-        return 6.5
+    if program_matches >= 2:
+        return 8.5
+    elif program_matches == 1:
+        return 7.0
     else:
-        return 5.0  # Neutral baseline
+        return 5.5
+
+
+def _score_eligibility(call_data: dict, company_profile: dict) -> float:
+    """Score eligibility fit (0-10, where 10 = fully eligible)."""
+    # This is a simplified version - the real eligibility check is in eligibility.py
+    score = 10.0
+
+    # Check budget feasibility
+    budget = call_data.get("budget_per_project", {})
+    max_budget = budget.get("max", 0)
+
+    # SME preference for smaller budgets
+    if company_profile.get("type") == "SME":
+        if max_budget > 5000000:
+            score -= 1.5
+        elif max_budget > 10000000:
+            score -= 3.0
+
+    return max(1.0, score)
+
+
+def _score_budget_feasibility(call_data: dict, company_profile: dict) -> float:
+    """Score budget feasibility for the company."""
+    budget = call_data.get("budget_per_project", {})
+    min_budget = budget.get("min", 0)
+    max_budget = budget.get("max", 0)
+    avg_budget = (
+        (min_budget + max_budget) / 2 if min_budget and max_budget else max_budget
+    )
+
+    company_type = company_profile.get("type", "")
+    employees = company_profile.get("employees", 50)
+
+    # SME considerations
+    if company_type == "SME":
+        if avg_budget <= 500000:
+            return 8.0
+        elif avg_budget <= 1000000:
+            return 7.0
+        elif avg_budget <= 3000000:
+            return 5.5
+        elif avg_budget <= 5000000:
+            return 4.0
+        else:
+            return 2.5
+    else:
+        # Larger organizations can handle bigger budgets
+        if avg_budget <= 5000000:
+            return 8.5
+        elif avg_budget <= 10000000:
+            return 7.5
+        else:
+            return 6.0
 
 
 def _score_deadline_comfort(call_data: dict) -> float:
-    """Score based on days until deadline with urgency consideration."""
+    """Score deadline comfort based on days remaining."""
     from datetime import datetime
-    import re
 
-    # Extract deadline from general_info.dates.deadline
     general_info = call_data.get("general_info", {})
     dates = general_info.get("dates", {})
     deadline_str = dates.get("deadline", "")
 
-    # Calculate days until deadline
-    days = 0
+    if not deadline_str:
+        return 5.0  # Neutral if no deadline info
 
-    if deadline_str:
-        # Parse date from various formats
-        # Format: "18 September 2026 17:00:00 Brussels time" or "15 April 2026 17:00:00 Sofia time"
+    # Parse deadline
+    import re
 
-        # Extract date part (remove time and timezone)
-        date_match = re.search(
-            r"(\d{1,2})\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})",
-            deadline_str,
-            re.IGNORECASE,
+    date_match = re.search(
+        r"(\d{1,2})\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})",
+        deadline_str,
+        re.IGNORECASE,
+    )
+
+    if not date_match:
+        return 5.0
+
+    months = {
+        "january": 1,
+        "february": 2,
+        "march": 3,
+        "april": 4,
+        "may": 5,
+        "june": 6,
+        "july": 7,
+        "august": 8,
+        "september": 9,
+        "october": 10,
+        "november": 11,
+        "december": 12,
+    }
+
+    try:
+        deadline_date = datetime(
+            int(date_match.group(3)),
+            months[date_match.group(2).lower()],
+            int(date_match.group(1)),
         )
+        days_until = (deadline_date - datetime.now()).days
+    except:
+        return 5.0
 
-        if date_match:
-            day = int(date_match.group(1))
-            month_name = date_match.group(2).lower()
-            year = int(date_match.group(3))
-
-            # Convert month name to number
-            months = {
-                "january": 1,
-                "february": 2,
-                "march": 3,
-                "april": 4,
-                "may": 5,
-                "june": 6,
-                "july": 7,
-                "august": 8,
-                "september": 9,
-                "october": 10,
-                "november": 11,
-                "december": 12,
-            }
-            month = months.get(month_name, 1)
-
-            try:
-                deadline_date = datetime(year, month, day)
-                today = datetime.now()
-                days = (deadline_date - today).days
-            except:
-                days = 0
-
-    # Use pre-calculated days if available and parsing failed
-    if days <= 0:
-        days = call_data.get("days_until_deadline", 0)
-
-    if days >= 270:  # 9+ months - plenty of time
-        return 9.0
-    elif days >= 180:  # 6-9 months - comfortable
-        return 8.5
-    elif days >= 90:  # 3-6 months - good
-        return 7.5
-    elif days >= 60:  # 2-3 months - manageable
-        return 6.5
-    elif days >= 30:  # 1-2 months - getting tight
-        return 5.5
-    elif days >= 14:  # 2-4 weeks - urgent but doable
-        return 4.5
-    elif days >= 7:  # 1-2 weeks - very urgent
-        return 3.5
+    # Score based on days remaining
+    if days_until < 0:
+        return 1.0  # Already passed
+    elif days_until < 14:
+        return 3.0  # Very urgent
+    elif days_until < 30:
+        return 4.5  # Urgent
+    elif days_until < 60:
+        return 6.5  # Tight but doable
+    elif days_until < 120:
+        return 8.0  # Comfortable
     else:
-        return 2.0  # <1 week - probably too late
+        return 9.0  # Very comfortable
 
 
-def _get_recommendation(score: float) -> dict:
-    """Get recommendation based on total score with adjusted thresholds."""
-    if score >= 8.0:
+def _get_recommendation(total_score: float) -> dict:
+    """Get recommendation based on total score."""
+    if total_score >= 7.5:
         return {"action": "apply", "label": "КАНДИДАТСТВАЙТЕ", "color": "green"}
-    elif score >= 6.0:
+    elif total_score >= 5.5:
         return {"action": "consider", "label": "ОБМИСЛЕТЕ", "color": "yellow"}
-    elif score >= 4.0:
+    elif total_score >= 3.5:
         return {"action": "monitor", "label": "НАБЛЮДАВАЙТЕ", "color": "blue"}
     else:
         return {"action": "skip", "label": "ПРОПУСНЕТЕ", "color": "red"}

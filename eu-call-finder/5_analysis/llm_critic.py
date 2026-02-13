@@ -1,21 +1,213 @@
+"""
+LLM-based qualitative analysis for EU project calls.
+Uses OpenAI API for nuanced analysis of call-company fit.
+API key and model loaded from environment variables (.env file).
+"""
+
+import os
+import json
+from typing import Dict, List
+from dataclasses import dataclass
+
+
+# ============================================================================
+# OPENAI CONFIGURATION - From environment variables
+# ============================================================================
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_MODEL = os.getenv("LLM_MODEL", os.getenv("OPENAI_MODEL", "gpt-4"))
+OPENAI_TEMPERATURE = float(os.getenv("OPENAI_TEMPERATURE", "0.3"))
+OPENAI_MAX_TOKENS = int(os.getenv("OPENAI_MAX_TOKENS", "1500"))
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+
+LLM_TIMEOUT_SECONDS = int(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
+ENABLE_LLM_ANALYSIS = os.getenv("ENABLE_LLM_ANALYSIS", "true").lower() == "true"
+SKIP_LLM_ON_ERROR = os.getenv("SKIP_LLM_ON_ERROR", "true").lower() == "true"
+
+
+@dataclass
+class LLMResponse:
+    """Structured response from LLM"""
+
+    match_summary: str
+    domain_matches: List[Dict]
+    keyword_hits: List[str]
+    relevant_past_projects: List[Dict]
+    suggested_partners: List[str]
+    estimated_effort_hours: str
+    reasoning: str
+    confidence: str  # high, medium, low
+
+
 def perform_qualitative_analysis(call_data: dict, company_profile: dict) -> dict:
     """
     Perform LLM-based qualitative analysis of how well a call matches the company.
-    Analyzes domain alignment, keyword relevance, and generates match summaries.
+    Falls back to rule-based if LLM not configured or disabled.
     """
 
-    # Analyze domain matches with strength ratings
+    # Check if LLM is enabled and configured
+    if not ENABLE_LLM_ANALYSIS or not OPENAI_API_KEY:
+        return perform_rule_based_analysis(call_data, company_profile)
+
+    try:
+        # Call OpenAI for analysis
+        llm_result = call_openai(call_data, company_profile)
+
+        return {
+            "match_summary": llm_result.match_summary,
+            "domain_matches": llm_result.domain_matches,
+            "keyword_hits": llm_result.keyword_hits,
+            "relevant_past_projects": llm_result.relevant_past_projects,
+            "suggested_partners": llm_result.suggested_partners,
+            "estimated_effort_hours": llm_result.estimated_effort_hours,
+            "llm_reasoning": llm_result.reasoning,
+            "llm_confidence": llm_result.confidence,
+            "analysis_method": "llm",
+        }
+
+    except Exception as e:
+        if SKIP_LLM_ON_ERROR:
+            print(f"[LLM Error] {e}. Falling back to rule-based analysis.")
+            result = perform_rule_based_analysis(call_data, company_profile)
+            result["llm_error"] = str(e)
+            return result
+        else:
+            raise
+
+
+def call_openai(call_data: dict, company_profile: dict) -> LLMResponse:
+    """Call OpenAI API for analysis using environment configuration"""
+    from openai import OpenAI
+
+    # Build the prompt
+    prompt = build_analysis_prompt(call_data, company_profile)
+
+    # Initialize OpenAI client
+    client = OpenAI(api_key=OPENAI_API_KEY, base_url=OPENAI_BASE_URL)
+
+    # Call API
+    response = client.chat.completions.create(
+        model=OPENAI_MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": "You are an expert EU funding advisor providing structured analysis in JSON format.",
+            },
+            {"role": "user", "content": prompt},
+        ],
+        temperature=OPENAI_TEMPERATURE,
+        max_tokens=OPENAI_MAX_TOKENS,
+    )
+
+    # Parse JSON response
+    content = response.choices[0].message.content or ""
+
+    # Extract JSON from response (handle markdown code blocks)
+    if "```json" in content:
+        content = content.split("```json")[1].split("```")[0]
+    elif "```" in content:
+        parts = content.split("```")
+        if len(parts) >= 2:
+            content = parts[1]
+
+    data = json.loads(content.strip())
+
+    return LLMResponse(
+        match_summary=data.get("match_summary", ""),
+        domain_matches=data.get("domain_matches", []),
+        keyword_hits=data.get("keyword_hits", []),
+        relevant_past_projects=data.get("relevant_past_projects", []),
+        suggested_partners=data.get("suggested_partners", []),
+        estimated_effort_hours=data.get("estimated_effort_hours", "80-150"),
+        reasoning=data.get("reasoning", ""),
+        confidence=data.get("confidence", "medium"),
+    )
+
+
+def build_analysis_prompt(call_data: dict, company_profile: dict) -> str:
+    """Build comprehensive prompt for LLM analysis"""
+
+    # Extract key information
+    call_title = call_data.get("title", "")
+    call_desc = call_data.get("content", {}).get("description", "")[:2000]
+    call_domains = call_data.get("required_domains", [])
+    call_keywords = call_data.get("keywords", [])
+
+    company_name = company_profile.get("name", "")
+    company_domains = company_profile.get("domains", [])
+    company_keywords = company_profile.get("keywords", {}).get("include", [])
+    past_projects = company_profile.get("past_eu_projects", [])
+
+    prompt = f"""You are an expert EU funding advisor analyzing how well a funding call matches a company's capabilities.
+
+## COMPANY PROFILE
+Name: {company_name}
+Domains: {", ".join([d["name"] + f" ({d.get('level', 'unknown')})" for d in company_domains])}
+Keywords: {", ".join(company_keywords)}
+Past EU Projects: {", ".join([p["name"] + f" ({p['program']})" for p in past_projects])}
+
+## FUNDING CALL
+Title: {call_title}
+Required Domains: {", ".join(call_domains)}
+Keywords: {", ".join(call_keywords[:15])}
+
+Description: {call_desc}
+
+## YOUR TASK
+Analyze how well this call matches the company. Provide:
+
+1. MATCH SUMMARY: A 1-2 sentence summary (Excellent/Good/Moderate/Weak match)
+
+2. DOMAIN MATCHES: List how company domains align with call requirements. For each match:
+   - Company domain
+   - Call requirement
+   - Strength: strong/moderate/weak
+   - Reasoning (1 sentence)
+
+3. KEYWORD HITS: Which company keywords are present in the call
+
+4. RELEVANT PAST PROJECTS: Which past EU projects are relevant to this call and why
+
+5. SUGGESTED PARTNERS: 2-3 specific partner types or organizations
+
+6. EFFORT ESTIMATE: Estimated hours needed for proposal (40-80, 80-150, 100-200, 200-300)
+
+7. REASONING: 2-3 sentences explaining your analysis
+
+8. CONFIDENCE: high/medium/low
+
+Respond in valid JSON format:
+{{
+    "match_summary": "...",
+    "domain_matches": [
+        {{"your_domain": "...", "call_requirement": "...", "strength": "...", "reasoning": "..."}}
+    ],
+    "keyword_hits": ["...", "..."],
+    "relevant_past_projects": [
+        {{"project": "...", "program": "...", "relevance": "high/medium"}}
+    ],
+    "suggested_partners": ["..."],
+    "estimated_effort_hours": "...",
+    "reasoning": "...",
+    "confidence": "..."
+}}"""
+
+    return prompt
+
+
+# =============================================================================
+# RULE-BASED FALLBACK
+# =============================================================================
+
+
+def perform_rule_based_analysis(call_data: dict, company_profile: dict) -> dict:
+    """Fallback rule-based analysis when LLM not available"""
+
     domain_matches = analyze_domain_matches(call_data, company_profile)
-
-    # Analyze keyword matches
     keyword_analysis = analyze_keyword_matches(call_data, company_profile)
-
-    # Generate overall match summary
     match_summary = generate_match_summary(
         call_data, company_profile, domain_matches, keyword_analysis
     )
-
-    # Find relevant past projects
     relevant_projects = find_relevant_past_projects(call_data, company_profile)
 
     return {
@@ -25,14 +217,12 @@ def perform_qualitative_analysis(call_data: dict, company_profile: dict) -> dict
         "relevant_past_projects": relevant_projects,
         "suggested_partners": suggest_partners(call_data, company_profile),
         "estimated_effort_hours": estimate_effort(call_data, company_profile),
+        "analysis_method": "rule_based",
     }
 
 
 def analyze_domain_matches(call_data: dict, company_profile: dict) -> list:
-    """
-    Analyze how company domains match call requirements.
-    Returns list of matches with strength ratings (strong/moderate/weak).
-    """
+    """Analyze how company domains match call requirements."""
     company_domains = company_profile.get("domains", [])
     call_requirements = call_data.get("required_domains", [])
 
@@ -64,20 +254,17 @@ def calculate_match_strength(company_domain: dict, call_requirement: str) -> str
     cd_subdomains = [s.lower() for s in company_domain.get("sub_domains", [])]
     req_lower = call_requirement.lower()
 
-    # Check direct domain name match
     if cd_name in req_lower or req_lower in cd_name:
         if company_domain.get("level") in ["expert", "advanced"]:
             return "strong"
         return "moderate"
 
-    # Check subdomain matches
     subdomain_matches = sum(1 for sd in cd_subdomains if sd in req_lower)
     if subdomain_matches >= 2:
         return "strong"
     elif subdomain_matches == 1:
         return "moderate"
 
-    # Check for related terms
     related_terms = get_related_terms(cd_name)
     if any(term in req_lower for term in related_terms):
         return "weak"
@@ -130,9 +317,7 @@ def generate_match_reasoning(company_domain: dict, call_req: str, strength: str)
 
 
 def analyze_keyword_matches(call_data: dict, company_profile: dict) -> dict:
-    """
-    Analyze keyword matches between company and call.
-    """
+    """Analyze keyword matches between company and call."""
     include_keywords = set(
         k.lower() for k in company_profile.get("keywords", {}).get("include", [])
     )
@@ -140,18 +325,20 @@ def analyze_keyword_matches(call_data: dict, company_profile: dict) -> dict:
         k.lower() for k in company_profile.get("keywords", {}).get("exclude", [])
     )
     call_keywords = set(k.lower() for k in call_data.get("keywords", []))
-    call_text = call_data.get("description", "") + " " + call_data.get("title", "")
+    call_text = (
+        call_data.get("content", {}).get("description", "")
+        + " "
+        + call_data.get("title", "")
+    )
     call_text_lower = call_text.lower()
 
     hits = []
     excluded_found = []
 
-    # Check included keywords
     for kw in include_keywords:
         if kw in call_text_lower or kw in call_keywords:
             hits.append(kw)
 
-    # Check excluded keywords
     for kw in exclude_keywords:
         if kw in call_text_lower:
             excluded_found.append(kw)
@@ -188,7 +375,7 @@ def generate_match_summary(
 def find_relevant_past_projects(call_data: dict, company_profile: dict) -> list:
     """Find past EU projects relevant to this call."""
     past_projects = company_profile.get("past_eu_projects", [])
-    call_program = call_data.get("program", "")
+    call_program = call_data.get("general_info", {}).get("programme", "")
     call_domains = call_data.get("required_domains", [])
 
     relevant = []
@@ -196,11 +383,9 @@ def find_relevant_past_projects(call_data: dict, company_profile: dict) -> list:
     for project in past_projects:
         score = 0
 
-        # Same program bonus
         if call_program in project.get("program", ""):
             score += 3
 
-        # Check domain relevance
         project_name = project.get("name", "").lower()
         for domain in call_domains:
             if any(term in project_name for term in domain.lower().split()):
@@ -219,29 +404,24 @@ def find_relevant_past_projects(call_data: dict, company_profile: dict) -> list:
 
 
 def suggest_partners(call_data: dict, company_profile: dict) -> list:
-    """Suggest potential consortium partners based on call requirements."""
+    """Suggest potential consortium partners."""
     consortium = call_data.get("consortium", {})
     min_partners = consortium.get("min_partners", 3)
-    min_countries = consortium.get("min_countries", 3)
 
-    suggestions = []
-
-    # If SME needs more partners
     if min_partners > 1:
-        suggestions.extend(
-            [
-                "Fraunhofer (Germany) — research partner",
-                "University partners from EU countries",
-                "Industry partners from different sectors",
-            ]
-        )
+        return [
+            "Fraunhofer (Germany) — research partner",
+            "University partners from EU countries",
+            "Industry partners from different sectors",
+        ][:3]
 
-    return suggestions[:3]
+    return []
 
 
 def estimate_effort(call_data: dict, company_profile: dict) -> str:
     """Estimate proposal preparation effort in hours."""
-    action_type = call_data.get("action_type", "")
+    general_info = call_data.get("general_info", {})
+    action_type = general_info.get("action_type", "")
     budget = call_data.get("budget_per_project", {}).get("max", 0)
 
     if "RIA" in action_type or "Innovation Action" in action_type:
