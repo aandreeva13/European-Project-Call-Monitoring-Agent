@@ -1,0 +1,1031 @@
+{
+  "metadata": {
+    "test_run_at": "2026-02-13T13:53:54.111549",
+    "mock_data_file": "eu-call-finder/mock_data/sample_calls.json",
+    "total_calls_analyzed": 12,
+    "company_name": "NexGen AI Solutions"
+  },
+  "summary": {
+    "reflection": {
+      "decision": "finalize",
+      "reasoning": "Results are sufficient: 1 high-quality matches found with average score 6.4/10.",
+      "recommendations": [
+        "Proceed with top 1 recommendations",
+        "Prepare detailed analysis for high-scoring calls",
+        "Consider setting up monitoring for similar future calls"
+      ],
+      "stats": {
+        "total_results": 12,
+        "high_scores": 1,
+        "medium_scores": 7,
+        "low_scores": 2,
+        "average_score": 6.38,
+        "max_score": 8.3,
+        "portals_covered": [
+          "DIGITAL (HORIZON-CL4-2026-04)",
+          "DIGITAL (HORIZON-CL4-2026-05)",
+          "COST Open Call",
+          "BG-RRP-3.008",
+          "DIGITAL (HORIZON-CL4-2027-04)",
+          "BG16RFOP002-1.015",
+          "SPACE (HORIZON-CL6-2026)",
+          "DIGITAL (HORIZON-CL4-2026-HUMAN)",
+          "FOOD (HORIZON-CL5-2026)",
+          "EIC Advanced Innovation Challenge (HORIZON-EIC-2026-AIC)"
+        ],
+        "portal_coverage": 333.3
+      }
+    },
+    "confidence": {
+      "level": "high",
+      "score": 100.0,
+      "data_completeness": 100.0,
+      "score_consistency": "consistent",
+      "std_deviation": 1.05
+    },
+    "top_recommendation": "HORIZON-CL4-2026-HUMAN-01-03",
+    "highest_score": 8.3,
+    "average_score": 6.38
+  },
+  "ranked_results": [
+    {
+      "call_id": "HORIZON-CL4-2026-HUMAN-01-03",
+      "title": "Trustworthy AI for cybersecurity of critical infrastructure",
+      "portal": "DIGITAL (HORIZON-CL4-2026-HUMAN)",
+      "program": "Horizon Europe (HORIZON)",
+      "deadline": "18 September 2026 17:00:00 Brussels time",
+      "days_until_deadline": 216,
+      "budget_per_project": {
+        "min": 3000000,
+        "max": 5000000,
+        "currency": "EUR"
+      },
+      "analysis": {
+        "scoring": {
+          "total": 8.3,
+          "domain_match": 8.5,
+          "keyword_match": 9.5,
+          "eligibility_fit": 10.0,
+          "budget_feasibility": 5.5,
+          "strategic_value": 6.5,
+          "deadline_comfort": 8.5,
+          "recommendation": {
+            "action": "apply",
+            "label": "КАНДИДАТСТВАЙТЕ",
+            "color": "green"
+          }
+        },
+        "qualitative": {
+          "match_summary": "Excellent match. The call combines Artificial Intelligence and Cybersecurity — your strongest domains. High relevance with 4 keyword matches.",
+          "domain_matches": [
+            {
+              "your_domain": "Artificial Intelligence",
+              "call_requirement": "Artificial Intelligence",
+              "strength": "strong",
+              "your_level": "advanced",
+              "reasoning": "Your advanced expertise in Artificial Intelligence directly aligns with the requirement for 'Artificial Intelligence'."
+            },
+            {
+              "your_domain": "Cybersecurity",
+              "call_requirement": "Cybersecurity",
+              "strength": "strong",
+              "your_level": "expert",
+              "reasoning": "Your expert expertise in Cybersecurity directly aligns with the requirement for 'Cybersecurity'."
+            },
+            {
+              "your_domain": "Cybersecurity",
+              "call_requirement": "Critical Infrastructure Protection",
+              "strength": "weak",
+              "your_level": "expert",
+              "reasoning": "Some overlap between Cybersecurity and 'Critical Infrastructure Protection'."
+            }
+          ],
+          "keyword_hits": [
+            "trustworthy ai",
+            "cybersecurity",
+            "artificial intelligence",
+            "machine learning"
+          ],
+          "relevant_past_projects": [
+            {
+              "project": "AI4Manufacturing",
+              "program": "Horizon 2020",
+              "relevance": "medium"
+            },
+            {
+              "project": "CyberSME",
+              "program": "DIGITAL Europe",
+              "relevance": "medium"
+            }
+          ],
+          "suggested_partners": [
+            "Fraunhofer (Germany) — research partner",
+            "University partners from EU countries",
+            "Industry partners from different sectors"
+          ],
+          "estimated_effort_hours": "80-150"
+        },
+        "eligibility": {
+          "type_ok": true,
+          "country_ok": true,
+          "budget_ok": false,
+          "trl_ok": true,
+          "consortium_ok": true,
+          "sme_encouraged": true,
+          "sme_required": false,
+          "all_passed": false,
+          "details": {
+            "type_message": "Organization type 'SME' is eligible",
+            "country_message": "Country 'Bulgaria' is eligible",
+            "budget_message": "Budget may be outside preferred range",
+            "trl_message": "TRL 4-7 is compatible with company capabilities",
+            "consortium_message": "Consortium of 3+ partners is feasible"
+          }
+        }
+      },
+      "rank": 1
+    },
+    {
+      "call_id": "HORIZON-EIC-2026-AIC-01",
+      "title": "Accelerating Physical AI: Embodied Intelligence for the Next Frontier of AI-Powered Robotics",
+      "portal": "EIC Advanced Innovation Challenge (HORIZON-EIC-2026-AIC)",
+      "program": "Horizon Europe (HORIZON)",
+      "deadline": "26 February 2026 17:00:00 Brussels time",
+      "days_until_deadline": 12,
+      "budget_per_project": {
+        "min": 250000,
+        "max": 350000,
+        "currency": "EUR"
+      },
+      "analysis": {
+        "scoring": {
+          "total": 7.4,
+          "domain_match": 7.0,
+          "keyword_match": 9.5,
+          "eligibility_fit": 10.0,
+          "budget_feasibility": 7.0,
+          "strategic_value": 5.0,
+          "deadline_comfort": 3.5,
+          "recommendation": {
+            "action": "consider",
+            "label": "ОБМИСЛЕТЕ",
+            "color": "yellow"
+          }
+        },
+        "qualitative": {
+          "match_summary": "Strong match in Artificial Intelligence. Good alignment with your core competencies.",
+          "domain_matches": [
+            {
+              "your_domain": "Artificial Intelligence",
+              "call_requirement": "Artificial Intelligence",
+              "strength": "strong",
+              "your_level": "advanced",
+              "reasoning": "Your advanced expertise in Artificial Intelligence directly aligns with the requirement for 'Artificial Intelligence'."
+            },
+            {
+              "your_domain": "Artificial Intelligence",
+              "call_requirement": "Physical AI",
+              "strength": "weak",
+              "your_level": "advanced",
+              "reasoning": "Some overlap between Artificial Intelligence and 'Physical AI'."
+            }
+          ],
+          "keyword_hits": [
+            "automation",
+            "machine learning"
+          ],
+          "relevant_past_projects": [
+            {
+              "project": "AI4Manufacturing",
+              "program": "Horizon 2020",
+              "relevance": "high"
+            },
+            {
+              "project": "CyberSME",
+              "program": "DIGITAL Europe",
+              "relevance": "medium"
+            }
+          ],
+          "suggested_partners": [],
+          "estimated_effort_hours": "40-80"
+        },
+        "eligibility": {
+          "type_ok": true,
+          "country_ok": true,
+          "budget_ok": true,
+          "trl_ok": true,
+          "consortium_ok": true,
+          "sme_encouraged": false,
+          "sme_required": false,
+          "all_passed": true,
+          "details": {
+            "type_message": "Organization type 'SME' is eligible",
+            "country_message": "Country 'Bulgaria' is eligible",
+            "budget_message": "Budget range 250000-350000 EUR is feasible",
+            "trl_message": "TRL 4-5 is compatible with company capabilities",
+            "consortium_message": "Single applicant allowed"
+          }
+        }
+      },
+      "rank": 2
+    },
+    {
+      "call_id": "HORIZON-CL4-2026-HUMAN-02",
+      "title": "NLP Technologies for Multilingual Europe",
+      "portal": "DIGITAL (HORIZON-CL4-2026-HUMAN)",
+      "program": "Horizon Europe (HORIZON)",
+      "deadline": "15 May 2026 17:00:00 Brussels time",
+      "days_until_deadline": 90,
+      "budget_per_project": {
+        "min": 3000000,
+        "max": 5000000,
+        "currency": "EUR"
+      },
+      "analysis": {
+        "scoring": {
+          "total": 7.4,
+          "domain_match": 6.8,
+          "keyword_match": 9.5,
+          "eligibility_fit": 9.4,
+          "budget_feasibility": 5.5,
+          "strategic_value": 5.0,
+          "deadline_comfort": 7.5,
+          "recommendation": {
+            "action": "consider",
+            "label": "ОБМИСЛЕТЕ",
+            "color": "yellow"
+          }
+        },
+        "qualitative": {
+          "match_summary": "Strong match in Artificial Intelligence. Good alignment with your core competencies.",
+          "domain_matches": [
+            {
+              "your_domain": "Artificial Intelligence",
+              "call_requirement": "NLP",
+              "strength": "moderate",
+              "your_level": "advanced",
+              "reasoning": "Your experience in Artificial Intelligence is relevant to 'NLP'."
+            },
+            {
+              "your_domain": "Artificial Intelligence",
+              "call_requirement": "Artificial Intelligence",
+              "strength": "strong",
+              "your_level": "advanced",
+              "reasoning": "Your advanced expertise in Artificial Intelligence directly aligns with the requirement for 'Artificial Intelligence'."
+            }
+          ],
+          "keyword_hits": [
+            "nlp",
+            "machine learning"
+          ],
+          "relevant_past_projects": [
+            {
+              "project": "AI4Manufacturing",
+              "program": "Horizon 2020",
+              "relevance": "medium"
+            },
+            {
+              "project": "CyberSME",
+              "program": "DIGITAL Europe",
+              "relevance": "medium"
+            }
+          ],
+          "suggested_partners": [
+            "Fraunhofer (Germany) — research partner",
+            "University partners from EU countries",
+            "Industry partners from different sectors"
+          ],
+          "estimated_effort_hours": "80-150"
+        },
+        "eligibility": {
+          "type_ok": true,
+          "country_ok": true,
+          "budget_ok": false,
+          "trl_ok": true,
+          "consortium_ok": true,
+          "sme_encouraged": false,
+          "sme_required": false,
+          "all_passed": false,
+          "details": {
+            "type_message": "Organization type 'SME' is eligible",
+            "country_message": "Country 'Bulgaria' is eligible",
+            "budget_message": "Budget may be outside preferred range",
+            "trl_message": "TRL 4-7 is compatible with company capabilities",
+            "consortium_message": "Consortium of 3+ partners is feasible"
+          }
+        }
+      },
+      "rank": 3
+    },
+    {
+      "call_id": "HORIZON-CL4-2027-04-DIGITAL-EMERGING-05",
+      "title": "AI-Driven Robotics for Industry: Enabling System Integration and Adoption",
+      "portal": "DIGITAL (HORIZON-CL4-2027-04)",
+      "program": "Horizon Europe (HORIZON)",
+      "deadline": "18 March 2027 17:00:00 Brussels time",
+      "days_until_deadline": 397,
+      "budget_per_project": {
+        "min": 15000000,
+        "max": 18000000,
+        "currency": "EUR"
+      },
+      "analysis": {
+        "scoring": {
+          "total": 7.0,
+          "domain_match": 7.0,
+          "keyword_match": 9.5,
+          "eligibility_fit": 9.4,
+          "budget_feasibility": 1.5,
+          "strategic_value": 5.0,
+          "deadline_comfort": 9.0,
+          "recommendation": {
+            "action": "consider",
+            "label": "ОБМИСЛЕТЕ",
+            "color": "yellow"
+          }
+        },
+        "qualitative": {
+          "match_summary": "Strong match in Artificial Intelligence. Good alignment with your core competencies.",
+          "domain_matches": [
+            {
+              "your_domain": "Artificial Intelligence",
+              "call_requirement": "Artificial Intelligence",
+              "strength": "strong",
+              "your_level": "advanced",
+              "reasoning": "Your advanced expertise in Artificial Intelligence directly aligns with the requirement for 'Artificial Intelligence'."
+            }
+          ],
+          "keyword_hits": [
+            "machine learning"
+          ],
+          "relevant_past_projects": [
+            {
+              "project": "AI4Manufacturing",
+              "program": "Horizon 2020",
+              "relevance": "medium"
+            },
+            {
+              "project": "CyberSME",
+              "program": "DIGITAL Europe",
+              "relevance": "medium"
+            }
+          ],
+          "suggested_partners": [
+            "Fraunhofer (Germany) — research partner",
+            "University partners from EU countries",
+            "Industry partners from different sectors"
+          ],
+          "estimated_effort_hours": "80-150"
+        },
+        "eligibility": {
+          "type_ok": true,
+          "country_ok": true,
+          "budget_ok": false,
+          "trl_ok": true,
+          "consortium_ok": true,
+          "sme_encouraged": false,
+          "sme_required": false,
+          "all_passed": false,
+          "details": {
+            "type_message": "Organization type 'SME' is eligible",
+            "country_message": "Country 'Bulgaria' is eligible",
+            "budget_message": "Budget may be outside preferred range",
+            "trl_message": "TRL 5-7 is compatible with company capabilities",
+            "consortium_message": "Consortium of 3+ partners is feasible"
+          }
+        }
+      },
+      "rank": 4
+    },
+    {
+      "call_id": "COST-2026-OPEN-01",
+      "title": "COST Open Call for Network Proposals - Cybersecurity",
+      "portal": "COST Open Call",
+      "program": "COST Programme",
+      "deadline": "15 March 2026 12:00:00 Brussels time",
+      "days_until_deadline": 29,
+      "budget_per_project": {
+        "min": 500000,
+        "max": 600000,
+        "currency": "EUR"
+      },
+      "analysis": {
+        "scoring": {
+          "total": 6.9,
+          "domain_match": 8.0,
+          "keyword_match": 4.0,
+          "eligibility_fit": 8.9,
+          "budget_feasibility": 7.0,
+          "strategic_value": 6.5,
+          "deadline_comfort": 4.5,
+          "recommendation": {
+            "action": "consider",
+            "label": "ОБМИСЛЕТЕ",
+            "color": "yellow"
+          }
+        },
+        "qualitative": {
+          "match_summary": "Strong match in Cybersecurity. Good alignment with your core competencies.",
+          "domain_matches": [
+            {
+              "your_domain": "Cybersecurity",
+              "call_requirement": "Cybersecurity",
+              "strength": "strong",
+              "your_level": "expert",
+              "reasoning": "Your expert expertise in Cybersecurity directly aligns with the requirement for 'Cybersecurity'."
+            }
+          ],
+          "keyword_hits": [
+            "cybersecurity"
+          ],
+          "relevant_past_projects": [
+            {
+              "project": "AI4Manufacturing",
+              "program": "Horizon 2020",
+              "relevance": "medium"
+            },
+            {
+              "project": "CyberSME",
+              "program": "DIGITAL Europe",
+              "relevance": "medium"
+            }
+          ],
+          "suggested_partners": [
+            "Fraunhofer (Germany) — research partner",
+            "University partners from EU countries",
+            "Industry partners from different sectors"
+          ],
+          "estimated_effort_hours": "40-80"
+        },
+        "eligibility": {
+          "type_ok": true,
+          "country_ok": true,
+          "budget_ok": true,
+          "trl_ok": true,
+          "consortium_ok": true,
+          "sme_encouraged": false,
+          "sme_required": false,
+          "all_passed": true,
+          "details": {
+            "type_message": "Organization type 'SME' is eligible",
+            "country_message": "Country 'Bulgaria' is eligible",
+            "budget_message": "Budget range 500000-600000 EUR is feasible",
+            "trl_message": "TRL N/A is compatible with company capabilities",
+            "consortium_message": "Consortium of 7+ partners is feasible"
+          }
+        }
+      },
+      "rank": 5
+    },
+    {
+      "call_id": "HORIZON-CL4-2026-05-DIGITAL-EMERGING-02",
+      "title": "Next-Generation AI Agents for Real-World Applications in the Apply AI sectors",
+      "portal": "DIGITAL (HORIZON-CL4-2026-05)",
+      "program": "Horizon Europe (HORIZON)",
+      "deadline": "15 April 2026 17:00:00 Brussels time",
+      "days_until_deadline": 60,
+      "budget_per_project": {
+        "min": 15000000,
+        "max": 20000000,
+        "currency": "EUR"
+      },
+      "analysis": {
+        "scoring": {
+          "total": 6.6,
+          "domain_match": 6.8,
+          "keyword_match": 8.5,
+          "eligibility_fit": 9.4,
+          "budget_feasibility": 1.5,
+          "strategic_value": 5.0,
+          "deadline_comfort": 6.5,
+          "recommendation": {
+            "action": "consider",
+            "label": "ОБМИСЛЕТЕ",
+            "color": "yellow"
+          }
+        },
+        "qualitative": {
+          "match_summary": "Strong match in Artificial Intelligence. Good alignment with your core competencies.",
+          "domain_matches": [
+            {
+              "your_domain": "Artificial Intelligence",
+              "call_requirement": "Artificial Intelligence",
+              "strength": "strong",
+              "your_level": "advanced",
+              "reasoning": "Your advanced expertise in Artificial Intelligence directly aligns with the requirement for 'Artificial Intelligence'."
+            },
+            {
+              "your_domain": "Artificial Intelligence",
+              "call_requirement": "Agentic AI",
+              "strength": "moderate",
+              "your_level": "advanced",
+              "reasoning": "Your experience in Artificial Intelligence is relevant to 'Agentic AI'."
+            },
+            {
+              "your_domain": "Artificial Intelligence",
+              "call_requirement": "LLM",
+              "strength": "moderate",
+              "your_level": "advanced",
+              "reasoning": "Your experience in Artificial Intelligence is relevant to 'LLM'."
+            }
+          ],
+          "keyword_hits": [
+            "trustworthy ai",
+            "machine learning",
+            "ai agents"
+          ],
+          "relevant_past_projects": [
+            {
+              "project": "AI4Manufacturing",
+              "program": "Horizon 2020",
+              "relevance": "high"
+            },
+            {
+              "project": "CyberSME",
+              "program": "DIGITAL Europe",
+              "relevance": "medium"
+            }
+          ],
+          "suggested_partners": [
+            "Fraunhofer (Germany) — research partner",
+            "University partners from EU countries",
+            "Industry partners from different sectors"
+          ],
+          "estimated_effort_hours": "80-150"
+        },
+        "eligibility": {
+          "type_ok": true,
+          "country_ok": true,
+          "budget_ok": false,
+          "trl_ok": true,
+          "consortium_ok": true,
+          "sme_encouraged": false,
+          "sme_required": false,
+          "all_passed": false,
+          "details": {
+            "type_message": "Organization type 'SME' is eligible",
+            "country_message": "Country 'Bulgaria' is eligible",
+            "budget_message": "Budget may be outside preferred range",
+            "trl_message": "TRL 4-6 is compatible with company capabilities",
+            "consortium_message": "Consortium of 3+ partners is feasible"
+          }
+        }
+      },
+      "rank": 6
+    },
+    {
+      "call_id": "ISUN-2026-DIGITAL-45",
+      "title": "ИСУН Процедура: Дигитализация на бизнеса",
+      "portal": "BG16RFOP002-1.015",
+      "program": "Оперативна програма Иновации и конкурентоспособност",
+      "deadline": "31 May 2026 17:00:00 Sofia time",
+      "days_until_deadline": 106,
+      "budget_per_project": {
+        "min": 50000,
+        "max": 300000,
+        "currency": "BGN"
+      },
+      "analysis": {
+        "scoring": {
+          "total": 6.3,
+          "domain_match": 2.0,
+          "keyword_match": 9.5,
+          "eligibility_fit": 10.0,
+          "budget_feasibility": 7.0,
+          "strategic_value": 5.0,
+          "deadline_comfort": 7.5,
+          "recommendation": {
+            "action": "consider",
+            "label": "ОБМИСЛЕТЕ",
+            "color": "yellow"
+          }
+        },
+        "qualitative": {
+          "match_summary": "Weak match. Limited alignment with your expertise.",
+          "domain_matches": [
+            {
+              "your_domain": "Artificial Intelligence",
+              "call_requirement": "AI",
+              "strength": "weak",
+              "your_level": "advanced",
+              "reasoning": "Some overlap between Artificial Intelligence and 'AI'."
+            }
+          ],
+          "keyword_hits": [
+            "cloud",
+            "automation"
+          ],
+          "relevant_past_projects": [
+            {
+              "project": "AI4Manufacturing",
+              "program": "Horizon 2020",
+              "relevance": "high"
+            },
+            {
+              "project": "CyberSME",
+              "program": "DIGITAL Europe",
+              "relevance": "medium"
+            }
+          ],
+          "suggested_partners": [],
+          "estimated_effort_hours": "40-80"
+        },
+        "eligibility": {
+          "type_ok": true,
+          "country_ok": true,
+          "budget_ok": true,
+          "trl_ok": true,
+          "consortium_ok": true,
+          "sme_encouraged": false,
+          "sme_required": false,
+          "all_passed": true,
+          "details": {
+            "type_message": "Organization type 'SME' is eligible",
+            "country_message": "Country 'Bulgaria' is eligible",
+            "budget_message": "Budget range 50000-300000 EUR is feasible",
+            "trl_message": "TRL 8-9 is compatible with company capabilities",
+            "consortium_message": "Single applicant allowed"
+          }
+        }
+      },
+      "rank": 7
+    },
+    {
+      "call_id": "BG-RRP-3.008",
+      "title": "Дигитална трансформация на малки и средни предприятия",
+      "portal": "BG-RRP-3.008",
+      "program": "National Recovery Plan",
+      "deadline": "15 April 2026 17:00:00 Sofia time",
+      "days_until_deadline": 60,
+      "budget_per_project": {
+        "min": 20000,
+        "max": 200000,
+        "currency": "BGN"
+      },
+      "analysis": {
+        "scoring": {
+          "total": 6.2,
+          "domain_match": 2.0,
+          "keyword_match": 9.5,
+          "eligibility_fit": 10.0,
+          "budget_feasibility": 7.0,
+          "strategic_value": 5.0,
+          "deadline_comfort": 6.5,
+          "recommendation": {
+            "action": "consider",
+            "label": "ОБМИСЛЕТЕ",
+            "color": "yellow"
+          }
+        },
+        "qualitative": {
+          "match_summary": "Weak match. Limited alignment with your expertise.",
+          "domain_matches": [],
+          "keyword_hits": [
+            "cybersecurity",
+            "digital transformation",
+            "cloud",
+            "automation"
+          ],
+          "relevant_past_projects": [
+            {
+              "project": "AI4Manufacturing",
+              "program": "Horizon 2020",
+              "relevance": "medium"
+            },
+            {
+              "project": "CyberSME",
+              "program": "DIGITAL Europe",
+              "relevance": "medium"
+            }
+          ],
+          "suggested_partners": [],
+          "estimated_effort_hours": "40-80"
+        },
+        "eligibility": {
+          "type_ok": true,
+          "country_ok": true,
+          "budget_ok": true,
+          "trl_ok": true,
+          "consortium_ok": true,
+          "sme_encouraged": false,
+          "sme_required": false,
+          "all_passed": true,
+          "details": {
+            "type_message": "Organization type 'SME' is eligible",
+            "country_message": "Country 'Bulgaria' is eligible",
+            "budget_message": "Budget range 20000-200000 EUR is feasible",
+            "trl_message": "TRL 7-9 is compatible with company capabilities",
+            "consortium_message": "Single applicant allowed"
+          }
+        }
+      },
+      "rank": 8
+    },
+    {
+      "call_id": "HORIZON-CL5-2026-DATA-01",
+      "title": "Agricultural AI for Sustainable Farming and Food Security",
+      "portal": "FOOD (HORIZON-CL5-2026)",
+      "program": "Horizon Europe (HORIZON)",
+      "deadline": "15 June 2026 17:00:00 Brussels time",
+      "days_until_deadline": 121,
+      "budget_per_project": {
+        "min": 4000000,
+        "max": 6000000,
+        "currency": "EUR"
+      },
+      "analysis": {
+        "scoring": {
+          "total": 5.5,
+          "domain_match": 2.0,
+          "keyword_match": 8.5,
+          "eligibility_fit": 8.9,
+          "budget_feasibility": 4.0,
+          "strategic_value": 5.0,
+          "deadline_comfort": 7.5,
+          "recommendation": {
+            "action": "monitor",
+            "label": "НАБЛЮДАВАЙТЕ",
+            "color": "blue"
+          }
+        },
+        "qualitative": {
+          "match_summary": "Weak match. Limited alignment with your expertise.",
+          "domain_matches": [
+            {
+              "your_domain": "Artificial Intelligence",
+              "call_requirement": "AI",
+              "strength": "weak",
+              "your_level": "advanced",
+              "reasoning": "Some overlap between Artificial Intelligence and 'AI'."
+            }
+          ],
+          "keyword_hits": [],
+          "relevant_past_projects": [
+            {
+              "project": "AI4Manufacturing",
+              "program": "Horizon 2020",
+              "relevance": "high"
+            },
+            {
+              "project": "CyberSME",
+              "program": "DIGITAL Europe",
+              "relevance": "medium"
+            }
+          ],
+          "suggested_partners": [
+            "Fraunhofer (Germany) — research partner",
+            "University partners from EU countries",
+            "Industry partners from different sectors"
+          ],
+          "estimated_effort_hours": "80-150"
+        },
+        "eligibility": {
+          "type_ok": true,
+          "country_ok": true,
+          "budget_ok": false,
+          "trl_ok": true,
+          "consortium_ok": true,
+          "sme_encouraged": false,
+          "sme_required": false,
+          "all_passed": false,
+          "details": {
+            "type_message": "Organization type 'SME' is eligible",
+            "country_message": "Country 'Bulgaria' is eligible",
+            "budget_message": "Budget may be outside preferred range",
+            "trl_message": "TRL 5-7 is compatible with company capabilities",
+            "consortium_message": "Consortium of 4+ partners is feasible"
+          }
+        }
+      },
+      "rank": 9
+    },
+    {
+      "call_id": "HORIZON-CL4-2026-04-DATA-06",
+      "title": "Efficient and compliant access to and use of data",
+      "portal": "DIGITAL (HORIZON-CL4-2026-04)",
+      "program": "Horizon Europe (HORIZON)",
+      "deadline": "15 April 2026 17:00:00 Brussels time",
+      "days_until_deadline": 60,
+      "budget_per_project": {
+        "min": 10000000,
+        "max": 25000000,
+        "currency": "EUR"
+      },
+      "analysis": {
+        "scoring": {
+          "total": 5.4,
+          "domain_match": 2.0,
+          "keyword_match": 9.5,
+          "eligibility_fit": 9.4,
+          "budget_feasibility": 2.5,
+          "strategic_value": 5.0,
+          "deadline_comfort": 6.5,
+          "recommendation": {
+            "action": "monitor",
+            "label": "НАБЛЮДАВАЙТЕ",
+            "color": "blue"
+          }
+        },
+        "qualitative": {
+          "match_summary": "Weak match. Limited alignment with your expertise.",
+          "domain_matches": [
+            {
+              "your_domain": "Artificial Intelligence",
+              "call_requirement": "AI",
+              "strength": "weak",
+              "your_level": "advanced",
+              "reasoning": "Some overlap between Artificial Intelligence and 'AI'."
+            }
+          ],
+          "keyword_hits": [
+            "cloud"
+          ],
+          "relevant_past_projects": [
+            {
+              "project": "AI4Manufacturing",
+              "program": "Horizon 2020",
+              "relevance": "high"
+            },
+            {
+              "project": "CyberSME",
+              "program": "DIGITAL Europe",
+              "relevance": "medium"
+            }
+          ],
+          "suggested_partners": [
+            "Fraunhofer (Germany) — research partner",
+            "University partners from EU countries",
+            "Industry partners from different sectors"
+          ],
+          "estimated_effort_hours": "80-150"
+        },
+        "eligibility": {
+          "type_ok": true,
+          "country_ok": true,
+          "budget_ok": false,
+          "trl_ok": true,
+          "consortium_ok": true,
+          "sme_encouraged": false,
+          "sme_required": false,
+          "all_passed": false,
+          "details": {
+            "type_message": "Organization type 'SME' is eligible",
+            "country_message": "Country 'Bulgaria' is eligible",
+            "budget_message": "Budget may be outside preferred range",
+            "trl_message": "TRL 6-8 is compatible with company capabilities",
+            "consortium_message": "Consortium of 3+ partners is feasible"
+          }
+        }
+      },
+      "rank": 10
+    },
+    {
+      "call_id": "HORIZON-CL4-2026-04-DIGITAL-EMERGING-19",
+      "title": "Challenge-Driven GenAI4EU Booster in Apply AI prioritised sectors",
+      "portal": "DIGITAL (HORIZON-CL4-2026-04)",
+      "program": "Horizon Europe (HORIZON)",
+      "deadline": "15 April 2026 17:00:00 Brussels time",
+      "days_until_deadline": 60,
+      "budget_per_project": {
+        "min": 10000000,
+        "max": 17000000,
+        "currency": "EUR"
+      },
+      "analysis": {
+        "scoring": {
+          "total": 4.8,
+          "domain_match": 2.0,
+          "keyword_match": 5.5,
+          "eligibility_fit": 9.4,
+          "budget_feasibility": 2.5,
+          "strategic_value": 5.0,
+          "deadline_comfort": 6.5,
+          "recommendation": {
+            "action": "monitor",
+            "label": "НАБЛЮДАВАЙТЕ",
+            "color": "blue"
+          }
+        },
+        "qualitative": {
+          "match_summary": "Weak match. Limited alignment with your expertise.",
+          "domain_matches": [
+            {
+              "your_domain": "Artificial Intelligence",
+              "call_requirement": "Generative AI",
+              "strength": "weak",
+              "your_level": "advanced",
+              "reasoning": "Some overlap between Artificial Intelligence and 'Generative AI'."
+            }
+          ],
+          "keyword_hits": [],
+          "relevant_past_projects": [
+            {
+              "project": "AI4Manufacturing",
+              "program": "Horizon 2020",
+              "relevance": "high"
+            },
+            {
+              "project": "CyberSME",
+              "program": "DIGITAL Europe",
+              "relevance": "medium"
+            }
+          ],
+          "suggested_partners": [
+            "Fraunhofer (Germany) — research partner",
+            "University partners from EU countries",
+            "Industry partners from different sectors"
+          ],
+          "estimated_effort_hours": "80-150"
+        },
+        "eligibility": {
+          "type_ok": true,
+          "country_ok": true,
+          "budget_ok": false,
+          "trl_ok": true,
+          "consortium_ok": true,
+          "sme_encouraged": false,
+          "sme_required": false,
+          "all_passed": false,
+          "details": {
+            "type_message": "Organization type 'SME' is eligible",
+            "country_message": "Country 'Bulgaria' is eligible",
+            "budget_message": "Budget may be outside preferred range",
+            "trl_message": "TRL 4-7 is compatible with company capabilities",
+            "consortium_message": "Consortium of 3+ partners is feasible"
+          }
+        }
+      },
+      "rank": 11
+    },
+    {
+      "call_id": "HORIZON-CL6-2026-SPACE-01",
+      "title": "Space Data Analytics for Maritime Operations",
+      "portal": "SPACE (HORIZON-CL6-2026)",
+      "program": "Horizon Europe (HORIZON)",
+      "deadline": "30 November 2026 17:00:00 Brussels time",
+      "days_until_deadline": 289,
+      "budget_per_project": {
+        "min": 4000000,
+        "max": 6000000,
+        "currency": "EUR"
+      },
+      "analysis": {
+        "scoring": {
+          "total": 4.8,
+          "domain_match": 2.0,
+          "keyword_match": 2.5,
+          "eligibility_fit": 8.9,
+          "budget_feasibility": 4.0,
+          "strategic_value": 5.0,
+          "deadline_comfort": 9.0,
+          "recommendation": {
+            "action": "monitor",
+            "label": "НАБЛЮДАВАЙТЕ",
+            "color": "blue"
+          }
+        },
+        "qualitative": {
+          "match_summary": "Weak match. Limited alignment with your expertise.",
+          "domain_matches": [],
+          "keyword_hits": [],
+          "relevant_past_projects": [
+            {
+              "project": "AI4Manufacturing",
+              "program": "Horizon 2020",
+              "relevance": "medium"
+            },
+            {
+              "project": "CyberSME",
+              "program": "DIGITAL Europe",
+              "relevance": "medium"
+            }
+          ],
+          "suggested_partners": [
+            "Fraunhofer (Germany) — research partner",
+            "University partners from EU countries",
+            "Industry partners from different sectors"
+          ],
+          "estimated_effort_hours": "80-150"
+        },
+        "eligibility": {
+          "type_ok": true,
+          "country_ok": true,
+          "budget_ok": false,
+          "trl_ok": true,
+          "consortium_ok": true,
+          "sme_encouraged": false,
+          "sme_required": false,
+          "all_passed": false,
+          "details": {
+            "type_message": "Organization type 'SME' is eligible",
+            "country_message": "Country 'Bulgaria' is eligible",
+            "budget_message": "Budget may be outside preferred range",
+            "trl_message": "TRL 5-8 is compatible with company capabilities",
+            "consortium_message": "Consortium of 5+ partners is feasible"
+          }
+        }
+      },
+      "rank": 12
+    }
+  ]
+}

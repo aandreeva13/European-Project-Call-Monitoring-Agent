@@ -1,0 +1,88 @@
+{
+  "metadata": {
+    "plan_id": "plan_2026-02-13_001",
+    "generated_at": "2026-02-13T10:00:00Z",
+    "company": "NexGen AI Solutions",
+    "planner_version": "1.0"
+  },
+  "search_strategy": {
+    "objective": "Find EU funding opportunities for AI and cybersecurity SME from Bulgaria",
+    "priority_domains": ["Artificial Intelligence", "Cybersecurity", "Digital Transformation"],
+    "target_programs": ["Horizon Europe", "DIGITAL Europe", "EIC Accelerator", "National Programs"],
+    "excluded_sectors": ["Agriculture", "Maritime", "Fisheries", "Forestry"],
+    "keywords_must_have": ["AI", "artificial intelligence", "cybersecurity", "machine learning", "NLP"],
+    "keywords_nice_to_have": ["automation", "cloud", "trustworthy AI", "digital transformation"],
+    "keywords_exclude": ["agriculture only", "maritime only", "space only"]
+  },
+  "target_criteria": {
+    "organization_type": "SME",
+    "country_eligibility": ["EU Member States", "Associated Countries"],
+    "preferred_budget_range": {
+      "min_eur": 50000,
+      "max_eur": 500000,
+      "notes": "As partner in consortium. Can go higher for Horizon programs if SME role suitable."
+    },
+    "deadline_preferences": {
+      "minimum_days": 30,
+      "ideal_days": 90,
+      "maximum_days": 365
+    },
+    "consortium_preferences": {
+      "can_lead": false,
+      "preferred_role": "partner",
+      "max_partners": 8,
+      "geographic_spread": "any EU"
+    }
+  },
+  "portal_search_plan": [
+    {
+      "portal": "ftop",
+      "priority": "high",
+      "search_terms": ["AI", "cybersecurity", "trustworthy AI", "digital"],
+      "clusters": ["HORIZON-CL4", "HORIZON-EIC"],
+      "expected_calls": 15
+    },
+    {
+      "portal": "eufunds_bg",
+      "priority": "high",
+      "search_terms": ["дигитализация", "киберсигурност", "изкуствен интелект"],
+      "programs": ["BG-RRP", "OPIC"],
+      "expected_calls": 5
+    },
+    {
+      "portal": "isun",
+      "priority": "medium",
+      "search_terms": ["иновации", "дигитализация"],
+      "expected_calls": 3
+    },
+    {
+      "portal": "eic",
+      "priority": "high",
+      "search_terms": ["accelerator", "SME", "innovation"],
+      "expected_calls": 4
+    },
+    {
+      "portal": "cordis",
+      "priority": "low",
+      "search_terms": ["COST", "networking", "AI"],
+      "expected_calls": 2
+    }
+  ],
+  "expected_outcomes": {
+    "min_total_calls": 20,
+    "target_relevant_calls": 8,
+    "target_high_score_calls": 3,
+    "success_criteria": [
+      "At least 3 calls with score >= 7.5",
+      "At least 2 fully eligible calls",
+      "Mix of Horizon and national programs",
+      "Deadlines spread across next 12 months"
+    ]
+  },
+  "quality_thresholds": {
+    "min_domain_matches": 1,
+    "ideal_domain_matches": 2,
+    "min_keyword_hits": 2,
+    "ideal_keyword_hits": 4
+  }
+}
