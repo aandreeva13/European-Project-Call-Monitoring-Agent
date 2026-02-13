@@ -1,28 +1,20 @@
 """
 LLM-based qualitative analysis for EU project calls.
 Uses OpenAI API for nuanced analysis of call-company fit.
-API key and model loaded from environment variables (.env file).
+API key loaded from environment variables (.env file).
 """
 
 import os
 import json
-from typing import Dict, List
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 
 
-# ============================================================================
-# OPENAI CONFIGURATION - From environment variables
-# ============================================================================
-
+# LLM Configuration - API key from environment
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai")  # openai, anthropic, etc.
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-OPENAI_MODEL = os.getenv("LLM_MODEL", os.getenv("OPENAI_MODEL", "gpt-4"))
-OPENAI_TEMPERATURE = float(os.getenv("OPENAI_TEMPERATURE", "0.3"))
-OPENAI_MAX_TOKENS = int(os.getenv("OPENAI_MAX_TOKENS", "1500"))
-OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-
-LLM_TIMEOUT_SECONDS = int(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
-ENABLE_LLM_ANALYSIS = os.getenv("ENABLE_LLM_ANALYSIS", "true").lower() == "true"
-SKIP_LLM_ON_ERROR = os.getenv("SKIP_LLM_ON_ERROR", "true").lower() == "true"
+LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4")
+LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.3"))
 
 
 @dataclass
@@ -42,17 +34,19 @@ class LLMResponse:
 def perform_qualitative_analysis(call_data: dict, company_profile: dict) -> dict:
     """
     Perform LLM-based qualitative analysis of how well a call matches the company.
-    Falls back to rule-based if LLM not configured or disabled.
+    Falls back to rule-based if LLM not configured.
     """
 
-    # Check if LLM is enabled and configured
-    if not ENABLE_LLM_ANALYSIS or not OPENAI_API_KEY:
+    # Check if LLM is configured
+    if not is_llm_configured():
+        # Fallback to rule-based analysis
         return perform_rule_based_analysis(call_data, company_profile)
 
     try:
-        # Call OpenAI for analysis
-        llm_result = call_openai(call_data, company_profile)
+        # Call LLM for analysis
+        llm_result = call_llm_for_analysis(call_data, company_profile)
 
+        # Convert to expected format
         return {
             "match_summary": llm_result.match_summary,
             "domain_matches": llm_result.domain_matches,
@@ -66,62 +60,37 @@ def perform_qualitative_analysis(call_data: dict, company_profile: dict) -> dict
         }
 
     except Exception as e:
-        if SKIP_LLM_ON_ERROR:
-            print(f"[LLM Error] {e}. Falling back to rule-based analysis.")
-            result = perform_rule_based_analysis(call_data, company_profile)
-            result["llm_error"] = str(e)
-            return result
-        else:
-            raise
+        # Fallback to rule-based if LLM fails
+        print(f"[LLM Error] {e}. Falling back to rule-based analysis.")
+        result = perform_rule_based_analysis(call_data, company_profile)
+        result["llm_error"] = str(e)
+        return result
 
 
-def call_openai(call_data: dict, company_profile: dict) -> LLMResponse:
-    """Call OpenAI API for analysis using environment configuration"""
-    from openai import OpenAI
+def is_llm_configured() -> bool:
+    """Check if LLM API key is configured"""
+    if LLM_PROVIDER == "openai":
+        return bool(OPENAI_API_KEY)
+    elif LLM_PROVIDER == "anthropic":
+        return bool(ANTHROPIC_API_KEY)
+    return False
+
+
+def call_llm_for_analysis(call_data: dict, company_profile: dict) -> LLMResponse:
+    """
+    Call LLM API for qualitative analysis.
+    Supports OpenAI and Anthropic.
+    """
 
     # Build the prompt
     prompt = build_analysis_prompt(call_data, company_profile)
 
-    # Initialize OpenAI client
-    client = OpenAI(api_key=OPENAI_API_KEY, base_url=OPENAI_BASE_URL)
-
-    # Call API
-    response = client.chat.completions.create(
-        model=OPENAI_MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": "You are an expert EU funding advisor providing structured analysis in JSON format.",
-            },
-            {"role": "user", "content": prompt},
-        ],
-        temperature=OPENAI_TEMPERATURE,
-        max_tokens=OPENAI_MAX_TOKENS,
-    )
-
-    # Parse JSON response
-    content = response.choices[0].message.content or ""
-
-    # Extract JSON from response (handle markdown code blocks)
-    if "```json" in content:
-        content = content.split("```json")[1].split("```")[0]
-    elif "```" in content:
-        parts = content.split("```")
-        if len(parts) >= 2:
-            content = parts[1]
-
-    data = json.loads(content.strip())
-
-    return LLMResponse(
-        match_summary=data.get("match_summary", ""),
-        domain_matches=data.get("domain_matches", []),
-        keyword_hits=data.get("keyword_hits", []),
-        relevant_past_projects=data.get("relevant_past_projects", []),
-        suggested_partners=data.get("suggested_partners", []),
-        estimated_effort_hours=data.get("estimated_effort_hours", "80-150"),
-        reasoning=data.get("reasoning", ""),
-        confidence=data.get("confidence", "medium"),
-    )
+    if LLM_PROVIDER == "openai":
+        return call_openai(prompt, call_data, company_profile)
+    elif LLM_PROVIDER == "anthropic":
+        return call_anthropic(prompt, call_data, company_profile)
+    else:
+        raise ValueError(f"Unknown LLM provider: {LLM_PROVIDER}")
 
 
 def build_analysis_prompt(call_data: dict, company_profile: dict) -> str:
@@ -129,7 +98,9 @@ def build_analysis_prompt(call_data: dict, company_profile: dict) -> str:
 
     # Extract key information
     call_title = call_data.get("title", "")
-    call_desc = call_data.get("content", {}).get("description", "")[:2000]
+    call_desc = call_data.get("content", {}).get("description", "")[
+        :2000
+    ]  # Truncate if too long
     call_domains = call_data.get("required_domains", [])
     call_keywords = call_data.get("keywords", [])
 
@@ -168,13 +139,13 @@ Analyze how well this call matches the company. Provide:
 
 4. RELEVANT PAST PROJECTS: Which past EU projects are relevant to this call and why
 
-5. SUGGESTED PARTNERS: 2-3 specific partner types or organizations
+5. SUGGESTED PARTNERS: 2-3 specific partner types or organizations that would strengthen the consortium
 
 6. EFFORT ESTIMATE: Estimated hours needed for proposal (40-80, 80-150, 100-200, 200-300)
 
 7. REASONING: 2-3 sentences explaining your analysis
 
-8. CONFIDENCE: high/medium/low
+8. CONFIDENCE: high/medium/low (how confident are you in this assessment)
 
 Respond in valid JSON format:
 {{
@@ -195,19 +166,117 @@ Respond in valid JSON format:
     return prompt
 
 
+def call_openai(prompt: str, call_data: dict, company_profile: dict) -> LLMResponse:
+    """Call OpenAI API for analysis"""
+    try:
+        from openai import OpenAI
+
+        client = OpenAI(api_key=OPENAI_API_KEY)
+
+        response = client.chat.completions.create(
+            model=LLM_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an expert EU funding advisor providing structured analysis in JSON format.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+            temperature=LLM_TEMPERATURE,
+            max_tokens=1500,
+        )
+
+        # Parse JSON response
+        content = response.choices[0].message.content
+
+        # Extract JSON from response (handle markdown code blocks)
+        if "```json" in content:
+            content = content.split("```json")[1].split("```")[0]
+        elif "```" in content:
+            content = content.split("```")[1].split("```")[0]
+
+        data = json.loads(content.strip())
+
+        return LLMResponse(
+            match_summary=data.get("match_summary", ""),
+            domain_matches=data.get("domain_matches", []),
+            keyword_hits=data.get("keyword_hits", []),
+            relevant_past_projects=data.get("relevant_past_projects", []),
+            suggested_partners=data.get("suggested_partners", []),
+            estimated_effort_hours=data.get("estimated_effort_hours", "80-150"),
+            reasoning=data.get("reasoning", ""),
+            confidence=data.get("confidence", "medium"),
+        )
+
+    except ImportError:
+        raise ImportError("OpenAI library not installed. Run: pip install openai")
+    except Exception as e:
+        raise Exception(f"OpenAI API error: {e}")
+
+
+def call_anthropic(prompt: str, call_data: dict, company_profile: dict) -> LLMResponse:
+    """Call Anthropic API for analysis"""
+    try:
+        import anthropic
+
+        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+        response = client.messages.create(
+            model="claude-3-sonnet-20240229",
+            max_tokens=1500,
+            temperature=LLM_TEMPERATURE,
+            system="You are an expert EU funding advisor providing structured analysis in JSON format.",
+            messages=[{"role": "user", "content": prompt}],
+        )
+
+        # Parse JSON response
+        content = response.content[0].text
+
+        # Extract JSON from response
+        if "```json" in content:
+            content = content.split("```json")[1].split("```")[0]
+        elif "```" in content:
+            content = content.split("```")[1].split("```")[0]
+
+        data = json.loads(content.strip())
+
+        return LLMResponse(
+            match_summary=data.get("match_summary", ""),
+            domain_matches=data.get("domain_matches", []),
+            keyword_hits=data.get("keyword_hits", []),
+            relevant_past_projects=data.get("relevant_past_projects", []),
+            suggested_partners=data.get("suggested_partners", []),
+            estimated_effort_hours=data.get("estimated_effort_hours", "80-150"),
+            reasoning=data.get("reasoning", ""),
+            confidence=data.get("confidence", "medium"),
+        )
+
+    except ImportError:
+        raise ImportError("Anthropic library not installed. Run: pip install anthropic")
+    except Exception as e:
+        raise Exception(f"Anthropic API error: {e}")
+
+
 # =============================================================================
-# RULE-BASED FALLBACK
+# RULE-BASED FALLBACK (Original Implementation)
 # =============================================================================
 
 
 def perform_rule_based_analysis(call_data: dict, company_profile: dict) -> dict:
     """Fallback rule-based analysis when LLM not available"""
 
+    # Analyze domain matches with strength ratings
     domain_matches = analyze_domain_matches(call_data, company_profile)
+
+    # Analyze keyword matches
     keyword_analysis = analyze_keyword_matches(call_data, company_profile)
+
+    # Generate overall match summary
     match_summary = generate_match_summary(
         call_data, company_profile, domain_matches, keyword_analysis
     )
+
+    # Find relevant past projects
     relevant_projects = find_relevant_past_projects(call_data, company_profile)
 
     return {
@@ -254,17 +323,20 @@ def calculate_match_strength(company_domain: dict, call_requirement: str) -> str
     cd_subdomains = [s.lower() for s in company_domain.get("sub_domains", [])]
     req_lower = call_requirement.lower()
 
+    # Check direct domain name match
     if cd_name in req_lower or req_lower in cd_name:
         if company_domain.get("level") in ["expert", "advanced"]:
             return "strong"
         return "moderate"
 
+    # Check subdomain matches
     subdomain_matches = sum(1 for sd in cd_subdomains if sd in req_lower)
     if subdomain_matches >= 2:
         return "strong"
     elif subdomain_matches == 1:
         return "moderate"
 
+    # Check for related terms
     related_terms = get_related_terms(cd_name)
     if any(term in req_lower for term in related_terms):
         return "weak"
@@ -335,10 +407,12 @@ def analyze_keyword_matches(call_data: dict, company_profile: dict) -> dict:
     hits = []
     excluded_found = []
 
+    # Check included keywords
     for kw in include_keywords:
         if kw in call_text_lower or kw in call_keywords:
             hits.append(kw)
 
+    # Check excluded keywords
     for kw in exclude_keywords:
         if kw in call_text_lower:
             excluded_found.append(kw)
@@ -383,9 +457,11 @@ def find_relevant_past_projects(call_data: dict, company_profile: dict) -> list:
     for project in past_projects:
         score = 0
 
+        # Same program bonus
         if call_program in project.get("program", ""):
             score += 3
 
+        # Check domain relevance
         project_name = project.get("name", "").lower()
         for domain in call_domains:
             if any(term in project_name for term in domain.lower().split()):
@@ -404,18 +480,24 @@ def find_relevant_past_projects(call_data: dict, company_profile: dict) -> list:
 
 
 def suggest_partners(call_data: dict, company_profile: dict) -> list:
-    """Suggest potential consortium partners."""
+    """Suggest potential consortium partners based on call requirements."""
     consortium = call_data.get("consortium", {})
     min_partners = consortium.get("min_partners", 3)
+    min_countries = consortium.get("min_countries", 3)
 
+    suggestions = []
+
+    # If SME needs more partners
     if min_partners > 1:
-        return [
-            "Fraunhofer (Germany) — research partner",
-            "University partners from EU countries",
-            "Industry partners from different sectors",
-        ][:3]
+        suggestions.extend(
+            [
+                "Fraunhofer (Germany) — research partner",
+                "University partners from EU countries",
+                "Industry partners from different sectors",
+            ]
+        )
 
-    return []
+    return suggestions[:3]
 
 
 def estimate_effort(call_data: dict, company_profile: dict) -> str:
