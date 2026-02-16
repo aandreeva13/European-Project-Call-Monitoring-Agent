@@ -4,43 +4,33 @@ from typing import Dict, Optional
 def score_call(
     call_data: dict, company_profile: dict, llm_insights: Optional[dict] = None
 ) -> dict:
-    """
-    Score a call based on 6 criteria with weighted scoring (1-10 scale).
+    """Score a call based on 6 criteria with weighted scoring (1-10 scale).
 
-    If llm_insights provided (LLM-first approach), uses LLM analysis for:
-    - Domain Match (30%)
-    - Keyword Match (15%)
-    - Strategic Value (10%)
-
-    Otherwise falls back to rule-based scoring.
+    This project uses an LLM-enhanced scoring approach.
 
     Weights: Domain Match (30%), Keyword Match (15%), Eligibility (20%),
              Budget (15%), Strategic Value (10%), Deadline (10%)
     """
 
-    # Check if we have LLM insights (LLM-first approach)
-    use_llm = llm_insights is not None and llm_insights.get("analysis_method") == "llm"
-
-    if use_llm and llm_insights is not None:
-        # Use LLM insights for nuanced scoring
-        domain_score = _score_domain_match_from_llm(llm_insights)
-        keyword_score = _score_keyword_match_from_llm(llm_insights)
-        strategic_score = _score_strategic_value_from_llm(
-            call_data, company_profile, llm_insights
+    use_llm = bool(llm_insights) and llm_insights.get("analysis_method") == "llm"
+    if not use_llm:
+        raise ValueError(
+            "LLM insights are required for scoring. "
+            "Provide llm_insights with analysis_method='llm'."
         )
 
-        # Apply LLM confidence boost
-        confidence = llm_insights.get("llm_confidence", "medium")
-        confidence_multiplier = {"high": 1.0, "medium": 0.95, "low": 0.90}.get(
-            confidence, 0.95
-        )
-        domain_score = min(10.0, domain_score * confidence_multiplier)
-        keyword_score = min(10.0, keyword_score * confidence_multiplier)
-    else:
-        # Fall back to rule-based scoring
-        domain_score = _score_domain_match(call_data, company_profile)
-        keyword_score = _score_keyword_match(call_data, company_profile)
-        strategic_score = _score_strategic_value(call_data, company_profile)
+    # Use LLM insights for nuanced scoring
+    domain_score = _score_domain_match_from_llm(llm_insights)
+    keyword_score = _score_keyword_match_from_llm(llm_insights)
+    strategic_score = _score_strategic_value_from_llm(call_data, company_profile, llm_insights)
+
+    # Apply LLM confidence adjustment
+    confidence = llm_insights.get("llm_confidence", "medium")
+    confidence_multiplier = {"high": 1.0, "medium": 0.95, "low": 0.90}.get(
+        confidence, 0.95
+    )
+    domain_score = min(10.0, domain_score * confidence_multiplier)
+    keyword_score = min(10.0, keyword_score * confidence_multiplier)
 
     # These are always rule-based (hard constraints)
     eligibility_score = _score_eligibility(call_data, company_profile)
