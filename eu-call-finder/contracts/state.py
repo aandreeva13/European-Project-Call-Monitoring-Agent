@@ -46,6 +46,7 @@ class WorkflowState(TypedDict):
     analyzed_calls: List[Dict[str, Any]]  # Calls with scores and analysis
     eligibility_results: List[Dict[str, Any]]
     analysis_errors: List[str]
+    analysis_summary: Optional[Dict[str, Any]]  # Reflection results and decision
 
     # === REPORTING ===
     final_report: Optional[Dict[str, Any]]
@@ -100,31 +101,32 @@ class CompanyProfile:
 
 def create_initial_state(company_input: Dict[str, Any]) -> WorkflowState:
     """Create initial workflow state from company input."""
-    return WorkflowState(
-        company_input=company_input,
-        safety_check_passed=False,
-        validation_result=None,
-        validation_errors=[],
-        planner_iterations=0,
-        max_planner_iterations=3,
-        scraper_plan=None,
-        plan_approved=False,
-        plan_feedback=None,
-        search_terms=[],
-        search_query={},
-        scraped_topics=[],
-        retrieval_errors=[],
-        analyzed_calls=[],
-        eligibility_results=[],
-        analysis_errors=[],
-        final_report=None,
-        report_format="json",
-        current_step="safety_check",
-        workflow_status="running",
-        error_message=None,
-        start_time=datetime.now().isoformat(),
-        end_time=None,
-    )
+    return {
+        "company_input": company_input,
+        "safety_check_passed": False,
+        "validation_result": None,
+        "validation_errors": [],
+        "planner_iterations": 0,
+        "max_planner_iterations": 3,
+        "scraper_plan": None,
+        "plan_approved": False,
+        "plan_feedback": None,
+        "search_terms": [],
+        "search_query": {},
+        "scraped_topics": [],
+        "retrieval_errors": [],
+        "analyzed_calls": [],
+        "eligibility_results": [],
+        "analysis_errors": [],
+        "analysis_summary": None,
+        "final_report": None,
+        "report_format": "json",
+        "current_step": "safety_check",
+        "workflow_status": "running",
+        "error_message": None,
+        "start_time": datetime.now().isoformat(),
+        "end_time": None,
+    }
 
 
 def get_state_summary(state: WorkflowState) -> Dict[str, Any]:
