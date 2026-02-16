@@ -198,10 +198,10 @@ def main():
             eligibility = eligibility_module.apply_eligibility_filters(
                 topic, company_profile
             )
-            scoring = scorer_module.score_call(topic, company_profile, {})
             qualitative = llm_critic_module.perform_qualitative_analysis(
                 topic, company_profile
             )
+            scoring = scorer_module.score_call(topic, company_profile, qualitative)
 
             print(f"  Eligibility: {'PASS' if eligibility['all_passed'] else 'FAIL'}")
             print(f"  Score: {scoring['total']}/10")

@@ -4,7 +4,7 @@ uvicorn==0.27.0
 
 # LangGraph & AI
 langgraph==0.0.40
-langchain==0.1.0
+# langchain==0.1.0  # Removed: conflicts with your environment's existing langchain-community/langsmith resolution
 langchain-openai==0.0.5
 
 # Data Validation
@@ -16,7 +16,8 @@ beautifulsoup4==4.12.0
 selenium==4.16.0
 
 # Database
-sqlite3
+# NOTE: sqlite3 is part of the Python standard library; it is not installable via pip.
+# Do not list it as a pip dependency.
 
 # Environment
 python-dotenv==1.0.0
