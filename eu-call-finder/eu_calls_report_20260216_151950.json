@@ -1,0 +1,138 @@
+{
+  "timestamp": "2026-02-16T15:19:50.320298",
+  "total_calls": 3,
+  "high_relevance": 0,
+  "eligible_calls": 3,
+  "calls": [
+    {
+      "id": "HORIZON-CL4-2027-04-DIGITAL-EMERGING-04",
+      "title": "Apply AI: Challenge-Driven AI Innovation Booster in Apply AI prioritised sectors (RIA) (Partnership in AI, Data and Robotics)",
+      "programme": "Horizon Europe (HORIZON)",
+      "deadline": "18 March 2027 17:00:00 Brussels time",
+      "score": 6.2,
+      "score_breakdown": {
+        "domain_match": 3.0,
+        "keyword_match": 5.0,
+        "eligibility_fit": 10.0,
+        "budget_feasibility": 8.0
+      },
+      "eligible": true,
+      "eligibility_details": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": true,
+        "trl_ok": true,
+        "consortium_ok": true,
+        "sme_encouraged": false,
+        "sme_required": false,
+        "all_passed": true,
+        "details": {
+          "type_message": "Organization type 'SME' is eligible",
+          "country_message": "Country 'Bulgaria' is eligible",
+          "budget_message": "Budget range N/A-N/A EUR is feasible",
+          "trl_message": "TRL N/A is compatible with company capabilities",
+          "consortium_message": "Single applicant allowed"
+        }
+      },
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL4-2027-04-DIGITAL-EMERGING-04",
+      "match_summary": "Excellent match, as the company's core expertise in advanced AI and healthcare directly aligns with ",
+      "keyword_hits": [
+        "Artificial Intelligence",
+        "Healthcare"
+      ],
+      "suggested_partners": [
+        "University Hospital or Clinical Research Center (to provide medical data and validation sites)",
+        "Robotics manufacturer (if integrating imaging with robotic surgery)",
+        "Automotive or Manufacturing partner (to cover the other mandatory sectors if the call requires a multi-sector consortium, though usually, RIA calls allow focus on one)"
+      ],
+      "estimated_effort": "200-300",
+      "analysis_method": "llm"
+    },
+    {
+      "id": "DIGITAL-2026-AI-09-SOLUTIONS-CANCER-STEP",
+      "title": "Deployment of cutting-edge multi-modal AI-based solutions in medical imaging",
+      "programme": "Digital Europe Programme (DIGITAL)",
+      "deadline": "03 March 2026 17:00:00 Brussels time",
+      "score": 5.8,
+      "score_breakdown": {
+        "domain_match": 3.0,
+        "keyword_match": 5.0,
+        "eligibility_fit": 10.0,
+        "budget_feasibility": 8.0
+      },
+      "eligible": true,
+      "eligibility_details": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": true,
+        "trl_ok": true,
+        "consortium_ok": true,
+        "sme_encouraged": false,
+        "sme_required": false,
+        "all_passed": true,
+        "details": {
+          "type_message": "Organization type 'SME' is eligible",
+          "country_message": "Country 'Bulgaria' is eligible",
+          "budget_message": "Budget range N/A-N/A EUR is feasible",
+          "trl_message": "TRL N/A is compatible with company capabilities",
+          "consortium_message": "Single applicant allowed"
+        }
+      },
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/DIGITAL-2026-AI-09-SOLUTIONS-CANCER-STEP",
+      "match_summary": "Excellent match. The company's core expertise in advanced AI, healthcare, and medical imaging aligns",
+      "keyword_hits": [
+        "Artificial Intelligence",
+        "Healthcare",
+        "Medical Imaging"
+      ],
+      "suggested_partners": [
+        "Clinical Hospitals/University Medical Centers (for multi-centre validation and data provision)",
+        "Legal/Ethics Experts (for EHDS compliance and data governance)",
+        "Patient Associations (to demonstrate user-centricity and impact)"
+      ],
+      "estimated_effort": "200-300",
+      "analysis_method": "llm"
+    },
+    {
+      "id": "HORIZON-CL5-2024-D3-02-01",
+      "title": "Digital tools for CSP and solar thermal plants",
+      "programme": "Horizon Europe (HORIZON)",
+      "deadline": "04 February 2025 17:00:00 Brussels time",
+      "score": 5.4,
+      "score_breakdown": {
+        "domain_match": 3.0,
+        "keyword_match": 5.0,
+        "eligibility_fit": 10.0,
+        "budget_feasibility": 8.0
+      },
+      "eligible": true,
+      "eligibility_details": {
+        "type_ok": true,
+        "country_ok": true,
+        "budget_ok": true,
+        "trl_ok": true,
+        "consortium_ok": true,
+        "sme_encouraged": false,
+        "sme_required": false,
+        "all_passed": true,
+        "details": {
+          "type_message": "Organization type 'SME' is eligible",
+          "country_message": "Country 'Bulgaria' is eligible",
+          "budget_message": "Budget range N/A-N/A EUR is feasible",
+          "trl_message": "TRL N/A is compatible with company capabilities",
+          "consortium_message": "Single applicant allowed"
+        }
+      },
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL5-2024-D3-02-01",
+      "match_summary": "Weak match; while the company possesses advanced AI capabilities mentioned in the scope, their exclu",
+      "keyword_hits": [],
+      "suggested_partners": [
+        "CSP plant operators or solar thermal facility owners (for demonstration sites)",
+        "Energy research institutes (e.g., DLR, CENER, CIEMAT) to provide domain expertise",
+        "Industrial engineering firms specializing in thermal energy storage"
+      ],
+      "estimated_effort": "200-300",
+      "analysis_method": "llm"
+    }
+  ]
+}
