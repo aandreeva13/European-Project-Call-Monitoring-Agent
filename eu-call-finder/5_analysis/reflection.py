@@ -9,7 +9,7 @@ def reflect_on_results(results: list, search_params: dict, iteration: int = 1) -
     min_results = search_params.get("max_results", 30)
 
     # Calculate score distribution
-    scores = [r.get("score", 0) for r in results]
+    scores = [r.get("relevance_score", 0) for r in results]
     high_scores = [s for s in scores if s >= 8.0]
     medium_scores = [s for s in scores if 6.0 <= s < 8.0]
     low_scores = [s for s in scores if s < 5.0]
@@ -213,7 +213,7 @@ def evaluate_confidence(results: list) -> dict:
     avg_completeness = sum(completeness_scores) / len(completeness_scores)
 
     # Check consistency of scores
-    scores = [r.get("score", 0) for r in results]
+    scores = [r.get("relevance_score", 0) for r in results]
     if len(scores) > 1:
         variance = sum((s - (sum(scores) / len(scores))) ** 2 for s in scores) / len(
             scores
