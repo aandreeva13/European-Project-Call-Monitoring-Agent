@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from './components/Layout';
 import Step1Company from './components/Step1Company';
@@ -9,11 +8,12 @@ const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [companyData, setCompanyData] = useState<CompanyData>({
     companyName: '',
-    website: '',
     orgType: '',
     description: '',
-    employees: '',
-    country: 'BG'
+    employees: 0,
+    country: '',
+    city: '',
+    domains: []
   });
 
   const handleCompanyChange = (updates: Partial<CompanyData>) => {
@@ -25,11 +25,12 @@ const App: React.FC = () => {
     setCurrentStep(1);
     setCompanyData({
       companyName: '',
-      website: '',
       orgType: '',
       description: '',
-      employees: '',
-      country: 'BG'
+      employees: 0,
+      country: '',
+      city: '',
+      domains: []
     });
   };
 

@@ -85,7 +85,9 @@ def scrape_partners(driver: webdriver.Chrome) -> List[Dict[str, str]]:
             )
         )
 
-        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", partner_btn)
+        driver.execute_script(
+            "arguments[0].scrollIntoView({block: 'center'});", partner_btn
+        )
         time.sleep(0.5)
         driver.execute_script("arguments[0].click();", partner_btn)
 
@@ -114,7 +116,9 @@ def scrape_partners(driver: webdriver.Chrome) -> List[Dict[str, str]]:
     return partners
 
 
-def _api_search_topics(search_terms: List[str], query_data: Dict[str, Any]) -> List[Dict[str, str]]:
+def _api_search_topics(
+    search_terms: List[str], query_data: Dict[str, Any]
+) -> List[Dict[str, str]]:
     """Return unique topics from the EU search API as list of {identifier, title}."""
     unique_topics_map: Dict[str, Dict[str, str]] = {}
 
@@ -126,10 +130,16 @@ def _api_search_topics(search_terms: List[str], query_data: Dict[str, Any]) -> L
 
         files = {
             "query": ("blob", json.dumps(query_data), "application/json"),
-            "displayFields": ("blob", json.dumps(["identifier", "title"]), "application/json"),
+            "displayFields": (
+                "blob",
+                json.dumps(["identifier", "title"]),
+                "application/json",
+            ),
         }
 
-        response = requests.post(search_url, params=params, files=files, headers=headers, timeout=30)
+        response = requests.post(
+            search_url, params=params, files=files, headers=headers, timeout=30
+        )
         response.raise_for_status()
 
         raw_results = response.json().get("results", [])
@@ -210,7 +220,9 @@ def scrape_topics_to_json(
 
             driver.get(url)
             wait = WebDriverWait(driver, 20)
-            wait.until(EC.presence_of_element_located((By.CLASS_NAME, "eui-page-content")))
+            wait.until(
+                EC.presence_of_element_located((By.CLASS_NAME, "eui-page-content"))
+            )
 
             # Remove common overlays
             try:
@@ -222,10 +234,14 @@ def scrape_topics_to_json(
 
             # Expand "Show more"
             time.sleep(1.5)
-            expand_triggers = driver.find_elements(By.XPATH, "//*[contains(text(), 'Show more')]")
+            expand_triggers = driver.find_elements(
+                By.XPATH, "//*[contains(text(), 'Show more')]"
+            )
             for trigger in expand_triggers:
                 try:
-                    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", trigger)
+                    driver.execute_script(
+                        "arguments[0].scrollIntoView({block: 'center'});", trigger
+                    )
                     time.sleep(0.1)
                     driver.execute_script("arguments[0].click();", trigger)
                     time.sleep(0.1)
@@ -249,12 +265,50 @@ def scrape_topics_to_json(
             budget_text = extract_section(
                 full_text,
                 "Budget overview",
-                ["Partner search announcements", "Start submission", "Topic Q&As", "Get support"],
+                [
+                    "Partner search announcements",
+                    "Start submission",
+                    "Topic Q&As",
+                    "Get support",
+                ],
             )
 
             def get_val(label: str) -> str:
-                match = re.search(rf"{re.escape(label)}\s*\n([^\n]+)", full_text, re.IGNORECASE)
+                match = re.search(
+                    rf"{re.escape(label)}\s*\n([^\n]+)", full_text, re.IGNORECASE
+                )
                 return match.group(1).strip() if match else "N/A"
+
+            # Extract specific budget amount for this topic
+            def extract_budget_amount(topic_id: str, budget_text: str) -> str:
+                """Extract the specific budget amount for this topic from the budget table."""
+                if not budget_text or topic_id not in budget_text:
+                    return "N/A"
+
+                lines = budget_text.split("\n")
+                for i, line in enumerate(lines):
+                    if topic_id in line:
+                        # Look for budget in current or next few lines
+                        for j in range(i, min(i + 3, len(lines))):
+                            # Match patterns like "35 000 000" or "18000000"
+                            match = re.search(r"(\d[\d\s,]*\d|\d+)", lines[j])
+                            if match:
+                                amount = (
+                                    match.group(1).replace(" ", "").replace(",", "")
+                                )
+                                try:
+                                    num = int(amount)
+                                    if num >= 1000000:
+                                        return f"€{num / 1000000:.1f}M"
+                                    elif num >= 1000:
+                                        return f"€{num / 1000:.0f}K"
+                                    else:
+                                        return f"€{num}"
+                                except:
+                                    return match.group(1)
+                return "N/A"
+
+            budget_amount = extract_budget_amount(topic_id, budget_text)
 
             partners_data = scrape_partners(driver)
 
@@ -280,6 +334,7 @@ def scrape_topics_to_json(
                     "budget_overview": clean_text(budget_text),
                 },
                 "partners": partners_data,
+                "budget": budget_amount,
             }
             final_data.append(record)
 

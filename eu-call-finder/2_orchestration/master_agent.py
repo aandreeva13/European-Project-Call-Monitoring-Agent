@@ -95,6 +95,15 @@ _analysis_reflection = _load_module(
 )
 reflect_on_results = _analysis_reflection.reflect_on_results
 
+# Load Reporter Module
+_reporter_module = _load_module(
+    "reporter",
+    os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "6_reporter", "reporter.py"
+    ),
+)
+generate_comprehensive_report = _reporter_module.generate_comprehensive_report
+
 
 # ==================== NODE IMPLEMENTATIONS ====================
 
@@ -381,7 +390,7 @@ def retrieval_node(state: WorkflowState) -> WorkflowState:
             "search_terms": state.get("search_terms", []),
             "search_query": state.get("search_query", {}),
             "headless": True,  # Run headless in production
-            "max_topics": 10,  # Limit for testing
+            "max_topics": 2,  # Limit for testing - will be removed later
         }
 
         print(f"\n[SEARCH] Searching with terms: {scraper_state['search_terms']}")
@@ -601,8 +610,8 @@ def analysis_node(state: WorkflowState) -> WorkflowState:
 
 def reporter_node(state: WorkflowState) -> WorkflowState:
     """
-    Node 5: Reporter (STUB - to be implemented)
-    Generates final report from analyzed calls.
+    Node 5: Reporter
+    Generates comprehensive LLM-powered report with card-based structure.
     """
     print("\n" + "=" * 70)
     print("STEP 5: REPORTING")
@@ -611,27 +620,149 @@ def reporter_node(state: WorkflowState) -> WorkflowState:
     analyzed_calls = state.get("analyzed_calls", [])
     company_input = state.get("company_input", {})
 
-    print(f"\n[REPORT] Generating report for {len(analyzed_calls)} calls...")
+    print(
+        f"\n[REPORT] Generating comprehensive report for {len(analyzed_calls)} calls..."
+    )
 
-    # STUB: Simple report generation
-    report = {
-        "company_name": company_input.get("company", {}).get("name", "Unknown"),
-        "search_date": datetime.now().isoformat(),
-        "total_calls_found": len(analyzed_calls),
-        "calls": analyzed_calls,
-        "summary": f"Found {len(analyzed_calls)} relevant EU funding calls matching your profile.",
-        "recommendations": [
-            "Review each call for eligibility requirements",
-            "Check deadlines carefully",
-            "Prepare consortium partners if needed",
-        ]
-        if analyzed_calls
-        else ["No matching calls found. Try broadening your search criteria."],
-    }
+    try:
+        # Use the LLM-powered reporter module
+        print("[REPORT] Calling generate_comprehensive_report...")
+        report = generate_comprehensive_report(analyzed_calls, company_input)
 
-    print(f"\n[OK] Report generated!")
-    print(f"   Total calls: {report['total_calls_found']}")
-    print(f"   Summary: {report['summary']}")
+        print(f"\n[OK] LLM Report generated!")
+        print(f"   Report type: {report.get('report_type', 'unknown')}")
+        print(f"   Total calls: {report.get('total_calls', 0)}")
+        print(f"   Funding cards: {len(report.get('funding_cards', []))}")
+
+        # Debug: Print first card details
+        if report.get("funding_cards"):
+            first_card = report["funding_cards"][0]
+            print(f"\n[DEBUG] First card details:")
+            print(f"   Title: {first_card.get('title', 'N/A')}")
+            print(
+                f"   Short summary: {first_card.get('short_summary', 'N/A')[:100]}..."
+            )
+            print(
+                f"   Why recommended: {first_card.get('why_recommended', 'N/A')[:100]}..."
+            )
+
+        # Save full report to JSON for debugging
+        import json
+
+        debug_file = f"final_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        with open(debug_file, "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=2, ensure_ascii=False)
+        print(f"\n[REPORT] Full report saved to: {debug_file}")
+
+    except Exception as e:
+        print(f"\n[ERROR] LLM report failed: {e}")
+        import traceback
+
+        traceback.print_exc()
+        print("[REPORT] Falling back to basic report generation...")
+
+        # Fallback to basic report generation inline
+        company = (
+            company_input.get("company", {}) if isinstance(company_input, dict) else {}
+        )
+
+        # Build funding cards from analyzed calls
+        funding_cards = []
+        for call in analyzed_calls:
+            relevance = call.get("relevance_score", 0)
+            match_pct = int(relevance * 10)
+
+            card = {
+                "id": call.get("id", ""),
+                "title": call.get("title", "Untitled"),
+                "programme": call.get("programme", ""),
+                "description": call.get("raw_data", {}).get("description", "")[:500]
+                if call.get("raw_data")
+                else call.get("description", ""),
+                "short_summary": call.get("match_summary", ""),
+                "match_percentage": match_pct,
+                "relevance_score": relevance,
+                "eligibility_passed": call.get("eligibility_passed", False),
+                "budget": call.get("budget", "N/A"),
+                "deadline": call.get("deadline", "N/A"),
+                "url": call.get("url", ""),
+                "status": call.get("status", ""),
+                "tags": call.get("keyword_hits", []),
+                "why_recommended": call.get("match_summary", "")[:150]
+                if call.get("match_summary")
+                else f"Match score: {relevance}/10",
+                "key_benefits": [f"Relevance score: {relevance}/10"]
+                if relevance > 0
+                else [],
+                "action_items": [
+                    "Review full call details",
+                    "Check eligibility requirements",
+                    f"Note deadline: {call.get('deadline', 'TBD')}",
+                ],
+                "success_probability": "high"
+                if match_pct >= 80
+                else "medium"
+                if match_pct >= 60
+                else "low",
+                "domain_matches": call.get("domain_matches", []),
+                "suggested_partners": call.get("suggested_partners", []),
+            }
+            funding_cards.append(card)
+
+        # Sort by match percentage
+        funding_cards.sort(key=lambda x: x["match_percentage"], reverse=True)
+
+        # Count priorities
+        high_priority = len([c for c in funding_cards if c["match_percentage"] >= 80])
+        medium_priority = len(
+            [c for c in funding_cards if 60 <= c["match_percentage"] < 80]
+        )
+        low_priority = len([c for c in funding_cards if c["match_percentage"] < 60])
+
+        # Build fallback report
+        report = {
+            "company_profile": {
+                "name": company.get("name", "Unknown"),
+                "type": company.get("type", ""),
+                "country": company.get("country", ""),
+                "employees": company.get("employees", 0),
+                "description": company.get("description", ""),
+                "domains": company.get("domains", []),
+            },
+            "company_summary": {
+                "profile_overview": f"{company.get('name', 'Company')} is a {company.get('type', 'organization')} based in {company.get('country', 'EU')}.",
+                "key_strengths": [
+                    d.get("name", "")
+                    for d in company.get("domains", [])
+                    if d.get("name")
+                ],
+                "recommended_focus_areas": [],
+            },
+            "overall_assessment": {
+                "total_opportunities": len(analyzed_calls),
+                "high_priority_count": high_priority,
+                "medium_priority_count": medium_priority,
+                "low_priority_count": low_priority,
+                "summary_text": f"Found {len(analyzed_calls)} relevant EU funding calls matching your profile.",
+                "strategic_advice": "Focus on high-priority opportunities (80%+ match) first.",
+            },
+            "funding_cards": funding_cards,
+            "top_recommendations": [
+                {
+                    "call_id": c["id"],
+                    "priority_rank": i + 1,
+                    "match_percentage": c["match_percentage"],
+                    "why_recommended": c["why_recommended"][:100],
+                    "success_probability": c["success_probability"],
+                }
+                for i, c in enumerate(funding_cards[:3])
+            ],
+            "total_calls": len(analyzed_calls),
+            "report_type": "fallback",
+            "generated_at": datetime.now().isoformat(),
+        }
+
+        print(f"\n[OK] Fallback report generated!")
 
     return {
         **state,
@@ -747,9 +878,9 @@ def run_workflow(
     config = {"configurable": {"thread_id": thread_id or "default"}}
 
     # Run workflow
-    print("\n" + "🚀" * 35)
+    print("\n" + "=" * 70)
     print("STARTING EU CALL FINDER WORKFLOW")
-    print("🚀" * 35)
+    print("=" * 70)
 
     for event in app.stream(initial_state, config):
         # Events are streamed as nodes complete
