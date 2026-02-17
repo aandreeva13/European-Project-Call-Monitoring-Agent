@@ -24,6 +24,7 @@ export interface FundingCard {
   relevance_score: number;
   eligibility_passed: boolean;
   budget: string;
+  contribution?: string;
   deadline: string;
   url: string;
   status: string;

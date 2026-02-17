@@ -548,7 +548,23 @@ def analysis_node(state: WorkflowState) -> WorkflowState:
             "deadline": topic.get("general_info", {})
             .get("dates", {})
             .get("deadline", "N/A"),
-            "budget": topic.get("general_info", {}).get("budget", "N/A"),
+            # Prefer the per-topic extracted budget from retrieval; fall back to general_info
+            "budget": topic.get("budget")
+            or topic.get("general_info", {}).get("budget")
+            or topic.get("content", {}).get("budget_overview")
+            or "N/A",
+            # More actionable than total topic budget: indicative EU contribution per project (if available)
+            "contribution": topic.get("contribution", "N/A"),
+            # Keep the full budget table accessible to the frontend
+            "content": {
+                **(topic.get("content", {}) if isinstance(topic.get("content"), dict) else {}),
+                "budget_overview": (
+                    (topic.get("content", {}) if isinstance(topic.get("content"), dict) else {}).get(
+                        "budget_overview"
+                    )
+                    or ""
+                ),
+            },
             "analysis_method": qualitative.get("analysis_method", "rule_based"),
         }
 

@@ -281,34 +281,110 @@ def scrape_topics_to_json(
 
             # Extract specific budget amount for this topic
             def extract_budget_amount(topic_id: str, budget_text: str) -> str:
-                """Extract the specific budget amount for this topic from the budget table."""
+                """Extract the specific budget amount for this topic from the budget table.
+
+                Strategy:
+                - Find the line containing the topic_id
+                - Prefer the first *large* number (>= 10k) near that line (same line or next few)
+                - Avoid years / row numbers (common noise)
+                """
                 if not budget_text or topic_id not in budget_text:
                     return "N/A"
 
                 lines = budget_text.split("\n")
                 for i, line in enumerate(lines):
-                    if topic_id in line:
-                        # Look for budget in current or next few lines
-                        for j in range(i, min(i + 3, len(lines))):
-                            # Match patterns like "35 000 000" or "18000000"
-                            match = re.search(r"(\d[\d\s,]*\d|\d+)", lines[j])
-                            if match:
-                                amount = (
-                                    match.group(1).replace(" ", "").replace(",", "")
-                                )
-                                try:
-                                    num = int(amount)
-                                    if num >= 1000000:
-                                        return f"€{num / 1000000:.1f}M"
-                                    elif num >= 1000:
-                                        return f"€{num / 1000:.0f}K"
-                                    else:
-                                        return f"€{num}"
-                                except:
-                                    return match.group(1)
+                    if topic_id not in line:
+                        continue
+
+                    # Look for numeric candidates in the topic line and a few subsequent lines
+                    window = "\n".join(lines[i : min(i + 4, len(lines))])
+                    raw_nums = re.findall(r"\d[\d\s,]*\d|\d+", window)
+
+                    candidates: list[int] = []
+                    for raw in raw_nums:
+                        digits = raw.replace(" ", "").replace(",", "")
+                        try:
+                            n = int(digits)
+                        except Exception:
+                            continue
+
+                        # Filter out obvious non-budget values (years, indices)
+                        if n < 10000:
+                            continue
+                        if 1900 <= n <= 2100:
+                            continue
+                        candidates.append(n)
+
+                    if not candidates:
+                        return "N/A"
+
+                    # Budget is usually the biggest number in that local window
+                    num = max(candidates)
+                    if num >= 1000000:
+                        return f"€{num / 1000000:.1f}M"
+                    elif num >= 1000:
+                        return f"€{num / 1000:.0f}K"
+                    else:
+                        return f"€{num}"
+
                 return "N/A"
 
             budget_amount = extract_budget_amount(topic_id, budget_text)
+
+            def extract_contribution_amount(topic_id: str, budget_text: str) -> str:
+                """Extract indicative per-project contribution for this topic.
+
+                The 'Budget overview' section usually contains a 'Contributions' column.
+                We try to capture patterns like:
+                - around 17500000
+                - 4800000 to 5600000
+                - around 4 000 000
+                """
+                if not budget_text or topic_id not in budget_text:
+                    return "N/A"
+
+                lines = [ln.strip() for ln in budget_text.split("\n") if ln.strip()]
+                for i, line in enumerate(lines):
+                    if topic_id not in line:
+                        continue
+
+                    window = "\n".join(lines[i : min(i + 8, len(lines))]).lower()
+
+                    # Range pattern: "4800000 to 5600000" (spaces allowed)
+                    m_range = re.search(r"(\d[\d\s,]{3,})\s*to\s*(\d[\d\s,]{3,})", window)
+                    if m_range:
+                        a_digits = re.sub(r"\D", "", m_range.group(1))
+                        b_digits = re.sub(r"\D", "", m_range.group(2))
+                        if not a_digits or not b_digits:
+                            return "N/A"
+                        a = int(a_digits)
+                        b = int(b_digits)
+                        lo, hi = min(a, b), max(a, b)
+                        return f"€{lo/1_000_000:.1f}M–€{hi/1_000_000:.1f}M"
+
+                    # Around pattern: "around 17500000"
+                    m_around = re.search(r"around\s*(\d[\d\s,]{3,})", window)
+                    if m_around:
+                        n_digits = re.sub(r"\D", "", m_around.group(1))
+                        if not n_digits:
+                            return "N/A"
+                        n = int(n_digits)
+                        return f"~€{n/1_000_000:.1f}M" if n >= 1_000_000 else f"~€{n}"
+
+                    # Fallback: any big number in the window (>= 100k)
+                    nums = [
+                        int(re.sub(r"\D", "", x))
+                        for x in re.findall(r"\d[\d\s,]{4,}", window)
+                        if re.sub(r"\D", "", x)
+                    ]
+                    nums = [n for n in nums if n >= 100000 and not (1900 <= n <= 2100)]
+                    if nums:
+                        n = max(nums)
+                        return f"€{n/1_000_000:.1f}M" if n >= 1_000_000 else f"€{n}"
+
+                return "N/A"
+
+            contribution_amount = extract_contribution_amount(topic_id, budget_text)
 
             partners_data = scrape_partners(driver)
 
@@ -334,7 +410,10 @@ def scrape_topics_to_json(
                     "budget_overview": clean_text(budget_text),
                 },
                 "partners": partners_data,
+                # budget: total indicative topic budget
                 "budget": budget_amount,
+                # contribution: indicative EU contribution per project (when detectable)
+                "contribution": contribution_amount,
             }
             final_data.append(record)
 

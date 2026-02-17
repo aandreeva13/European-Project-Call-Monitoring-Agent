@@ -52,7 +52,9 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset }) => {
       },
       (searchResult) => {
         console.log('Search complete:', searchResult);
-        setResult(searchResult as SearchResult);
+        // The stream endpoint returns the full SearchResult structure.
+        // If TS complains, it's usually because the service type is too broad.
+        setResult(searchResult as unknown as SearchResult);
         setLoading(false);
         setCompletedAgents(AGENTS.map(a => a.name));
       },
@@ -84,28 +86,38 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset }) => {
 
   const formatBudget = (budget: string) => {
     if (!budget || budget === 'N/A') return 'Budget N/A';
-    
-    // Try to extract numbers and format nicely
-    const numbers = budget.match(/[\d,\.]+/g);
-    if (!numbers) return budget;
-    
-    // Check for millions/billions
-    if (budget.toLowerCase().includes('million') || budget.toLowerCase().includes('m ')) {
-      return budget.replace(/(\d[\d,\.]*)/, (match) => {
-        const num = parseFloat(match.replace(/,/g, ''));
-        if (num >= 1000000) {
-          return `€${(num / 1000000).toFixed(1)}M`;
-        }
-        return `€${match}`;
-      });
+
+    const normalized = String(budget).replace(/\s+/g, ' ').trim();
+
+    // Prefer big numbers from the text (e.g., "35 000 000") and format them.
+    // The current UI bug (showing "€4") happens because we were matching small numbers first
+    // (e.g., the "2027" year or "1" from "Showing 1–11").
+    const matches = normalized.match(/\d[\d\s,.]*/g) || [];
+    const parsed = matches
+      .map(m => {
+        // Keep digits only
+        const digits = m.replace(/[^\d]/g, '');
+        if (!digits) return null;
+        const n = Number(digits);
+        return Number.isFinite(n) ? n : null;
+      })
+      .filter((n): n is number => n !== null);
+
+    // Filter out obvious non-budget numbers (years, indices)
+    const candidates = parsed.filter(n => n >= 10000); // 10k+ is a reasonable "budget-ish" threshold
+
+    if (candidates.length > 0) {
+      const max = Math.max(...candidates);
+      if (max >= 1_000_000_000) return `€${(max / 1_000_000_000).toFixed(1)}B`;
+      if (max >= 1_000_000) return `€${(max / 1_000_000).toFixed(1)}M`;
+      if (max >= 1_000) return `€${(max / 1_000).toFixed(0)}K`;
+      return `€${max}`;
     }
-    
-    // Add euro symbol if not present
-    if (!budget.includes('€') && !budget.toLowerCase().includes('eur')) {
-      return `€${budget}`;
-    }
-    
-    return budget;
+
+    // If it's already formatted with currency markers, keep it.
+    if (normalized.includes('€') || normalized.toLowerCase().includes('eur')) return normalized;
+
+    return `€${normalized}`;
   };
 
   const parseBudgetTable = (budgetText: string) => {
@@ -424,10 +436,20 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset }) => {
 
                   {/* Budget & Deadline */}
                   <div className="flex gap-4 mb-4">
-                    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                      <span className="material-icons text-sm">euro</span>
+                    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400" title="Total indicative topic budget (may be split across multiple grants)">
+                      <span className="material-icons text-sm">account_balance</span>
                       <span className="text-sm font-semibold">{formatBudget(card.budget)}</span>
+                      <span className="text-xs text-slate-400">total</span>
                     </div>
+
+                    {card.contribution && card.contribution !== 'N/A' && (
+                      <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400" title="Indicative EU contribution per project (more actionable than total)">
+                        <span className="material-icons text-sm">paid</span>
+                        <span className="text-sm font-semibold">{card.contribution}</span>
+                        <span className="text-xs text-slate-400">per project</span>
+                      </div>
+                    )}
+
                     <div className="flex items-center gap-2 text-red-500">
                       <span className="material-icons text-sm">event</span>
                       <span className="text-sm font-semibold">{card.deadline}</span>
