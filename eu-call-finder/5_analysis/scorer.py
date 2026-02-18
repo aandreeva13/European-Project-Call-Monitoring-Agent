@@ -1,4 +1,20 @@
-from typing import Dict, Optional
+from __future__ import annotations
+
+from typing import Optional
+
+
+class ScoreQuality:
+    """Data-quality diagnostics for a scored call.
+
+    Note: this is intentionally a simple class (not a dataclass) because some
+    scripts load this module via `importlib.util.module_from_spec()` without
+    registering it in `sys.modules`, which can break `@dataclass` on Py3.12.
+    """
+
+    def __init__(self, level: str, score: float, reasons: list[str]):
+        self.level = level  # high | medium | low
+        self.score = score  # 0..100
+        self.reasons = reasons
 
 
 def score_call(
@@ -6,31 +22,44 @@ def score_call(
 ) -> dict:
     """Score a call based on 6 criteria with weighted scoring (1-10 scale).
 
-    This project uses an LLM-enhanced scoring approach.
-
     Weights: Domain Match (30%), Keyword Match (15%), Eligibility (20%),
              Budget (15%), Strategic Value (10%), Deadline (10%)
+
+    Behavior:
+    - If LLM insights are available (analysis_method == "llm"), use LLM-enhanced
+      scoring for domain/keyword/strategic criteria.
+    - Otherwise, fall back to deterministic rule-based scoring.
+
+    Additionally:
+    - Computes a data-quality indicator and applies a *small* penalty when the
+      call content is too sparse (e.g., missing description/keywords/domains).
+      This prevents inflated or misleading mid-scores caused by “unknown => neutral”.
     """
 
     use_llm = bool(llm_insights) and llm_insights.get("analysis_method") == "llm"
-    if not use_llm:
-        raise ValueError(
-            "LLM insights are required for scoring. "
-            "Provide llm_insights with analysis_method='llm'."
+
+    if use_llm:
+        # Use LLM insights for nuanced scoring
+        domain_score = _score_domain_match_from_llm(llm_insights)
+        keyword_score = _score_keyword_match_from_llm(llm_insights)
+        strategic_score = _score_strategic_value_from_llm(
+            call_data, company_profile, llm_insights
         )
 
-    # Use LLM insights for nuanced scoring
-    domain_score = _score_domain_match_from_llm(llm_insights)
-    keyword_score = _score_keyword_match_from_llm(llm_insights)
-    strategic_score = _score_strategic_value_from_llm(call_data, company_profile, llm_insights)
-
-    # Apply LLM confidence adjustment
-    confidence = llm_insights.get("llm_confidence", "medium")
-    confidence_multiplier = {"high": 1.0, "medium": 0.95, "low": 0.90}.get(
-        confidence, 0.95
-    )
-    domain_score = min(10.0, domain_score * confidence_multiplier)
-    keyword_score = min(10.0, keyword_score * confidence_multiplier)
+        # Apply LLM confidence adjustment
+        confidence = llm_insights.get("llm_confidence", "medium")
+        confidence_multiplier = {"high": 1.0, "medium": 0.95, "low": 0.90}.get(
+            confidence, 0.95
+        )
+        domain_score = min(10.0, domain_score * confidence_multiplier)
+        keyword_score = min(10.0, keyword_score * confidence_multiplier)
+        scoring_method = "llm_enhanced"
+    else:
+        # Rule-based fallback (no LLM configured or LLM failed)
+        domain_score = _score_domain_match(call_data, company_profile)
+        keyword_score = _score_keyword_match(call_data, company_profile)
+        strategic_score = _score_strategic_value(call_data, company_profile)
+        scoring_method = "rule_based"
 
     # These are always rule-based (hard constraints)
     eligibility_score = _score_eligibility(call_data, company_profile)
@@ -38,26 +67,35 @@ def score_call(
     deadline_score = _score_deadline_comfort(call_data)
 
     # Calculate weighted total
-    total = round(
+    total_raw = (
         domain_score * 0.30
         + keyword_score * 0.15
         + eligibility_score * 0.20
         + budget_score * 0.15
         + strategic_score * 0.10
-        + deadline_score * 0.10,
-        1,
+        + deadline_score * 0.10
     )
+
+    quality = _assess_call_data_quality(call_data)
+    total = round(_apply_quality_penalty(total_raw, quality), 1)
 
     result = {
         "total": total,
-        "domain_match": domain_score,
-        "keyword_match": keyword_score,
-        "eligibility_fit": eligibility_score,
-        "budget_feasibility": budget_score,
-        "strategic_value": strategic_score,
-        "deadline_comfort": deadline_score,
+        "total_raw": round(total_raw, 1),
+        "domain_match": round(domain_score, 1),
+        "keyword_match": round(keyword_score, 1),
+        "eligibility_fit": round(eligibility_score, 1),
+        "budget_feasibility": round(budget_score, 1),
+        "strategic_value": round(strategic_score, 1),
+        "deadline_comfort": round(deadline_score, 1),
         "recommendation": _get_recommendation(total),
-        "scoring_method": "llm_enhanced" if use_llm else "rule_based",
+        "scoring_method": scoring_method,
+        "data_quality": {
+            "level": quality.level,
+            "score": quality.score,
+            "reasons": quality.reasons,
+            "penalty_applied": round(total_raw - total, 2),
+        },
     }
 
     # Include LLM reasoning if available
@@ -330,22 +368,44 @@ def _score_strategic_value(call_data: dict, company_profile: dict) -> float:
 
 
 def _score_eligibility(call_data: dict, company_profile: dict) -> float:
-    """Score eligibility fit (0-10, where 10 = fully eligible)."""
-    # This is a simplified version - the real eligibility check is in eligibility.py
+    """Score eligibility fit (1-10).
+
+    Important: eligibility fields are often missing in scraped data.
+    This scorer is intentionally conservative when key fields are unknown.
+
+    Note: hard eligibility gating still lives in [`apply_eligibility_filters()`](eu-call-finder/5_analysis/eligibility.py:1).
+    """
+
     score = 10.0
 
-    # Check budget feasibility
+    # Country/org-type eligibility may be missing from portal output; we treat
+    # *missing* as mildly uncertain rather than fully eligible.
+    eligible_countries = call_data.get("eligible_countries", [])
+    eligible_types = call_data.get("eligible_organization_types", [])
+    if not eligible_countries:
+        score -= 0.5
+    if not eligible_types:
+        score -= 0.5
+
+    # TRL requirement missing -> slight uncertainty
+    if not call_data.get("trl"):
+        score -= 0.5
+
+    # Check budget feasibility if known
     budget = call_data.get("budget_per_project", {})
-    max_budget = budget.get("max", 0)
+    max_budget = budget.get("max")
 
-    # SME preference for smaller budgets
-    if company_profile.get("type") == "SME":
-        if max_budget > 5000000:
-            score -= 1.5
-        elif max_budget > 10000000:
-            score -= 3.0
+    if max_budget is None:
+        score -= 0.5
+    else:
+        # SME preference for smaller budgets
+        if company_profile.get("type") == "SME":
+            if max_budget > 10000000:
+                score -= 3.0
+            elif max_budget > 5000000:
+                score -= 1.5
 
-    return max(1.0, score)
+    return max(1.0, round(score, 1))
 
 
 def _score_budget_feasibility(call_data: dict, company_profile: dict) -> float:
@@ -455,3 +515,92 @@ def _get_recommendation(total_score: float) -> dict:
         return {"action": "monitor", "label": "НАБЛЮДАВАЙТЕ", "color": "blue"}
     else:
         return {"action": "skip", "label": "ПРОПУСНЕТЕ", "color": "red"}
+
+
+def _assess_call_data_quality(call_data: dict) -> ScoreQuality:
+    """Assess how complete the call data is for scoring.
+
+    This is portal-agnostic and only inspects fields used by scorer/critic.
+    """
+
+    reasons: list[str] = []
+
+    title = (call_data.get("title") or "").strip()
+    content_desc = (call_data.get("content", {}) or {}).get("description") or ""
+    content_desc = str(content_desc).strip()
+    keywords = call_data.get("keywords") or []
+    required_domains = call_data.get("required_domains") or []
+
+    budget = call_data.get("budget_per_project") or {}
+    budget_has_numbers = bool(budget.get("min") or budget.get("max"))
+
+    deadline = ((call_data.get("general_info") or {}).get("dates") or {}).get(
+        "deadline", ""
+    )
+    deadline = str(deadline).strip()
+
+    # 6 “signals” used downstream; compute coverage.
+    signals_total = 6
+    signals_present = 0
+
+    if title:
+        signals_present += 1
+    else:
+        reasons.append("missing title")
+
+    if len(content_desc) >= 80:
+        signals_present += 1
+    else:
+        reasons.append("missing/short description")
+
+    if isinstance(keywords, list) and len(keywords) >= 3:
+        signals_present += 1
+    else:
+        reasons.append("missing/low keywords")
+
+    if isinstance(required_domains, list) and len(required_domains) >= 1:
+        signals_present += 1
+    else:
+        reasons.append("missing required_domains")
+
+    if budget_has_numbers:
+        signals_present += 1
+    else:
+        reasons.append("missing budget")
+
+    if deadline:
+        signals_present += 1
+    else:
+        reasons.append("missing deadline")
+
+    coverage = signals_present / signals_total
+    score = round(coverage * 100, 1)
+
+    if coverage >= 0.84:
+        level = "high"
+    elif coverage >= 0.5:
+        level = "medium"
+    else:
+        level = "low"
+
+    return ScoreQuality(level=level, score=score, reasons=reasons)
+
+
+def _apply_quality_penalty(total_raw: float, quality: ScoreQuality) -> float:
+    """Apply a small downward adjustment when the call data is sparse.
+
+    Goal: avoid misleading mid-scores (5-6) when the match is basically unknown.
+
+    Penalty is capped and never pushes below 1.0.
+    """
+
+    # If data is good, do nothing.
+    if quality.level == "high":
+        return max(1.0, min(10.0, total_raw))
+
+    # Mild penalty for medium quality; stronger for low.
+    # Keep conservative: scoring remains primarily about fit, not completeness.
+    penalty = 0.3 if quality.level == "medium" else 0.8
+
+    adjusted = total_raw - penalty
+    return max(1.0, min(10.0, adjusted))

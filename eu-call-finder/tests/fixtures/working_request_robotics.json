@@ -1,0 +1,22 @@
+{
+  "company": {
+    "name": "Danube Robotics SRL",
+    "description": "We build robotics and automation solutions for logistics and manufacturing, including autonomous mobile robots, fleet management software, and safety-certified integration.",
+    "type": "SME",
+    "employees": 38,
+    "country": "Romania",
+    "city": "Cluj-Napoca",
+    "domains": [
+      {
+        "name": "Robotics",
+        "sub_domains": [
+          "Autonomous Mobile Robots",
+          "SLAM",
+          "Industrial Automation"
+        ],
+        "level": "advanced"
+      }
+    ]
+  },
+  "keywords": ["Horizon Europe", "HORIZON-CL4", "robotics", "automation"]
+}
