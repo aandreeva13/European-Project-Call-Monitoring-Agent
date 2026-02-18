@@ -5,8 +5,8 @@ interface LayoutProps {
   children: React.ReactNode;
   step: number;
   totalSteps: number;
-  historySessions?: Array<{ id: string; createdAt: number; company: { companyName: string } }>;
-  onSelectHistory?: (company: any) => void;
+  historySessions?: Array<{ id: string; createdAt: number; company: { companyName: string }; result?: any }>;
+  onSelectHistory?: (company: any, result?: any, sessionId?: string) => void;
   onClearHistory?: () => void;
 }
 
@@ -88,17 +88,12 @@ const Layout: React.FC<LayoutProps> = ({ children, step, totalSteps, historySess
                         <li key={s.id} className="px-4 py-0">
                           <button
                             type="button"
-                            onClick={() => {
-                              try {
-                                const raw = localStorage.getItem('eurofundfinder:sessions:v1');
-                                if (!raw) return;
-                                const parsed = JSON.parse(raw);
-                                const found = Array.isArray(parsed) ? parsed.find((x: any) => String(x?.id) === s.id) : null;
-                                if (found?.company && onSelectHistory) onSelectHistory(found.company);
-                                setIsHistoryOpen(false);
-                              } catch {
-                                // ignore
+                             onClick={() => {
+                              // Use the session data directly from props
+                              if (s.company && onSelectHistory) {
+                                onSelectHistory(s.company, s.result, s.id);
                               }
+                              setIsHistoryOpen(false);
                             }}
                             className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors"
                           >

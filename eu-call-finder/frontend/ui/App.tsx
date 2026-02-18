@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Layout from './components/Layout';
 import Step1Company from './components/Step1Company';
 import Step3Results from './components/Step3Results';
-import { CompanyData } from './types';
+import { CompanyData, SearchResult } from './types';
 
 const HISTORY_SESSIONS_KEY = 'eurofundfinder:sessions:v1';
 const MAX_SESSIONS = 20;
@@ -11,6 +11,7 @@ type SessionEntry = {
   id: string;
   createdAt: number;
   company: CompanyData;
+  result?: SearchResult;
 };
 
 const readSessions = (): SessionEntry[] => {
@@ -25,6 +26,7 @@ const readSessions = (): SessionEntry[] => {
         id: String(x.id ?? ''),
         createdAt: Number(x.createdAt ?? 0),
         company: x.company as CompanyData,
+        result: x.result as SearchResult | undefined,
       }))
       .filter((x) => x.id && Number.isFinite(x.createdAt) && x.company && typeof x.company.companyName === 'string')
       .slice(0, MAX_SESSIONS);
@@ -44,6 +46,8 @@ const App: React.FC = () => {
     city: '',
     domains: []
   });
+  const [cachedResult, setCachedResult] = useState<SearchResult | undefined>(undefined);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
   const handleCompanyChange = (updates: Partial<CompanyData>) => {
     setCompanyData(prev => ({ ...prev, ...updates }));
@@ -73,6 +77,7 @@ const App: React.FC = () => {
       const next = [entry, ...sessions].slice(0, MAX_SESSIONS);
       localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(next));
       setSessionsVersion(v => v + 1);
+      setCurrentSessionId(entry.id);
     } catch {
       // ignore
     }
@@ -80,11 +85,13 @@ const App: React.FC = () => {
 
   const nextStep = () => {
     setCurrentStep(prev => Math.min(prev + 1, 2));
+    setCachedResult(undefined); // Clear cached result for new search
     persistSession();
   };
 
   const reset = () => {
     setCurrentStep(1);
+    setCachedResult(undefined);
     setCompanyData({
       companyName: '',
       orgType: '',
@@ -96,9 +103,32 @@ const App: React.FC = () => {
     });
   };
 
-  const selectSession = (company: CompanyData) => {
+  const selectSession = (company: CompanyData, result?: SearchResult, sessionId?: string) => {
     setCompanyData(company);
+    setCachedResult(result);
+    setCurrentSessionId(sessionId || null);
     setCurrentStep(2);
+  };
+
+  const persistSessionResult = (result: SearchResult) => {
+    try {
+      const raw = localStorage.getItem(HISTORY_SESSIONS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return;
+      
+      // Find the session by ID
+      const updated = parsed.map((entry: any) => {
+        if (entry.id === currentSessionId) {
+          return { ...entry, result };
+        }
+        return entry;
+      });
+      
+      localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(updated));
+    } catch {
+      // ignore
+    }
   };
 
   const clearSessions = () => {
@@ -129,6 +159,8 @@ const App: React.FC = () => {
         <Step3Results
           company={companyData}
           onReset={reset}
+          cachedResult={cachedResult}
+          onResultComplete={persistSessionResult}
         />
       )}
     </Layout>
