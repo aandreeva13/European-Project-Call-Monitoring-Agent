@@ -5,6 +5,8 @@ import { searchFundingCallsStream, ProgressUpdate } from '../services/apiService
 interface Step3Props {
   company: CompanyData;
   onReset: () => void;
+  cachedResult?: SearchResult;
+  onResultComplete?: (result: SearchResult) => void;
 }
 
 const AGENTS = [
@@ -15,9 +17,9 @@ const AGENTS = [
   { name: 'Reporter', icon: 'summarize', color: 'text-indigo-500', bgColor: 'bg-indigo-500' }
 ];
 
-const Step3Results: React.FC<Step3Props> = ({ company, onReset }) => {
-  const [loading, setLoading] = useState(true);
-  const [result, setResult] = useState<SearchResult | null>(null);
+const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, onResultComplete }) => {
+  const [loading, setLoading] = useState(!cachedResult);
+  const [result, setResult] = useState<SearchResult | null>(cachedResult || null);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<ProgressUpdate>({
     agent: 'Initializing',
@@ -25,10 +27,27 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset }) => {
     message: 'Starting workflow...',
     status: 'running'
   });
-  const [completedAgents, setCompletedAgents] = useState<string[]>([]);
+  const [completedAgents, setCompletedAgents] = useState<string[]>(cachedResult ? AGENTS.map(a => a.name) : []);
   const [selectedCard, setSelectedCard] = useState<FundingCard | null>(null);
 
   useEffect(() => {
+    // If we have cached results, use them directly without searching
+    // Check for valid SearchResult structure (must have company_profile)
+    if (cachedResult && cachedResult.company_profile) {
+      console.log('Using cached result:', cachedResult);
+      setResult(cachedResult);
+      setLoading(false);
+      setCompletedAgents(AGENTS.map(a => a.name));
+      return;
+    }
+    
+    console.log('No cached result found, running search. cachedResult:', cachedResult);
+
+    // Otherwise, run the search
+    setLoading(true);
+    setResult(null);
+    setCompletedAgents([]);
+    
     const cleanup = searchFundingCallsStream(
       company,
       (update) => {
@@ -52,11 +71,14 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset }) => {
       },
       (searchResult) => {
         console.log('Search complete:', searchResult);
-        // The stream endpoint returns the full SearchResult structure.
-        // If TS complains, it's usually because the service type is too broad.
-        setResult(searchResult as unknown as SearchResult);
+        const typedResult = searchResult as unknown as SearchResult;
+        setResult(typedResult);
         setLoading(false);
         setCompletedAgents(AGENTS.map(a => a.name));
+        // Persist the result to the session
+        if (onResultComplete) {
+          onResultComplete(typedResult);
+        }
       },
       (errorMsg) => {
         console.error('Search error:', errorMsg);
@@ -66,7 +88,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset }) => {
     );
 
     return cleanup;
-  }, [company]);
+  }, [company, cachedResult, onResultComplete]);
 
   const getMatchColor = (percentage: number) => {
     if (percentage >= 80) return 'text-green-600 bg-green-50 border-green-200';

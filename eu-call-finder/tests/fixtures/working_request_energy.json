@@ -1,0 +1,18 @@
+{
+  "company": {
+    "name": "Solaris Microgrids GmbH",
+    "description": "We develop energy management systems, microgrids, battery storage optimization and grid-forming inverter control for industrial sites.",
+    "type": "SME",
+    "employees": 62,
+    "country": "Germany",
+    "city": "Leipzig",
+    "domains": [
+      {
+        "name": "Energy",
+        "sub_domains": ["Microgrids", "Battery Storage", "Energy Management Systems"],
+        "level": "advanced"
+      }
+    ]
+  },
+  "keywords": ["HORIZON-CL5", "battery", "hydrogen", "energy"]
+}

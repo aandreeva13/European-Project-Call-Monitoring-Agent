@@ -11,6 +11,18 @@ from datetime import datetime
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# langgraph >=1.0 removed/renamed some checkpoint symbols that older versions
+# expected (e.g., CheckpointAt). To keep the project working across langgraph
+# versions, we patch in a lightweight alias if missing.
+try:
+    import langgraph.checkpoint.base as _lg_cp_base
+
+    if not hasattr(_lg_cp_base, "CheckpointAt") and hasattr(_lg_cp_base, "Checkpoint"):
+        _lg_cp_base.CheckpointAt = _lg_cp_base.Checkpoint  # type: ignore[attr-defined]
+except Exception:
+    # If langgraph isn't importable yet, let the normal import error surface later.
+    pass
+
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -386,11 +398,14 @@ def retrieval_node(state: WorkflowState) -> WorkflowState:
 
     try:
         # Prepare state for scraper node
+        # Note: `max_topics=2` was a temporary test limit. Keeping it in production
+        # can easily lead to misleading empty/too-small result sets.
         scraper_state = {
             "search_terms": state.get("search_terms", []),
             "search_query": state.get("search_query", {}),
             "headless": True,  # Run headless in production
-            "max_topics": 2,  # Limit for testing - will be removed later
+            # Allow upstream to set a limit for debugging; otherwise scrape all.
+            "max_topics": state.get("max_topics"),
         }
 
         print(f"\n[SEARCH] Searching with terms: {scraper_state['search_terms']}")

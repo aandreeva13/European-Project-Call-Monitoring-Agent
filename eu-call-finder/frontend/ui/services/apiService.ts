@@ -1,6 +1,35 @@
 import { CompanyData, FundingCall } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// In dev, prefer Vite proxy (relative URL) to avoid CORS/network issues.
+// Override with VITE_API_URL (e.g. http://localhost:8000/api) when needed.
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+
+// Helper: add a timeout so fetch doesn't hang forever and returns a clearer error.
+const fetchWithTimeout = async (
+  input: RequestInfo | URL,
+  init?: RequestInit,
+  timeoutMs = 120_000
+) => {
+  // If the caller already supplied an AbortSignal (e.g. the SSE stream cleanup controller),
+  // do NOT add our own timeout abort controller. Otherwise we'd override the caller signal
+  // and unintentionally abort long-running streaming requests.
+  if (init?.signal) {
+    return fetch(input, init);
+  }
+
+  const controller = new AbortController();
+  const id = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    });
+    return response;
+  } finally {
+    window.clearTimeout(id);
+  }
+};
 
 export interface SearchRequest {
   company: {
@@ -70,14 +99,17 @@ export const searchFundingCallsStream = (
   const abortController = new AbortController();
   
   // Use fetch to connect to SSE endpoint
-  fetch(`${API_BASE_URL}/search/stream`, {
+  fetchWithTimeout(`${API_BASE_URL}/search/stream`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'text/event-stream',
     },
     body: JSON.stringify(request),
-    signal: abortController.signal,
+    // DO NOT pass a signal here.
+    // Passing an AbortSignal makes fetchWithTimeout skip its internal timeout controller,
+    // and in some browsers/proxies it can also cause premature aborts for streaming.
+    // The cleanup function will still stop parsing updates.
   }).then(async (response) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -147,6 +179,7 @@ export const searchFundingCallsStream = (
   }).catch((error) => {
     if (error.name === 'AbortError') {
       console.log('[SSE] Request aborted');
+      onError('Request timed out or was aborted');
     } else {
       console.error('[SSE] Fetch error:', error);
       onError(error.message);
@@ -193,7 +226,7 @@ export const searchFundingCalls = async (
 
     console.log('Sending request to backend:', JSON.stringify(request, null, 2));
 
-    const response = await fetch(`${API_BASE_URL}/search`, {
+    const response = await fetchWithTimeout(`${API_BASE_URL}/search`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -221,7 +254,7 @@ export const searchFundingCalls = async (
  */
 export const checkApiHealth = async (): Promise<boolean> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/health`);
+    const response = await fetchWithTimeout(`${API_BASE_URL}/health`, undefined, 10_000);
     return response.ok;
   } catch {
     return false;

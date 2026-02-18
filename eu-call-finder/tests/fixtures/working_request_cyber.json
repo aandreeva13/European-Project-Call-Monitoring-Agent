@@ -1,0 +1,18 @@
+{
+  "company": {
+    "name": "Nordic CyberSecure AB",
+    "description": "We provide cybersecurity products and managed services for critical infrastructure and industrial IoT. Focus on OT security monitoring, zero-trust, and incident response automation.",
+    "type": "SME",
+    "employees": 95,
+    "country": "Sweden",
+    "city": "Gothenburg",
+    "domains": [
+      {
+        "name": "Cybersecurity",
+        "sub_domains": ["OT Security", "Threat Detection", "Zero Trust"],
+        "level": "advanced"
+      }
+    ]
+  },
+  "keywords": ["HORIZON-CL3", "cybersecurity", "Digital Europe", "security"]
+}

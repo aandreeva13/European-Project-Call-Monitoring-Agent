@@ -1,0 +1,242 @@
+[
+  {
+    "companyName": "Danube Robotics SRL",
+    "organizationType": "SME",
+    "country": "Romania",
+    "city": "Cluj-Napoca",
+    "numberOfEmployees": 38,
+    "coreActivitiesAndMission": "We design and manufacture autonomous mobile robots (AMRs) and AI-powered warehouse automation solutions for logistics and light manufacturing. We focus on perception, navigation, fleet management, and safety-certified integration.",
+    "domainsOfExpertise": [
+      {
+        "domainName": "Robotics",
+        "expertiseLevel": "Advanced",
+        "subDomains": ["Autonomous Mobile Robots", "SLAM", "Motion Planning", "Industrial Automation"]
+      },
+      {
+        "domainName": "Artificial Intelligence",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Computer Vision", "Reinforcement Learning", "Edge AI"]
+      }
+    ]
+  },
+  {
+    "companyName": "Solaris Microgrids GmbH",
+    "organizationType": "SME",
+    "country": "Germany",
+    "city": "Leipzig",
+    "numberOfEmployees": 62,
+    "coreActivitiesAndMission": "We develop software and power electronics for renewable microgrids (PV + storage) for industrial sites. Our mission is to reduce CO2 through intelligent energy management and grid-forming inverters.",
+    "domainsOfExpertise": [
+      {
+        "domainName": "Energy",
+        "expertiseLevel": "Advanced",
+        "subDomains": ["Microgrids", "Battery Storage", "Energy Management Systems", "Power Electronics"]
+      },
+      {
+        "domainName": "Software",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Optimization", "IoT", "SCADA Integration"]
+      }
+    ]
+  },
+  {
+    "companyName": "Baltic Health Analytics OÜ",
+    "organizationType": "Startup",
+    "country": "Estonia",
+    "city": "Tallinn",
+    "numberOfEmployees": 14,
+    "coreActivitiesAndMission": "We build clinical decision support tools using machine learning on EHR and medical imaging metadata. Focus areas: risk stratification, explainability, and privacy-preserving analytics.",
+    "domainsOfExpertise": [
+      {
+        "domainName": "Health",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Clinical Decision Support", "Digital Health", "Medical Data Governance"]
+      },
+      {
+        "domainName": "Artificial Intelligence",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Machine Learning", "Explainable AI", "Federated Learning"]
+      }
+    ]
+  },
+  {
+    "companyName": "Iberian Circular Materials SA",
+    "organizationType": "Large enterprise",
+    "country": "Spain",
+    "city": "Valencia",
+    "numberOfEmployees": 520,
+    "coreActivitiesAndMission": "We operate recycling and advanced sorting facilities for plastics and composites. We develop chemical recycling pilots and traceability systems for circular economy compliance.",
+    "domainsOfExpertise": [
+      {
+        "domainName": "Materials",
+        "expertiseLevel": "Advanced",
+        "subDomains": ["Polymer Recycling", "Composite Materials", "Chemical Recycling"]
+      },
+      {
+        "domainName": "Sustainability",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Life Cycle Assessment", "Circular Economy", "Traceability"]
+      }
+    ]
+  },
+  {
+    "companyName": "Nordic CyberSecure AB",
+    "organizationType": "SME",
+    "country": "Sweden",
+    "city": "Gothenburg",
+    "numberOfEmployees": 95,
+    "coreActivitiesAndMission": "We provide cybersecurity products and managed services for critical infrastructure and industrial IoT. We focus on OT security monitoring, zero-trust architectures, and incident response automation.",
+    "domainsOfExpertise": [
+      {
+        "domainName": "Cybersecurity",
+        "expertiseLevel": "Advanced",
+        "subDomains": ["OT Security", "Threat Detection", "Zero Trust", "Incident Response"]
+      },
+      {
+        "domainName": "Networking",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["5G Security", "Secure Remote Access"]
+      }
+    ]
+  },
+  {
+    "companyName": "Adriatic AgriTech d.o.o.",
+    "organizationType": "SME",
+    "country": "Croatia",
+    "city": "Osijek",
+    "numberOfEmployees": 27,
+    "coreActivitiesAndMission": "We develop precision agriculture solutions combining satellite data, field sensors, and agronomic models to optimize irrigation and fertilizer usage. We aim to increase yields while reducing inputs and emissions.",
+    "domainsOfExpertise": [
+      {
+        "domainName": "Agriculture",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Precision Farming", "Remote Sensing", "Decision Support"]
+      },
+      {
+        "domainName": "Data",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Geospatial Analytics", "Time Series Forecasting", "IoT Data Platforms"]
+      }
+    ]
+  },
+  {
+    "companyName": "Alpine Clean Mobility SAS",
+    "organizationType": "Startup",
+    "country": "France",
+    "city": "Grenoble",
+    "numberOfEmployees": 21,
+    "coreActivitiesAndMission": "We develop lightweight e-mobility powertrains and battery thermal management for last-mile delivery vehicles. Our focus is efficiency, modular design, and recyclability.",
+    "domainsOfExpertise": [
+      {
+        "domainName": "Mobility",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Electric Powertrains", "Battery Systems", "Thermal Management"]
+      },
+      {
+        "domainName": "Engineering",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Mechanical Design", "Prototyping", "Testing & Validation"]
+      }
+    ]
+  },
+  {
+    "companyName": "Carpathian BioSensors SRL",
+    "organizationType": "SME",
+    "country": "Romania",
+    "city": "Iași",
+    "numberOfEmployees": 44,
+    "coreActivitiesAndMission": "We develop portable biosensors for food safety and environmental monitoring, including electrochemical sensing and microfluidics. We aim for rapid, low-cost detection for field use.",
+    "domainsOfExpertise": [
+      {
+        "domainName": "Biotechnology",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Biosensors", "Microfluidics", "Diagnostics"]
+      },
+      {
+        "domainName": "Environment",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Water Monitoring", "Soil Contaminants", "Field Analytics"]
+      }
+    ]
+  },
+  {
+    "companyName": "Helios Quantum Photonics BV",
+    "organizationType": "Research organization",
+    "country": "Netherlands",
+    "city": "Delft",
+    "numberOfEmployees": 180,
+    "coreActivitiesAndMission": "We conduct applied research and prototyping on integrated photonics for quantum communication and sensing. We support industry with pilot lines, packaging, and characterization.",
+    "domainsOfExpertise": [
+      {
+        "domainName": "Photonics",
+        "expertiseLevel": "Advanced",
+        "subDomains": ["Integrated Photonics", "Quantum Communication", "Optical Packaging"]
+      },
+      {
+        "domainName": "R&D",
+        "expertiseLevel": "Advanced",
+        "subDomains": ["Pilot Lines", "Metrology", "Technology Transfer"]
+      }
+    ]
+  },
+  {
+    "companyName": "Sahara Water Reuse Foundation",
+    "organizationType": "Non-profit",
+    "country": "Italy",
+    "city": "Bari",
+    "numberOfEmployees": 9,
+    "coreActivitiesAndMission": "We run demonstration projects and policy work on water reuse, desalination, and circular water systems in coastal regions. We coordinate municipalities, utilities, and research partners.",
+    "domainsOfExpertise": [
+      {
+        "domainName": "Water",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Water Reuse", "Desalination", "Water Governance"]
+      },
+      {
+        "domainName": "Policy",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Stakeholder Engagement", "Regulatory Compliance", "Impact Assessment"]
+      }
+    ]
+  },
+  {
+    "companyName": "Vienna Space Systems GmbH",
+    "organizationType": "SME",
+    "country": "Austria",
+    "city": "Vienna",
+    "numberOfEmployees": 73,
+    "coreActivitiesAndMission": "We build small satellite subsystems and ground software for Earth observation missions. Focus areas include onboard data processing, secure communications, and mission operations tooling.",
+    "domainsOfExpertise": [
+      {
+        "domainName": "Space",
+        "expertiseLevel": "Advanced",
+        "subDomains": ["Small Satellites", "Earth Observation", "Mission Operations"]
+      },
+      {
+        "domainName": "Software",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Ground Segment", "Data Processing", "Secure Communications"]
+      }
+    ]
+  },
+  {
+    "companyName": "Thames FinTech Labs Ltd",
+    "organizationType": "Startup",
+    "country": "United Kingdom",
+    "city": "London",
+    "numberOfEmployees": 32,
+    "coreActivitiesAndMission": "We develop compliance and risk analytics tools for banks and payment providers. We focus on AML transaction monitoring, explainable scoring models, and secure data pipelines.",
+    "domainsOfExpertise": [
+      {
+        "domainName": "Finance",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["Risk Analytics", "RegTech", "AML"]
+      },
+      {
+        "domainName": "Data",
+        "expertiseLevel": "Intermediate",
+        "subDomains": ["MLOps", "Data Engineering", "Model Governance"]
+      }
+    ]
+  }
+]

@@ -1,0 +1,100 @@
+{
+  "note": "These example inputs are designed to return topics reliably with the current retrieval implementation (EU Search API text parameter). The key is to use plain, broad terms (no quotes, no AND) like programme acronyms/codes.",
+  "recommended_search_terms": [
+    "Horizon Europe",
+    "HORIZON-CL",
+    "HORIZON-EIC",
+    "EIC Accelerator",
+    "Digital Europe",
+    "EU4Health",
+    "LIFE Programme",
+    "innovation",
+    "SME",
+    "cybersecurity",
+    "robotics",
+    "battery",
+    "hydrogen"
+  ],
+  "end_to_end_examples": [
+    {
+      "name": "Robotics SME (broad) - should return many topics",
+      "api_request_body": {
+        "company": {
+          "name": "Danube Robotics SRL",
+          "description": "We build robotics and automation solutions for logistics and manufacturing, including autonomous mobile robots, fleet management software, and safety-certified integration.",
+          "type": "SME",
+          "employees": 38,
+          "country": "Romania",
+          "city": "Cluj-Napoca",
+          "domains": [
+            {
+              "name": "Robotics",
+              "sub_domains": ["Autonomous Mobile Robots", "SLAM", "Industrial Automation"],
+              "level": "advanced"
+            }
+          ]
+        },
+        "keywords": ["Horizon Europe", "HORIZON-CL4", "robotics", "automation"]
+      },
+      "why_it_works": "Retrieval hits on plain programme terms + common tech keywords; avoids quoted boolean syntax that yields 0 results.",
+      "expected": {
+        "retrieved_topics_min": 10
+      }
+    },
+    {
+      "name": "Cybersecurity SME - should return many topics",
+      "api_request_body": {
+        "company": {
+          "name": "Nordic CyberSecure AB",
+          "description": "We provide cybersecurity products and managed services for critical infrastructure and industrial IoT. Focus on OT security monitoring, zero-trust, and incident response automation.",
+          "type": "SME",
+          "employees": 95,
+          "country": "Sweden",
+          "city": "Gothenburg",
+          "domains": [
+            {
+              "name": "Cybersecurity",
+              "sub_domains": ["OT Security", "Threat Detection", "Zero Trust"],
+              "level": "advanced"
+            }
+          ]
+        },
+        "keywords": ["HORIZON-CL3", "cybersecurity", "Digital Europe", "security"]
+      },
+      "why_it_works": "HORIZON-CL3 and 'Digital Europe' are strong index terms; plain words map well to the EU Search API.",
+      "expected": {
+        "retrieved_topics_min": 10
+      }
+    },
+    {
+      "name": "Energy / batteries SME - should return topics",
+      "api_request_body": {
+        "company": {
+          "name": "Solaris Microgrids GmbH",
+          "description": "We develop energy management systems, microgrids, battery storage optimization and grid-forming inverter control for industrial sites.",
+          "type": "SME",
+          "employees": 62,
+          "country": "Germany",
+          "city": "Leipzig",
+          "domains": [
+            {
+              "name": "Energy",
+              "sub_domains": ["Microgrids", "Battery Storage", "Energy Management Systems"],
+              "level": "advanced"
+            }
+          ]
+        },
+        "keywords": ["HORIZON-CL5", "battery", "hydrogen", "energy"]
+      },
+      "why_it_works": "HORIZON-CL5 plus generic energy keywords produce hits even if the planner’s own queries are too strict.",
+      "expected": {
+        "retrieved_topics_min": 10
+      }
+    }
+  ],
+  "curl_commands": [
+    "curl -N -X POST http://127.0.0.1:8000/api/search/stream -H \"Content-Type: application/json\" -d @eu-call-finder/tests/fixtures/working_request_robotics.json",
+    "curl -N -X POST http://127.0.0.1:8000/api/search/stream -H \"Content-Type: application/json\" -d @eu-call-finder/tests/fixtures/working_request_cyber.json",
+    "curl -N -X POST http://127.0.0.1:8000/api/search/stream -H \"Content-Type: application/json\" -d @eu-call-finder/tests/fixtures/working_request_energy.json"
+  ]
+}
