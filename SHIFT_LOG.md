@@ -105,12 +105,22 @@ Planner extracts empty `Technologies`, `Applications`, `Focus Areas` for energy/
 ---
 
 ### 3. API/Workflow: Use Request Keywords
-**Problem:**  
+**Problem:**
 API accepts `keywords` in request body but planner ignores them.
+
+**What was tried (2026-02-19):**
+- Added frontend debug presets that can send `keywords: string[]` (A/B buttons: with vs without keywords).
+- Implemented a retrieval experiment to pass request `keywords` down to the EU Search API layer.
+- Attempted sending keywords as a **separate structured constraint** inside the EU Search API DSL payload:
+  - Added a `{"terms": {"keywords": [...]}}` clause into the multipart `query` JSON posted to the endpoint.
+
+**Result:**
+- This approach produced **0 results** for some searches, suggesting `terms.keywords` is either unsupported by the endpoint or too restrictive in practice.
+- A safety fallback was added to retry without the DSL keywords constraint when it yields no results.
 
 **Current Flow:**
 ```
-Request.keywords → stored in company_input → planner overwrites with generated queries
+Request.keywords → stored in company_input → (planner currently ignores) → retrieval may use as experiment hook
 ```
 
 **Fix Options:**
