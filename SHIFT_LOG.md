@@ -1,7 +1,20 @@
 # Shift Log / Handover Notes
 
-Project: **European-Project-Call-Monitoring-Agent** (EU Call Finder)  
+Project: **European-Project-Call-Monitoring-Agent** (EU Call Finder)
 Date: **2026-02-18**
+
+---
+
+## Update (2026-02-19) jana 
+
+### Summary
+- Planner → Retrieval query compatibility: documented that EU Search API `text` is plain text (no Boolean operators) and tracked remediation options.
+- Planner improvements: query sanitization added so LLM/rule-based output is converted into EU-API-friendly keyword text.
+- Reporter improvements: LLM report prompt/context enriched with richer call fields (`description`, `destination`, `conditions`) and added more robust JSON extraction/cleaning.
+
+### Key Code Areas Touched
+- Planner: [`SmartPlanner._sanitize_search_query()`](eu-call-finder/3_planning/smart_planner.py:386), [`SmartPlanner._parse_llm_queries()`](eu-call-finder/3_planning/smart_planner.py:415), [`SmartPlanner._generate_rule_based_queries()`](eu-call-finder/3_planning/smart_planner.py:451)
+- Reporter: [`generate_llm_report()`](eu-call-finder/6_reporter/reporter.py:44), [`build_llm_prompt()`](eu-call-finder/6_reporter/reporter.py:215)
 
 ---
 
