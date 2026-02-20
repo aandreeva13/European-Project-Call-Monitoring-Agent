@@ -584,7 +584,7 @@ DESTINATION & CONTEXT:
 ELIGIBILITY & CONDITIONS:
 {clean_text(c.get("eligibility_conditions", "No eligibility details"), 400)}
 
-Match Summary: {clean_text(c["match_summary"])}
+Match Summary: {clean_text(c.get("match_summary") or c.get("company_fit") or c.get("project_summary") or "")}
 """
             for i, c in enumerate(calls_for_llm)
         ]
