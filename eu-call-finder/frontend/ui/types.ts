@@ -20,6 +20,13 @@ export interface FundingCard {
   programme: string;
   description: string;
   short_summary: string;
+  project_summary?: {
+    overview: string;
+    company_fit_assessment: string;
+    key_alignment_points: string[];
+    potential_challenges: string[];
+    recommendation: string;
+  };
   match_percentage: number;
   relevance_score: number;
   eligibility_passed: boolean;

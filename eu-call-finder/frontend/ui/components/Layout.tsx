@@ -36,9 +36,6 @@ const Layout: React.FC<LayoutProps> = ({ children, step, totalSteps, historySess
             </span>
           </div>
           <div className="flex items-center gap-4 relative">
-            <div className="text-xs font-medium px-3 py-1 bg-primary/10 text-primary rounded-full uppercase tracking-wider">
-              Step {step} of {totalSteps}
-            </div>
 
             {/* History toggle */}
             <button
@@ -46,9 +43,9 @@ const Layout: React.FC<LayoutProps> = ({ children, step, totalSteps, historySess
               aria-label={historyTitle}
               title={historyTitle}
               onClick={() => setIsHistoryOpen((v) => !v)}
-              className="text-slate-500 hover:text-primary transition-colors"
+              className="text-slate-500 hover:text-primary transition-colors inline-flex items-center justify-center h-10 w-10"
             >
-              <span className="material-icons">history</span>
+              <span className="material-icons leading-none">history</span>
             </button>
 
             {/* History panel (closed by default) */}

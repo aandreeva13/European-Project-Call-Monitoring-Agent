@@ -44,6 +44,36 @@ const Step1Company: React.FC<Step1Props> = ({ data, onChange, onNext }) => {
     });
   };
 
+  // Debug function to fill in sample data (SaaS / Market Research Tech)
+  const fillDebugDataShopmetrics = () => {
+    onChange({
+      companyName: 'Shopmetrics Europe Ltd.',
+      orgType: 'Other',
+      description:
+        'We provide an enterprise-class SaaS platform for mystery shopping, fieldwork, and market research providers worldwide. Our mission is to help clients improve business performance through service excellence using real-time, accurate data collection and AI-powered analytics. Our focus areas include Digital Transformation, CX (Customer Experience) Excellence, and automated fieldwork management.',
+      employees: 47,
+      country: 'Bulgaria',
+      city: 'Varna',
+      domains: [
+        {
+          name: 'Customer Experience (CX) Software',
+          sub_domains: ['Cloud-based SaaS Platforms', 'Mystery Shopping Technology', 'Automated Workflow Services', 'Mobile Data Collection (Online/Offline)'],
+          level: 'expert'
+        },
+        {
+          name: 'Market Research Analytics',
+          sub_domains: ['Quantitative & Qualitative Research', 'Business Intelligence (BI) & Reporting', 'AI-Powered Data Validation & Fraud Detection', 'Sentimetrics (Social Media Sentiment Analysis)'],
+          level: 'expert'
+        },
+        {
+          name: 'Service Excellence Consulting',
+          sub_domains: ['Process Mapping & Re-engineering', 'Data Warehouse & Data Mart Solutions', 'Financial Impact Analysis & ROI Metrics'],
+          level: 'advanced'
+        }
+      ]
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onNext();
@@ -128,6 +158,14 @@ const Step1Company: React.FC<Step1Props> = ({ data, onChange, onNext }) => {
                 >
                   <span className="material-icons text-sm">bug_report</span>
                   <span>Fill Debug Data (Robotics)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={fillDebugDataShopmetrics}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg font-medium hover:bg-primary hover:text-white transition-all border border-primary/30"
+                >
+                  <span className="material-icons text-sm">bug_report</span>
+                  <span>Fill Debug Data (Shopmetrics)</span>
                 </button>
                 <button
                   type="button"

@@ -1,0 +1,1307 @@
+{
+  "report_type": "fallback",
+  "generated_at": "2026-02-20T16:59:10.830922",
+  "company_profile": {
+    "name": "Shopmetrics Europe Ltd.",
+    "type": "Other",
+    "country": "Bulgaria",
+    "employees": 47,
+    "description": "We provide an enterprise-class SaaS platform for mystery shopping, fieldwork, and market research providers worldwide. Our mission is to help clients improve business performance through service excellence using real-time, accurate data collection and AI-powered analytics. Our focus areas include Digital Transformation, CX (Customer Experience) Excellence, and automated fieldwork management.",
+    "domains": [
+      {
+        "name": "Customer Experience (CX) Software",
+        "sub_domains": [
+          "Cloud-based SaaS Platforms",
+          "Mystery Shopping Technology",
+          "Automated Workflow Services",
+          "Mobile Data Collection (Online/Offline)"
+        ],
+        "level": "expert"
+      },
+      {
+        "name": "Market Research Analytics",
+        "sub_domains": [
+          "Quantitative & Qualitative Research",
+          "Business Intelligence (BI) & Reporting",
+          "AI-Powered Data Validation & Fraud Detection",
+          "Sentimetrics (Social Media Sentiment Analysis)"
+        ],
+        "level": "expert"
+      },
+      {
+        "name": "Service Excellence Consulting",
+        "sub_domains": [
+          "Process Mapping & Re-engineering",
+          "Data Warehouse & Data Mart Solutions",
+          "Financial Impact Analysis & ROI Metrics"
+        ],
+        "level": "advanced"
+      }
+    ]
+  },
+  "company_summary": {
+    "profile_overview": "Shopmetrics Europe Ltd. is a Other based in Bulgaria with 47 employees and expertise in Customer Experience (CX) Software, Market Research Analytics, Service Excellence Consulting.",
+    "key_strengths": [
+      "Customer Experience (CX) Software",
+      "Market Research Analytics",
+      "Service Excellence Consulting"
+    ],
+    "recommended_focus_areas": [
+      "Customer Experience (CX) Software",
+      "Market Research Analytics"
+    ]
+  },
+  "top_recommendations": [
+    {
+      "call_id": "HORIZON-CL2-2027-01-HERITAGE-06",
+      "priority_rank": 1,
+      "match_percentage": 80,
+      "why_recommended": "Match score: 8.0/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+      "success_probability": "high"
+    },
+    {
+      "call_id": "HORIZON-CL2-2026-01-HERITAGE-03",
+      "priority_rank": 2,
+      "match_percentage": 80,
+      "why_recommended": "Match score: 8.0/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+      "success_probability": "high"
+    },
+    {
+      "call_id": "DIGITAL-2026-AI-09-VIRTUAL-TESTBEDS-STEP",
+      "priority_rank": 3,
+      "match_percentage": 75,
+      "why_recommended": "Match score: 7.5/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+      "success_probability": "medium"
+    }
+  ],
+  "overall_assessment": {
+    "total_opportunities": 19,
+    "high_priority_count": 2,
+    "medium_priority_count": 17,
+    "low_priority_count": 0,
+    "summary_text": "Found 19 funding opportunities matching the company profile. 2 high-priority opportunities identified.",
+    "strategic_advice": "Focus on high-priority opportunities (80%+ match) first. Prepare applications well before deadlines. Consider forming consortiums for larger projects."
+  },
+  "funding_cards": [
+    {
+      "id": "HORIZON-CL2-2027-01-HERITAGE-06",
+      "title": "Future-proofing sustainable cultural tourism",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 8.0/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+        "key_alignment_points": [
+          "Relevance score: 8.0/10",
+          "Domain match: Customer Experience (CX) Software",
+          "Domain match: Market Research Analytics"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: high. Review details and assess fit."
+      },
+      "match_percentage": 80,
+      "relevance_score": 8.0,
+      "eligibility_passed": true,
+      "budget": "€14.5M",
+      "deadline": "23 September 2027 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL2-2027-01-HERITAGE-06",
+      "status": "Forthcoming",
+      "tags": [
+        "Analytics",
+        "Software",
+        "Research",
+        "Digital Transformation"
+      ],
+      "why_recommended": "Match score: 8.0/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+      "key_benefits": [
+        "Relevance score: 8.0/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 23 September 2027 17:00:00 Brussels time"
+      ],
+      "success_probability": "high",
+      "domain_matches": [
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Evidence-based solutions for integrating cultural tourism into strategies for regenerative sustainability",
+          "strength": "strong",
+          "reasoning": "The company's software can be adapted to measure visitor satisfaction and sentiment, providing the 'evidence' needed for sustainable tourism policy recommendations."
+        },
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Analytical framework for ethical AI integration and AI-assisted foresight",
+          "strength": "strong",
+          "reasoning": "Expertise in analytics is directly applicable to creating the foresight tools and ethical AI frameworks requested in Focus 1."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Improving workforce numbers, skills, and working conditions",
+          "strength": "moderate",
+          "reasoning": "Consulting experience can help design the 'Service Excellence' standards for tourism workforces in emerging destinations."
+        }
+      ],
+      "suggested_partners": [
+        "Universities with Cultural Heritage or Sustainable Tourism departments (to lead the theoretical framework and policy co-creation).",
+        "Regional Tourism Boards or DMOs (Destination Management Organizations) from 'less-developed destinations' to provide pilot sites.",
+        "NGOs focused on Social Inclusion and Gender Equality to address the specific societal requirements of the call."
+      ]
+    },
+    {
+      "id": "HORIZON-CL2-2026-01-HERITAGE-03",
+      "title": "AI integration in CCSI work practice: catalysing innovation and competitiveness",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 8.0/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+        "key_alignment_points": [
+          "Relevance score: 8.0/10",
+          "Domain match: Customer Experience (CX) Software",
+          "Domain match: Market Research Analytics"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: high. Review details and assess fit."
+      },
+      "match_percentage": 80,
+      "relevance_score": 8.0,
+      "eligibility_passed": true,
+      "budget": "€15.0M",
+      "deadline": "23 September 2026 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL2-2026-01-HERITAGE-03",
+      "status": "Forthcoming",
+      "tags": [
+        "Customer Experience",
+        "Analytics",
+        "Software",
+        "Service Excellence"
+      ],
+      "why_recommended": "Match score: 8.0/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+      "key_benefits": [
+        "Relevance score: 8.0/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 23 September 2026 17:00:00 Brussels time"
+      ],
+      "success_probability": "high",
+      "domain_matches": [
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Engage audiences and personalize market content",
+          "strength": "strong",
+          "reasoning": "The company's core expertise in CX software directly supports the call's goal of using AI to enhance audience engagement and service delivery within cultural sectors."
+        },
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Predict trends and improve creative business models",
+          "strength": "strong",
+          "reasoning": "Shopmetrics' analytical capabilities are perfectly suited to developing AI-powered tools that help CCSI players understand market shifts and optimize their commercial strategies."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Guidelines, methods and tools supporting full AI integration",
+          "strength": "moderate",
+          "reasoning": "The company can translate its consulting experience into the required strategic frameworks and best practices for AI adoption in CCSI work practices."
+        }
+      ],
+      "suggested_partners": [
+        "Cultural Heritage Institutions (e.g., Museums or National Archives) to provide domain-specific data and pilot environments.",
+        "Academic Research Centers specializing in Ethical AI and Digital Humanities to address the ethical and inclusive design requirements.",
+        "SMEs from the Creative Industries (e.g., Digital Media or Design agencies) to co-create and validate the AI-powered creative tools."
+      ]
+    },
+    {
+      "id": "DIGITAL-2026-AI-09-VIRTUAL-TESTBEDS-STEP",
+      "title": "Virtual worlds test beds",
+      "programme": "Digital Europe Programme (DIGITAL)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 7.5/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+        "key_alignment_points": [
+          "Relevance score: 7.5/10",
+          "Domain match: Customer Experience (CX) Software",
+          "Domain match: Market Research Analytics"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 75,
+      "relevance_score": 7.5,
+      "eligibility_passed": true,
+      "budget": "€17.0M",
+      "deadline": "03 March 2026 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/DIGITAL-2026-AI-09-VIRTUAL-TESTBEDS-STEP",
+      "status": "Open",
+      "tags": [
+        "Analytics",
+        "Testing",
+        "Validation",
+        "Societal applications",
+        "Innovation capacity"
+      ],
+      "why_recommended": "Match score: 7.5/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+      "key_benefits": [
+        "Relevance score: 7.5/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 03 March 2026 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Testing and validation in real-world environments",
+          "strength": "strong",
+          "reasoning": "Shopmetrics can provide the analytical framework and software to measure user satisfaction and behavioral KPIs within the virtual test beds."
+        },
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Maximise the uptake of virtual worlds solutions",
+          "strength": "strong",
+          "reasoning": "Their analytics capabilities are essential for assessing market readiness and user adoption metrics for new immersive technologies."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Societal applications (public administration, healthcare, education)",
+          "strength": "moderate",
+          "reasoning": "They can consult on service design and quality assurance for public-facing virtual world applications."
+        }
+      ],
+      "suggested_partners": [
+        "Technical University with XR/Immersive Labs (to provide the core virtual world infrastructure)",
+        "Public Sector Entities (e.g., Municipalities or Healthcare providers for the societal application pilot)",
+        "VR/AR Hardware Manufacturers (to provide the physical world/virtual world interface components)"
+      ]
+    },
+    {
+      "id": "HORIZON-CL2-2027-01-HERITAGE-02",
+      "title": "AI4Creatives Support Platform: embracing a fair AI revolution",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 7.4/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+        "key_alignment_points": [
+          "Relevance score: 7.4/10",
+          "Domain match: Customer Experience (CX) Software"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 74,
+      "relevance_score": 7.4,
+      "eligibility_passed": true,
+      "budget": "€5.0M",
+      "deadline": "23 September 2027 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL2-2027-01-HERITAGE-02",
+      "status": "Forthcoming",
+      "tags": [
+        "Software",
+        "Analytics",
+        "AI",
+        "Innovation",
+        "Services"
+      ],
+      "why_recommended": "Match score: 7.4/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+      "key_benefits": [
+        "Relevance score: 7.4/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 23 September 2027 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "European virtual AI support platform",
+          "strength": "strong",
+          "reasoning": "Shopmetrics' expertise in building complex, user-centric software platforms is directly applicable to developing the required AI4Creatives support hub."
+        },
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Capacity building, training, and tools to adopt AI solutions",
+          "strength": "moderate",
+          "reasoning": "The company's analytical capabilities can be used to assess CCSI needs and measure the impact of AI adoption within the platform."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Shared services and expertise for CCSI networks",
+          "strength": "moderate",
+          "reasoning": "Shopmetrics can provide the framework for service delivery and operational excellence within the virtual support hub."
+        }
+      ],
+      "suggested_partners": [
+        "European Cultural Foundations or CCSI Umbrella Organizations (e.g., Culture Action Europe) to provide sector-specific requirements.",
+        "Ethical AI Research Institutes to address the call's focus on transparency, bias, and EU values.",
+        "Intellectual Property (IP) Law firms specializing in digital rights management for creative works."
+      ]
+    },
+    {
+      "id": "HORIZON-CL2-2026-01-DEMOCRACY-04",
+      "title": "Sustainable paths to media viability",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 7.2/10 - Eligible opportunity. Strong domain alignment in Market Research Analytics.",
+        "key_alignment_points": [
+          "Relevance score: 7.2/10",
+          "Domain match: Market Research Analytics"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 72,
+      "relevance_score": 7.2,
+      "eligibility_passed": true,
+      "budget": "€12.0M",
+      "deadline": "23 September 2026 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL2-2026-01-DEMOCRACY-04",
+      "status": "Forthcoming",
+      "tags": [
+        "Analytics",
+        "Digital Transformation",
+        "Innovation"
+      ],
+      "why_recommended": "Match score: 7.2/10 - Eligible opportunity. Strong domain alignment in Market Research Analytics.",
+      "key_benefits": [
+        "Relevance score: 7.2/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 23 September 2026 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Development of new business models",
+          "strength": "strong",
+          "reasoning": "Shopmetrics can provide the data-driven insights and audience analytics necessary to validate and scale sustainable revenue models for newsrooms."
+        },
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Stronger engagement with emerging media creators",
+          "strength": "moderate",
+          "reasoning": "CX tools can be adapted to measure and improve user engagement and trust levels between citizens and media platforms."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Reinforced digital transformation of the news media industry",
+          "strength": "moderate",
+          "reasoning": "Consulting expertise can help traditional newsrooms optimize their digital service delivery and operational efficiency."
+        }
+      ],
+      "suggested_partners": [
+        "European News Agencies or Media Houses (to provide the pilot environment and journalistic expertise)",
+        "Academic Institutions specializing in Media Studies or Journalism (to address democratic theory and professional standards)",
+        "Digital Rights NGOs (to ensure inclusivity and focus on systemic disadvantages)"
+      ]
+    },
+    {
+      "id": "HORIZON-CL5-2024-D6-01-04",
+      "title": "AI for advanced and collective perception and decision making for CCAM applications (CCAM Partnership)",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 7.0/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+        "key_alignment_points": [
+          "Relevance score: 7.0/10",
+          "Domain match: Customer Experience (CX) Software",
+          "Domain match: Market Research Analytics"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 70,
+      "relevance_score": 7.0,
+      "eligibility_passed": true,
+      "budget": "€10.0M",
+      "deadline": "05 September 2024 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL5-2024-D6-01-04",
+      "status": "Open",
+      "tags": [
+        "Analytics",
+        "User Needs",
+        "Human-centric",
+        "Decision making"
+      ],
+      "why_recommended": "Match score: 7.0/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+      "key_benefits": [
+        "Relevance score: 7.0/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 05 September 2024 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Increased user acceptability and societal benefit of CCAM solutions",
+          "strength": "strong",
+          "reasoning": "Shopmetrics can leverage its CX platforms to measure and analyze user trust, psychological comfort, and interaction quality with AI-driven vehicles."
+        },
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Understanding of user needs and human-centric AI",
+          "strength": "strong",
+          "reasoning": "The company's expertise in large-scale data collection and behavioral analytics is directly applicable to defining 'human-like control' and measuring societal benefits."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Understanding of AI-related ethical issues and user needs",
+          "strength": "moderate",
+          "reasoning": "Consulting frameworks can be adapted to develop ethical guidelines and service-level standards for CCAM interactions in urban environments."
+        }
+      ],
+      "suggested_partners": [
+        "Automotive OEMs or Tier-1 suppliers (e.g., Bosch, Continental) to provide the CCAM hardware and sensor data.",
+        "Academic Research Institutes specializing in Cognitive Psychology or Human-Machine Interaction (HMI).",
+        "Urban Planning Authorities or Municipalities to provide the 'complex urban scenarios' and restricted zone testbeds."
+      ]
+    },
+    {
+      "id": "HORIZON-CL6-2027-02-FARM2FORK-08",
+      "title": "AI-powered foodome characterization",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 6.8/10 - Eligible opportunity. ",
+        "key_alignment_points": [
+          "Relevance score: 6.8/10"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 68,
+      "relevance_score": 6.8,
+      "eligibility_passed": true,
+      "budget": "€7.8M",
+      "deadline": "23 September 2027 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL6-2027-02-FARM2FORK-08",
+      "status": "Forthcoming",
+      "tags": [
+        "AI",
+        "Analytics",
+        "Industry",
+        "Data-driven"
+      ],
+      "why_recommended": "Match score: 6.8/10 - Eligible opportunity. ",
+      "key_benefits": [
+        "Relevance score: 6.8/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 23 September 2027 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "AI tool for data analysis and quantification",
+          "strength": "moderate",
+          "reasoning": "The company's expertise in handling complex datasets can be adapted to the algorithmic requirements, though the data type (biochemical vs. consumer) differs significantly."
+        },
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Improving capacity and synergies between industry and research",
+          "strength": "weak",
+          "reasoning": "Shopmetrics could potentially develop the user interface or dashboard for the AI tool, but this is a peripheral requirement of the call."
+        }
+      ],
+      "suggested_partners": [
+        "University Research Labs specializing in Metabolomics or Food Chemistry",
+        "Bioinformatics SMEs with experience in mass spectrometry data",
+        "Large-scale Food Manufacturers (to provide sample data and validation environments)"
+      ]
+    },
+    {
+      "id": "DIGITAL-2026-SKILLS-09-COMPETITIONS",
+      "title": "European Advanced Digital Skills Competitions",
+      "programme": "Digital Europe Programme (DIGITAL)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 6.7/10 - Eligible opportunity. Strong domain alignment in Market Research Analytics.",
+        "key_alignment_points": [
+          "Relevance score: 6.7/10",
+          "Domain match: Market Research Analytics"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 67,
+      "relevance_score": 6.7,
+      "eligibility_passed": true,
+      "budget": "€7.0M",
+      "deadline": "03 March 2026 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/DIGITAL-2026-SKILLS-09-COMPETITIONS",
+      "status": "Open",
+      "tags": [
+        "Analytics",
+        "Software",
+        "Industry players",
+        "Research organisations"
+      ],
+      "why_recommended": "Match score: 6.7/10 - Eligible opportunity. Strong domain alignment in Market Research Analytics.",
+      "key_benefits": [
+        "Relevance score: 6.7/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 03 March 2026 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Measure and compare progress towards the ambitious goals",
+          "strength": "strong",
+          "reasoning": "Shopmetrics can provide the analytical framework and data visualization tools needed to evaluate participant performance and competition impact."
+        },
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Implementation and roll-out of the six competitions",
+          "strength": "moderate",
+          "reasoning": "The company's platform capabilities can be adapted to manage the participant journey, feedback loops, and engagement metrics for the competitions."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Competitions rule book and implementation roadmap",
+          "strength": "moderate",
+          "reasoning": "Their consulting background supports the structured design of service delivery and operational excellence required for a pan-European rollout."
+        }
+      ],
+      "suggested_partners": [
+        "Deep-tech Research Institutes (e.g., Fraunhofer or IMEC) to lead the technical content for Quantum/Chips/GenAI.",
+        "European Universities/Student Networks (e.g., ESN) to facilitate the 'young European people' engagement and recruitment.",
+        "Event Management/EdTech specialists to handle the physical logistics of the competition finals."
+      ]
+    },
+    {
+      "id": "HORIZON-RAISE-2027-01-02",
+      "title": "Automated Scientific Discovery – Food (RAISE pilot)",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 6.7/10 - Eligible opportunity. ",
+        "key_alignment_points": [
+          "Relevance score: 6.7/10"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 67,
+      "relevance_score": 6.7,
+      "eligibility_passed": true,
+      "budget": "€3.0M",
+      "deadline": "02 February 2027 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-RAISE-2027-01-02",
+      "status": "Forthcoming",
+      "tags": [
+        "Data management",
+        "Analysis tools",
+        "Decision-making processes",
+        "Digitalisation"
+      ],
+      "why_recommended": "Match score: 6.7/10 - Eligible opportunity. ",
+      "key_benefits": [
+        "Relevance score: 6.7/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 02 February 2027 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "AI-driven decision-making processes and robust data infrastructures",
+          "strength": "moderate",
+          "reasoning": "Shopmetrics' expertise in processing complex datasets can be adapted to the 'intelligence layer' required for analyzing experimental data."
+        },
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Scalable and secure data storage solutions and analysis tools",
+          "strength": "weak",
+          "reasoning": "While the company builds scalable software, the call requires integration with physical laboratory instrumentation which is not a core competency."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Development of best practices, challenges, and opportunities for accelerating R&D",
+          "strength": "weak",
+          "reasoning": "Consulting skills could support the 'best practices' outcome, but the context is scientific R&D rather than service delivery."
+        }
+      ],
+      "suggested_partners": [
+        "Food Science Research Institutes (e.g., Wageningen University or INRAE) to provide the laboratory environment.",
+        "Robotics and Laboratory Automation hardware providers to handle the physical closed-loop integration.",
+        "AI Ethics and Security specialists to address the 'trustworthy' and 'security by design' requirements."
+      ]
+    },
+    {
+      "id": "HORIZON-CL6-2026-03-GOVERNANCE-01-two-stage",
+      "title": "Open topic: Develop Earth Intelligence solutions using environmental observations and state-of-the-art AI for sustainable competitiveness and policy making",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 6.6/10 - Eligible opportunity. Strong domain alignment in Market Research Analytics.",
+        "key_alignment_points": [
+          "Relevance score: 6.6/10",
+          "Domain match: Market Research Analytics"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 66,
+      "relevance_score": 6.6,
+      "eligibility_passed": true,
+      "budget": "€12.0M",
+      "deadline": "N/A",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL6-2026-03-GOVERNANCE-01-two-stage",
+      "status": "Open",
+      "tags": [
+        "Analytics",
+        "Data-driven decision support",
+        "Socio-economic data",
+        "AI-driven tools"
+      ],
+      "why_recommended": "Match score: 6.6/10 - Eligible opportunity. Strong domain alignment in Market Research Analytics.",
+      "key_benefits": [
+        "Relevance score: 6.6/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: N/A"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Integration of socio-economic and impact datasets",
+          "strength": "strong",
+          "reasoning": "Shopmetrics can process complex socio-economic data to complement environmental observations, providing the 'Earth Intelligence' insights required for decision-making."
+        },
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "User-tailored, co-design approach for downstream applications",
+          "strength": "moderate",
+          "reasoning": "The company's expertise in building user-centric dashboards and feedback loops is essential for creating the 'fit-for-purpose' information tools requested."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Support to national and EU policy making or implementation",
+          "strength": "weak",
+          "reasoning": "Consulting experience can help translate technical data into actionable policy recommendations, though it lacks specific environmental policy focus."
+        }
+      ],
+      "suggested_partners": [
+        "Environmental Research Institutes or Universities with expertise in Copernicus/Earth Observation data processing.",
+        "Public Authorities or NGOs (e.g., European Environment Agency affiliates) to serve as the 'end-user' for the co-design process.",
+        "AI/ML Research Labs specializing in Geospatial AI (GeoAI) and Explainable AI (XAI)."
+      ]
+    },
+    {
+      "id": "SMP-COSME-2024-SMECC-01",
+      "title": "EU-SME Centre in China",
+      "programme": "Single Market Programme (SMP)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 6.6/10 - Eligible opportunity. Strong domain alignment in Market Research Analytics.",
+        "key_alignment_points": [
+          "Relevance score: 6.6/10",
+          "Domain match: Market Research Analytics"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 66,
+      "relevance_score": 6.6,
+      "eligibility_passed": true,
+      "budget": "€2.7M",
+      "deadline": "15 January 2025 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/SMP-COSME-2024-SMECC-01",
+      "status": "Open",
+      "tags": [
+        "Market Research",
+        "Analytics",
+        "Customer Evaluations",
+        "SME Support"
+      ],
+      "why_recommended": "Match score: 6.6/10 - Eligible opportunity. Strong domain alignment in Market Research Analytics.",
+      "key_benefits": [
+        "Relevance score: 6.6/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 15 January 2025 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Updated and new publications focusing on specific segments of the Chinese market",
+          "strength": "strong",
+          "reasoning": "The company's expertise in analytics can be leveraged to produce the data-driven market reports and segment analysis required by the call."
+        },
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Number of SMEs satisfied with the services provided (post-service customer evaluations)",
+          "strength": "moderate",
+          "reasoning": "Shopmetrics can provide the technical infrastructure to track, measure, and report on the satisfaction KPIs mandated by the European Commission."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Information and advice purposes / Training and information sessions",
+          "strength": "moderate",
+          "reasoning": "The company can contribute to the 'fitness and readiness' assessment of SMEs, though they may lack specific legal/regulatory expertise for the Chinese market."
+        }
+      ],
+      "suggested_partners": [
+        "European Chamber of Commerce in China (EUCCC) or similar Trade Promotion Organizations (TPOs) for local advocacy and regulatory expertise.",
+        "Legal/Consultancy firms specializing in Chinese IPR and business law to handle the 'de-risking' and compliance components.",
+        "Business Support Organizations (BSOs) with a large network of EU SMEs to ensure high outreach and enquiry volume."
+      ]
+    },
+    {
+      "id": "HORIZON-CL3-2026-01-FCT-02",
+      "title": "Open topic on preventing and countering the misuse of emerging technologies for criminal purposes, including issues related to lawful access to data",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 6.5/10 - Eligible opportunity. ",
+        "key_alignment_points": [
+          "Relevance score: 6.5/10"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 65,
+      "relevance_score": 6.5,
+      "eligibility_passed": true,
+      "budget": "€9.0M",
+      "deadline": "05 November 2026 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL3-2026-01-FCT-02",
+      "status": "Forthcoming",
+      "tags": [
+        "Data",
+        "Software",
+        "Analytics"
+      ],
+      "why_recommended": "Match score: 6.5/10 - Eligible opportunity. ",
+      "key_benefits": [
+        "Relevance score: 6.5/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 05 November 2026 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Efficient data access and investigation of criminal offences",
+          "strength": "moderate",
+          "reasoning": "The company's expertise in processing complex datasets can be pivoted toward developing analytical tools for Police Authorities to detect patterns in emerging technology misuse."
+        },
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Modern, accessible and validated tools for Police Authorities",
+          "strength": "weak",
+          "reasoning": "While the software is 'accessible,' the functional requirements for law enforcement (security, forensics) differ vastly from commercial CX metrics."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Sharing of best practices and interdisciplinary collaboration",
+          "strength": "weak",
+          "reasoning": "Consulting skills could assist in the 'training curricula' and 'best practices' outcomes, though the subject matter expertise in crime prevention is currently missing."
+        }
+      ],
+      "suggested_partners": [
+        "Law Enforcement Agencies (LEAs) such as Europol or national police forces to provide the end-user requirements and validation.",
+        "Cybersecurity Research Institutes specializing in generative AI or quantum-resistant encryption to address the 'emerging technology' scope.",
+        "Legal and Ethical Experts (NGOs or Law Faculties) to ensure compliance with fundamental rights and personal data protection."
+      ]
+    },
+    {
+      "id": "HORIZON-CL3-2027-01-SSRI-01",
+      "title": "Accelerating uptake through open proposals for advanced SME innovation",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 6.4/10 - Eligible opportunity. Strong domain alignment in Service Excellence Consulting.",
+        "key_alignment_points": [
+          "Relevance score: 6.4/10",
+          "Domain match: Service Excellence Consulting"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 64,
+      "relevance_score": 6.4,
+      "eligibility_passed": true,
+      "budget": "€4.5M",
+      "deadline": "04 November 2027 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL3-2027-01-SSRI-01",
+      "status": "Forthcoming",
+      "tags": [],
+      "why_recommended": "Match score: 6.4/10 - Eligible opportunity. Strong domain alignment in Service Excellence Consulting.",
+      "key_benefits": [
+        "Relevance score: 6.4/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 04 November 2027 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Fighting crime and terrorism / Disaster resilient societies",
+          "strength": "moderate",
+          "reasoning": "Advanced analytics can be repurposed for threat detection, sentiment analysis in radicalization prevention, or crisis response data processing."
+        },
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Diverse needs of all citizens (gender, age, ability)",
+          "strength": "moderate",
+          "reasoning": "CX tools can be adapted to measure citizen satisfaction with security services or to ensure inclusive design in civil protection interfaces."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Tailoring innovations to specific needs of civil security end-users",
+          "strength": "strong",
+          "reasoning": "The company's ability to bridge the gap between technical solutions and end-user requirements is vital for the call's focus on uptake and usability."
+        }
+      ],
+      "suggested_partners": [
+        "Law Enforcement Agencies (LEAs) or First Responders to provide the necessary security end-user context.",
+        "Academic Research Centers specializing in Criminology or Security Studies to align with the Cluster 3 policy priorities.",
+        "Cybersecurity SMEs to integrate the analytics software into secure, hardened infrastructure."
+      ]
+    },
+    {
+      "id": "DIGITAL-2026-AI-09-DS-HEALTH-TOOL",
+      "title": "Health: Data ingestion capacities and data services for the European Genomic Data Infrastructure in the European Health Data Space: data tools",
+      "programme": "Digital Europe Programme (DIGITAL)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 6.4/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+        "key_alignment_points": [
+          "Relevance score: 6.4/10",
+          "Domain match: Customer Experience (CX) Software"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 64,
+      "relevance_score": 6.4,
+      "eligibility_passed": true,
+      "budget": "€5.0M",
+      "deadline": "03 March 2026 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/DIGITAL-2026-AI-09-DS-HEALTH-TOOL",
+      "status": "Open",
+      "tags": [
+        "Data services",
+        "Data tools",
+        "Quality assurance",
+        "Analytics"
+      ],
+      "why_recommended": "Match score: 6.4/10 - Eligible opportunity. Strong domain alignment in Customer Experience (CX) Software.",
+      "key_benefits": [
+        "Relevance score: 6.4/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 03 March 2026 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Citizens’ portal for GDPR rights management and engagement",
+          "strength": "strong",
+          "reasoning": "The company's expertise in building user-centric interfaces and feedback systems is directly applicable to the required citizens' portal and engagement tools."
+        },
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Automated data and metadata curation and quality assurance",
+          "strength": "moderate",
+          "reasoning": "Expertise in processing large-scale market research data can be pivoted toward the data quality-check and curation requirements of the EHDS."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Compliance checks and risk/security management",
+          "strength": "weak",
+          "reasoning": "Consulting experience helps in process alignment, though the call requires specific technical implementation of health-sector legislative frameworks."
+        }
+      ],
+      "suggested_partners": [
+        "Bioinformatics Research Institutes (e.g., EMBL-EBI) to provide the necessary genomic domain knowledge.",
+        "Health Data Hubs or Clinical Centers to provide real-world datasets for testing curation tools.",
+        "Cybersecurity firms specializing in HIPAA/GDPR health data encryption and secure APIs."
+      ]
+    },
+    {
+      "id": "HORIZON-RAISE-2026-01-02",
+      "title": "Thematic Networks of Excellence for AI in Science – Agriculture and Environmental Pollution (RAISE pilot)",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 6.3/10 - Eligible opportunity. ",
+        "key_alignment_points": [
+          "Relevance score: 6.3/10"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 63,
+      "relevance_score": 6.3,
+      "eligibility_passed": true,
+      "budget": "€12.8M",
+      "deadline": "21 April 2026 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-RAISE-2026-01-02",
+      "status": "Open",
+      "tags": [
+        "Analytics",
+        "Software",
+        "Research"
+      ],
+      "why_recommended": "Match score: 6.3/10 - Eligible opportunity. ",
+      "key_benefits": [
+        "Relevance score: 6.3/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 21 April 2026 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Social Sciences and Humanities (SSH) expertise",
+          "strength": "moderate",
+          "reasoning": "The company's expertise in data-driven insights could support the SSH component of the call, though the call prioritizes scientific AI over commercial analytics."
+        },
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Innovative AI solutions for scientific research",
+          "strength": "weak",
+          "reasoning": "There is a significant gap between commercial CX software development and the high-level scientific AI modeling required for environmental pollution and agriculture."
+        }
+      ],
+      "suggested_partners": [
+        "University Research Labs specializing in Agronomy or Environmental Science (e.g., Wageningen University or INRAE).",
+        "AI Research Institutes focused on Deep Learning and Scientific Computing (e.g., DFKI or INRIA).",
+        "Public Environmental Agencies requiring data visualization and stakeholder engagement platforms."
+      ]
+    },
+    {
+      "id": "HORIZON-CL6-2026-03-GOVERNANCE-08",
+      "title": "Boosting data availability and AI solutions in food for consumers and food service professionals",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 6.3/10 - Eligible opportunity. Strong domain alignment in Market Research Analytics.",
+        "key_alignment_points": [
+          "Relevance score: 6.3/10",
+          "Domain match: Market Research Analytics"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 63,
+      "relevance_score": 6.3,
+      "eligibility_passed": true,
+      "budget": "€15.0M",
+      "deadline": "15 April 2026 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL6-2026-03-GOVERNANCE-08",
+      "status": "Open",
+      "tags": [],
+      "why_recommended": "Match score: 6.3/10 - Eligible opportunity. Strong domain alignment in Market Research Analytics.",
+      "key_benefits": [
+        "Relevance score: 6.3/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 15 April 2026 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "High value and high quality digital datasets for food products",
+          "strength": "strong",
+          "reasoning": "Shopmetrics' expertise in processing complex consumer data aligns perfectly with the need to develop high-quality datasets for food service applications."
+        },
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Human-centric, generative AI solutions for consumers",
+          "strength": "moderate",
+          "reasoning": "The company can leverage its CX platform experience to design the user interface and feedback loops for the required AI solutions, though it lacks specific food-sector AI models."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Improve productivity and sustainability of food service professionals",
+          "strength": "moderate",
+          "reasoning": "Consulting expertise can be applied to optimize food service workflows, though the focus must shift from general service to sustainability and dietary health."
+        }
+      ],
+      "suggested_partners": [
+        "Agritech or Food-Tech Research Institutes (e.g., Wageningen University) to provide domain expertise in dietary health and sustainability metrics.",
+        "Generative AI specialized SMEs to lead the development of the large language models (LLMs) specifically for food preparation and preservation.",
+        "European Digital Innovation Hubs (EDIHs) to facilitate the required SME support packages and market uptake."
+      ]
+    },
+    {
+      "id": "HORIZON-CL6-2026-02-FARM2FORK-11",
+      "title": "Integrating a holistic perspective in microbiome research for resilient, competitive and sustainable food systems",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 6.2/10 - Eligible opportunity. ",
+        "key_alignment_points": [
+          "Relevance score: 6.2/10"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 62,
+      "relevance_score": 6.2,
+      "eligibility_passed": true,
+      "budget": "€11.0M",
+      "deadline": "14 April 2026 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL6-2026-02-FARM2FORK-11",
+      "status": "Open",
+      "tags": [
+        "Analytics",
+        "Software",
+        "Data-gathering"
+      ],
+      "why_recommended": "Match score: 6.2/10 - Eligible opportunity. ",
+      "key_benefits": [
+        "Relevance score: 6.2/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 14 April 2026 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Integrated analysis of microbiome (meta)-data and FAIR principles",
+          "strength": "moderate",
+          "reasoning": "The company's expertise in complex data analytics could be pivoted toward managing and visualizing large-scale microbiome datasets or stakeholder feedback loops."
+        },
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Digital transition and AI Act compliance",
+          "strength": "weak",
+          "reasoning": "While the company has software expertise, the call requires deep biological systems modeling rather than consumer-facing experience platforms."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Trans-disciplinary collaboration among different stakeholders",
+          "strength": "weak",
+          "reasoning": "The company could potentially facilitate stakeholder engagement or impact assessment, though this is not a core technical requirement of the call."
+        }
+      ],
+      "suggested_partners": [
+        "Microbiology Research Institutes (to lead the biological and One Health research components)",
+        "Bioinformatics SMEs (to bridge the gap between Shopmetrics' data tools and biological meta-data)",
+        "Agrifood Industry Clusters (to provide the 'food systems' environment for software application)"
+      ]
+    },
+    {
+      "id": "HORIZON-CL3-2026-02-CS-ECCC-01",
+      "title": "Approaches and tools for security in software and hardware development and assessment",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 6.0/10 - Eligible opportunity. ",
+        "key_alignment_points": [
+          "Relevance score: 6.0/10"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 60,
+      "relevance_score": 6.0,
+      "eligibility_passed": true,
+      "budget": "€20.0M",
+      "deadline": "15 September 2026 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL3-2026-02-CS-ECCC-01",
+      "status": "Forthcoming",
+      "tags": [
+        "Software",
+        "Development"
+      ],
+      "why_recommended": "Match score: 6.0/10 - Eligible opportunity. ",
+      "key_benefits": [
+        "Relevance score: 6.0/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 15 September 2026 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Integrated security-by-design approaches in software development",
+          "strength": "weak",
+          "reasoning": "While the company develops software, their expertise is in application-level CX analytics rather than the systems-level security frameworks required by the call."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Standardised methodologies for hardware security assessment",
+          "strength": "weak",
+          "reasoning": "The company's consulting focus is on business service quality, which does not align with the technical cybersecurity certification and hardware assessment methodologies requested."
+        }
+      ],
+      "suggested_partners": [
+        "Semiconductor manufacturers or fabless chip design companies (e.g., Nordic Semiconductor, STMicroelectronics) to lead the hardware workstream.",
+        "Cybersecurity research institutes (e.g., Fraunhofer AISEC) to provide formal verification and security testing methodologies.",
+        "Cloud infrastructure providers to validate edge-to-cloud security architectures."
+      ]
+    },
+    {
+      "id": "HORIZON-CL3-2024-SSRI-01-02",
+      "title": "Accelerating uptake through open proposals for advanced SME innovation",
+      "programme": "Horizon Europe (HORIZON)",
+      "description": "",
+      "short_summary": "",
+      "project_summary": {
+        "overview": "",
+        "company_fit_assessment": "Match score: 6.0/10 - Eligible opportunity. ",
+        "key_alignment_points": [
+          "Relevance score: 6.0/10"
+        ],
+        "potential_challenges": [],
+        "recommendation": "Priority: medium. Review details and assess fit."
+      },
+      "match_percentage": 60,
+      "relevance_score": 6.0,
+      "eligibility_passed": true,
+      "budget": "€6.0M",
+      "deadline": "20 November 2024 17:00:00 Brussels time",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-CL3-2024-SSRI-01-02",
+      "status": "Open",
+      "tags": [
+        "SME",
+        "Innovation",
+        "Technological solution",
+        "Public buyers"
+      ],
+      "why_recommended": "Match score: 6.0/10 - Eligible opportunity. ",
+      "key_benefits": [
+        "Relevance score: 6.0/10",
+        "EU funding opportunity"
+      ],
+      "action_items": [
+        "Review full call details",
+        "Check eligibility requirements",
+        "Note deadline: 20 November 2024 17:00:00 Brussels time"
+      ],
+      "success_probability": "medium",
+      "domain_matches": [
+        {
+          "your_domain": "Market Research Analytics",
+          "call_requirement": "Mature technological solution addressing EU security policy priorities",
+          "strength": "moderate",
+          "reasoning": "Advanced analytics can be repurposed for threat detection, sentiment analysis, or public safety data processing within the civil security domain."
+        },
+        {
+          "your_domain": "Customer Experience (CX) Software",
+          "call_requirement": "Innovation in response to short to mid-term needs of public buyers",
+          "strength": "weak",
+          "reasoning": "CX software is primarily commercial, but its underlying feedback loops could be adapted for 'Citizen Experience' in public safety and emergency response services."
+        },
+        {
+          "your_domain": "Service Excellence Consulting",
+          "call_requirement": "Improved cooperation between public buyers and small supply market actors",
+          "strength": "moderate",
+          "reasoning": "The company's consulting background can help bridge the gap between technical security requirements and the operational needs of public security end-users."
+        }
+      ],
+      "suggested_partners": [
+        "Law Enforcement Agencies (LEAs) or First Responders to act as the mandatory 'civil security end-users'.",
+        "Security Research Institutes with experience in Horizon Europe Cluster 3 to provide the policy context.",
+        "Cybersecurity firms specializing in data privacy to ensure analytics solutions meet EU security standards."
+      ]
+    }
+  ],
+  "total_calls": 19
+}

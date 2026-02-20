@@ -1,6 +1,21 @@
 # Shift Log / Handover Notes
 
 Project: **European-Project-Call-Monitoring-Agent** (EU Call Finder)  
+Date: **2026-02-19**
+
+---
+
+## Andi
+
+### ✅ Changes / Findings (2026-02-19)
+- UI: centered the header History icon by making the button a fixed-size flex container and removing icon line-height drift in [`Layout.tsx`](eu-call-finder/frontend/ui/components/Layout.tsx:40).
+- Debug: verified scoring inputs for the latest run; `company_profile.keywords` is missing/`None` in [`final_report_20260219_154403.json`](eu-call-finder/final_report_20260219_154403.json:1), which explains depressed `keyword_match` from [`_score_keyword_match()`](eu-call-finder/5_analysis/scorer.py:250).
+
+---
+
+# Shift Log / Handover Notes
+
+Project: **European-Project-Call-Monitoring-Agent** (EU Call Finder)  
 Date: **2026-02-18**
 
 ---
