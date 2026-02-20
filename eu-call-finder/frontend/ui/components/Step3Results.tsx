@@ -72,6 +72,21 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
       (searchResult) => {
         console.log('Search complete:', searchResult);
         const typedResult = searchResult as unknown as SearchResult;
+        
+        // Debug: Log first funding card details
+        if (typedResult.funding_cards && typedResult.funding_cards.length > 0) {
+          const firstCard = typedResult.funding_cards[0];
+          console.log('[DEBUG] First funding card:', {
+            id: firstCard.id,
+            title: firstCard.title,
+            hasProjectSummary: !!firstCard.project_summary,
+            projectSummaryOverview: firstCard.project_summary?.overview?.substring(0, 100),
+            whyRecommended: firstCard.why_recommended?.substring(0, 100),
+            keyBenefitsCount: firstCard.key_benefits?.length,
+            actionItemsCount: firstCard.action_items?.length,
+          });
+        }
+        
         setResult(typedResult);
         setLoading(false);
         setCompletedAgents(AGENTS.map(a => a.name));
@@ -409,13 +424,15 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                       <span className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs font-bold">
                         {rec.priority_rank}
                       </span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${getProbabilityColor(rec.success_probability)}`}>
-                        {rec.success_probability}
+                    </div>
+
+                    <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1" title="Profile match based on your inputs and the call text. Not a funding success prediction.">
+                      {rec.match_percentage}%
+                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-2 align-middle">
+                        Profile match
                       </span>
                     </div>
-                    <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-                      {rec.match_percentage}%
-                    </div>
+
                     <div className="text-xs text-slate-500 line-clamp-2">
                       {rec.why_recommended}
                     </div>
@@ -438,8 +455,11 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1 pr-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className={`px-3 py-1 rounded-full text-sm font-bold border ${getMatchColor(card.match_percentage)}`}>
-                          {card.match_percentage}% Match
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-bold border ${getMatchColor(card.match_percentage)}`}
+                          title="Profile match based on your inputs and the call text. Not a funding success prediction."
+                        >
+                          {card.match_percentage}% Profile match
                         </span>
                         {card.eligibility_passed && (
                           <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">
@@ -578,9 +598,6 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                     <span className={`px-3 py-1 rounded-full text-sm font-bold border ${getMatchColor(selectedCard.match_percentage)}`}>
                       {selectedCard.match_percentage}% Match
                     </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${getProbabilityColor(selectedCard.success_probability)}`}>
-                      {selectedCard.success_probability} success probability
-                    </span>
                   </div>
                   <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{selectedCard.title}</h2>
                   {selectedCard.programme && (
@@ -617,7 +634,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
               <div className="mb-6">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">About This Opportunity</h3>
                 <div className="text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto">
-                  {selectedCard.content?.description || selectedCard.description || 'No detailed description available.'}
+                  {selectedCard.project_summary?.overview || selectedCard.content?.description || selectedCard.description || selectedCard.short_summary || 'No detailed description available.'}
                 </div>
               </div>
 

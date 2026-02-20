@@ -1,20 +1,22 @@
 # Shift Log / Handover Notes
 
-Project: **European-Project-Call-Monitoring-Agent** (EU Call Finder)
-Date: **2026-02-18**
+Project: **European-Project-Call-Monitoring-Agent** (EU Call Finder)  
+Date: **2026-02-19**
 
 ---
 
-## Update (2026-02-19) jana 
+## Andi
 
-### Summary
-- Planner → Retrieval query compatibility: documented that EU Search API `text` is plain text (no Boolean operators) and tracked remediation options.
-- Planner improvements: query sanitization added so LLM/rule-based output is converted into EU-API-friendly keyword text.
-- Reporter improvements: LLM report prompt/context enriched with richer call fields (`description`, `destination`, `conditions`) and added more robust JSON extraction/cleaning.
+### ✅ Changes / Findings (2026-02-19)
+- UI: centered the header History icon by making the button a fixed-size flex container and removing icon line-height drift in [`Layout.tsx`](eu-call-finder/frontend/ui/components/Layout.tsx:40).
+- Debug: verified scoring inputs for the latest run; `company_profile.keywords` is missing/`None` in [`final_report_20260219_154403.json`](eu-call-finder/final_report_20260219_154403.json:1), which explains depressed `keyword_match` from [`_score_keyword_match()`](eu-call-finder/5_analysis/scorer.py:250).
 
-### Key Code Areas Touched
-- Planner: [`SmartPlanner._sanitize_search_query()`](eu-call-finder/3_planning/smart_planner.py:386), [`SmartPlanner._parse_llm_queries()`](eu-call-finder/3_planning/smart_planner.py:415), [`SmartPlanner._generate_rule_based_queries()`](eu-call-finder/3_planning/smart_planner.py:451)
-- Reporter: [`generate_llm_report()`](eu-call-finder/6_reporter/reporter.py:44), [`build_llm_prompt()`](eu-call-finder/6_reporter/reporter.py:215)
+---
+
+# Shift Log / Handover Notes
+
+Project: **European-Project-Call-Monitoring-Agent** (EU Call Finder)  
+Date: **2026-02-18**
 
 ---
 
@@ -118,22 +120,12 @@ Planner extracts empty `Technologies`, `Applications`, `Focus Areas` for energy/
 ---
 
 ### 3. API/Workflow: Use Request Keywords
-**Problem:**
+**Problem:**  
 API accepts `keywords` in request body but planner ignores them.
-
-**What was tried (2026-02-19):**
-- Added frontend debug presets that can send `keywords: string[]` (A/B buttons: with vs without keywords).
-- Implemented a retrieval experiment to pass request `keywords` down to the EU Search API layer.
-- Attempted sending keywords as a **separate structured constraint** inside the EU Search API DSL payload:
-  - Added a `{"terms": {"keywords": [...]}}` clause into the multipart `query` JSON posted to the endpoint.
-
-**Result:**
-- This approach produced **0 results** for some searches, suggesting `terms.keywords` is either unsupported by the endpoint or too restrictive in practice.
-- A safety fallback was added to retry without the DSL keywords constraint when it yields no results.
 
 **Current Flow:**
 ```
-Request.keywords → stored in company_input → (planner currently ignores) → retrieval may use as experiment hook
+Request.keywords → stored in company_input → planner overwrites with generated queries
 ```
 
 **Fix Options:**

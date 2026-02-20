@@ -383,79 +383,48 @@ QUERY 6: "clinical decision support"
 
         return prompt
 
-    def _sanitize_search_query(self, query: str, max_len: int = 100) -> str:
-        """Convert planner queries into EU-API-friendly plain keyword text.
-
-        The EU search API `text` parameter is *not* a boolean query language.
-        We therefore strip boolean operators/parentheses and normalize whitespace.
-        """
-        if not query:
-            return ""
-
-        q = query
-
-        # Remove parentheses that imply boolean structure
-        q = q.replace("(", " ").replace(")", " ")
-
-        # Replace boolean operators (case-insensitive) with spaces
-        q = re.sub(r"\b(AND|OR|NOT)\b", " ", q, flags=re.IGNORECASE)
-
-        # Remove double quotes (keep the terms)
-        q = q.replace('"', " ")
-
-        # Collapse whitespace and trim
-        q = re.sub(r"\s+", " ", q).strip()
-
-        # Enforce max length
-        if len(q) > max_len:
-            q = q[:max_len].rsplit(" ", 1)[0].strip() or q[:max_len].strip()
-
-        return q
-
     def _parse_llm_queries(self, content: str) -> List[str]:
-        """Parse queries from LLM response, sanitize, and enforce length limits."""
-        queries: List[str] = []
+        """Parse queries from LLM response and enforce length limits."""
+        queries = []
         MAX_QUERY_LENGTH = 100  # EU API limit
 
         # Look for patterns like "QUERY X:" or numbered lists
         lines = content.strip().split("\n")
         for line in lines:
+            # Remove numbering and labels
             cleaned = re.sub(r"^(QUERY \d+:|\d+\.)\s*", "", line.strip())
-            cleaned = self._sanitize_search_query(cleaned, max_len=MAX_QUERY_LENGTH)
             if cleaned and len(cleaned) > 10:
+                # Truncate if too long
+                if len(cleaned) > MAX_QUERY_LENGTH:
+                    print(
+                        f"[WARNING] Query too long ({len(cleaned)} chars), truncating to {MAX_QUERY_LENGTH}"
+                    )
+                    cleaned = (
+                        cleaned[:MAX_QUERY_LENGTH].rsplit(" AND ", 1)[0]
+                        if " AND " in cleaned
+                        else cleaned[:MAX_QUERY_LENGTH]
+                    )
                 queries.append(cleaned)
 
-        # If no queries found, try to extract lines that look like quoted boolean expressions,
-        # but sanitize them into plain keywords.
+        # If no queries found, try to extract quoted strings with AND/OR
         if not queries:
             pattern = r'"[^"]+"\s+AND\s+"[^"]+"'
-            candidates = re.findall(pattern, content)
-            for c in candidates:
-                cleaned = self._sanitize_search_query(c, max_len=MAX_QUERY_LENGTH)
-                if cleaned and len(cleaned) > 10:
-                    queries.append(cleaned)
+            queries = re.findall(pattern, content)
+            # Truncate if needed
+            queries = [
+                q[:MAX_QUERY_LENGTH] if len(q) > MAX_QUERY_LENGTH else q
+                for q in queries
+            ]
 
-        if not queries:
-            return ["artificial intelligence SME"]
-
-        # De-dupe while preserving order
-        seen = set()
-        unique: List[str] = []
-        for q in queries:
-            if q not in seen:
-                seen.add(q)
-                unique.append(q)
-
-        return unique[:6]
+        return queries[:6] if queries else ["artificial intelligence AND SME"]
 
     def _generate_rule_based_queries(
         self, analysis: Dict, previous_feedback: str = None
     ) -> List[str]:
-        """Generate EU-API-friendly (non-boolean) keyword queries when LLM unavailable.
-
+        """Generate queries using rules when LLM unavailable.
         Uses ALL company profile fields: name, type, country, employees, domains, description.
         """
-        queries: List[str] = []
+        queries = []
 
         techs = analysis.get("technologies", [])
         apps = analysis.get("applications", [])
@@ -468,56 +437,58 @@ QUERY 6: "clinical decision support"
 
         # Strategy 1: Primary Technology + Application (most specific)
         if techs and apps:
-            queries.append(f"{techs[0]} {apps[0]}")
+            queries.append(f'"{techs[0]}" AND "{apps[0]}"')
 
         # Strategy 2: Technology + Company Type + Country
         if techs and country:
-            queries.append(f"{techs[0]} {company_type} {country}")
+            queries.append(f'"{techs[0]}" AND "{company_type}" AND "{country}"')
         elif techs:
-            queries.append(f"{techs[0]} {company_type}")
+            queries.append(f'"{techs[0]}" AND "{company_type}"')
 
         # Strategy 3: Two core technologies combined
         if len(techs) >= 2:
-            queries.append(f"{techs[0]} {techs[1]}")
+            queries.append(f'"{techs[0]}" AND "{techs[1]}"')
 
         # Strategy 4: Domain competency + Application
         if competencies and apps:
             comp_domain = competencies[0].get("domain", "")
             if comp_domain:
-                queries.append(f"{comp_domain} {apps[0]}")
+                queries.append(f'"{comp_domain}" AND "{apps[0]}"')
 
         # Strategy 5: Company size-appropriate keywords
         if employees < 50:
+            # SME-specific queries
             if techs and apps:
-                queries.append(f"SME {techs[0]} {apps[0]}")
+                queries.append(f'"SME" AND "{techs[0]}" AND "{apps[0]}"')
             elif techs:
-                queries.append(f"SME {techs[0]}")
+                queries.append(f'"SME" AND "{techs[0]}"')
         else:
+            # Larger company queries
             if techs:
-                queries.append(f"enterprise {techs[0]}")
+                queries.append(f'"enterprise" AND "{techs[0]}"')
 
         # Strategy 6: Extract industry from company name
         name_lower = name.lower()
         if any(word in name_lower for word in ["health", "medical", "bio"]):
             if techs:
-                queries.append(f"healthcare {techs[0]}")
+                queries.append(f'"healthcare" AND "{techs[0]}"')
         elif any(word in name_lower for word in ["tech", "digital", "soft"]):
             if techs:
-                queries.append(f"digital {techs[0]}")
+                queries.append(f'"digital" AND "{techs[0]}"')
         elif any(word in name_lower for word in ["green", "eco", "env"]):
             if techs:
-                queries.append(f"sustainability {techs[0]}")
+                queries.append(f'"sustainability" AND "{techs[0]}"')
 
         # Strategy 7: Country-specific innovation
         if country and len(queries) < 5:
             if techs:
-                queries.append(f"innovation {country} {techs[0]}")
+                queries.append(f'"innovation" AND "{country}" AND "{techs[0]}"')
             else:
-                queries.append(f"innovation {country}")
+                queries.append(f'"innovation" AND "{country}"')
 
         # Strategy 8: Top keywords combination
         if len(keywords) >= 2:
-            queries.append(f"{keywords[0]} {keywords[1]}")
+            queries.append(f'"{keywords[0]}" AND "{keywords[1]}"')
 
         # Apply feedback-based refinement
         if previous_feedback:
@@ -526,24 +497,23 @@ QUERY 6: "clinical decision support"
         # Ensure minimum queries with fallback
         while len(queries) < 3:
             if techs and apps:
-                queries.append(f"{techs[0]} {apps[0]}")
+                queries.append(f'"{techs[0]}" AND "{apps[0]}"')
             elif techs:
-                queries.append(f"{techs[0]} innovation")
+                queries.append(f'"{techs[0]}" AND "innovation"')
             elif apps:
-                queries.append(f"{apps[0]} technology")
+                queries.append(f'"{apps[0]}" AND "technology"')
             else:
-                queries.append(f"{company_type} innovation")
+                queries.append(f'"{company_type}" AND "innovation"')
 
-        # Sanitize, enforce max length, and de-dupe
-        sanitized: List[str] = []
+        # Remove duplicates while preserving order
         seen = set()
+        unique_queries = []
         for q in queries:
-            cleaned = self._sanitize_search_query(q, max_len=MAX_QUERY_LENGTH)
-            if cleaned and cleaned not in seen:
-                seen.add(cleaned)
-                sanitized.append(cleaned)
+            if q not in seen:
+                seen.add(q)
+                unique_queries.append(q)
 
-        return sanitized[:6]
+        return unique_queries[:6]
 
     def _refine_queries(
         self, queries: List[str], feedback: str, analysis: Dict

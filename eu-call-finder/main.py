@@ -3,6 +3,11 @@ eu-call-finder/main.py
 FastAPI app entry point
 """
 
+from dotenv import load_dotenv
+
+# Ensure env vars (LLM keys, model names, etc.) are loaded for the API process
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.routes import router

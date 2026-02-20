@@ -74,7 +74,8 @@ export type ProgressCallback = (update: ProgressUpdate) => void;
 export const searchFundingCallsStream = (
   companyData: CompanyData,
   onProgress: ProgressCallback,
-  onComplete: (calls: FundingCall[]) => void,
+  // The backend sends a full SearchResult-like object on `complete`.
+  onComplete: (result: unknown) => void,
   onError: (error: string) => void
 ): (() => void) => {
   // Transform CompanyData to backend format
@@ -97,7 +98,8 @@ export const searchFundingCallsStream = (
   console.log('Connecting to SSE stream with POST...');
   
   const abortController = new AbortController();
-  
+  let isClosed = false;
+
   // Use fetch to connect to SSE endpoint
   fetchWithTimeout(`${API_BASE_URL}/search/stream`, {
     method: 'POST',
@@ -106,10 +108,9 @@ export const searchFundingCallsStream = (
       'Accept': 'text/event-stream',
     },
     body: JSON.stringify(request),
-    // DO NOT pass a signal here.
-    // Passing an AbortSignal makes fetchWithTimeout skip its internal timeout controller,
-    // and in some browsers/proxies it can also cause premature aborts for streaming.
-    // The cleanup function will still stop parsing updates.
+    // NOTE: For proper cleanup and to prevent duplicate re-runs (React StrictMode / remounts),
+    // we DO pass a signal so we can abort the streaming request.
+    signal: abortController.signal,
   }).then(async (response) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -125,6 +126,11 @@ export const searchFundingCallsStream = (
 
     // Read the stream
     while (true) {
+      if (isClosed) {
+        try { await reader.cancel(); } catch {}
+        break;
+      }
+
       const { done, value } = await reader.read();
       if (done) break;
 
@@ -155,21 +161,30 @@ export const searchFundingCallsStream = (
           const parsed = JSON.parse(data);
           console.log(`[SSE] ${eventType}:`, parsed);
           
-          switch (eventType) {
-            case 'progress':
-              onProgress(parsed as ProgressUpdate);
-              break;
-            case 'complete':
-              console.log('[SSE] Complete! Result:', parsed);
-              // Pass the entire result object, not just calls
-              onComplete(parsed);
-              break;
-            case 'error':
-              console.error('[SSE] Error:', parsed.error);
-              onError(parsed.error || 'Unknown error');
-              break;
-          }
-        } catch (e) {
+           switch (eventType) {
+             case 'progress':
+               if (!isClosed) onProgress(parsed as ProgressUpdate);
+               break;
+             case 'complete':
+               console.log('[SSE] Complete! Result:', parsed);
+               // Guard against double-complete in case of duplicate streams
+               if (!isClosed) {
+                 isClosed = true;
+                 // Pass the entire result object, not just calls
+                 onComplete(parsed);
+                 abortController.abort();
+               }
+               break;
+             case 'error':
+               console.error('[SSE] Error:', parsed.error);
+               if (!isClosed) {
+                 isClosed = true;
+                 onError(parsed.error || 'Unknown error');
+                 abortController.abort();
+               }
+               break;
+           }
+} catch (e) {
           console.error('[SSE] Failed to parse:', data, e);
         }
       }
@@ -177,22 +192,32 @@ export const searchFundingCallsStream = (
 
     console.log('[SSE] Stream ended');
   }).catch((error) => {
-    if (error.name === 'AbortError') {
+    // React StrictMode / route changes / explicit cleanup will abort the request.
+    // Treat that as a normal cancellation, not a user-facing error.
+    if (error?.name === 'AbortError') {
       console.log('[SSE] Request aborted');
-      onError('Request timed out or was aborted');
-    } else {
-      console.error('[SSE] Fetch error:', error);
-      onError(error.message);
+      return;
     }
+
+    console.error('[SSE] Fetch error:', error);
+
+    // If backend/proxy closes the stream or the network flakes, browsers often surface
+    // this as a generic TypeError("Failed to fetch"). Provide a clearer message.
+    const msg =
+      (error && typeof error.message === 'string' && error.message) ||
+      'Request timed out or was aborted';
+
+    onError(msg);
   });
 
-  // Return cleanup function
+   // Return cleanup function
   return () => {
+    if (isClosed) return;
+    isClosed = true;
     console.log('[SSE] Aborting request...');
     abortController.abort();
   };
 };
-
 /**
  * Search for EU funding calls matching a company profile (non-streaming).
  * 

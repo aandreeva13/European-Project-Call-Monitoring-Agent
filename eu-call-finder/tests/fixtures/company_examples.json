@@ -20,6 +20,31 @@
     ]
   },
   {
+    "companyName": "Shopmetrics Europe Ltd.",
+    "organizationType": "SaaS / IT Services / Market Research Technology",
+    "country": "Bulgaria",
+    "city": "Varna",
+    "numberOfEmployees": 47,
+    "coreActivitiesAndMission": "We provide an enterprise-class SaaS platform for mystery shopping, fieldwork, and market research providers worldwide. Our mission is to help clients improve business performance through service excellence using real-time, accurate data collection and AI-powered analytics. Our focus areas include Digital Transformation, CX (Customer Experience) Excellence, and automated fieldwork management.",
+    "domainsOfExpertise": [
+      {
+        "domainName": "Customer Experience (CX) Software",
+        "expertiseLevel": "Expert",
+        "subDomains": ["Cloud-based SaaS Platforms", "Mystery Shopping Technology", "Automated Workflow Services", "Mobile Data Collection (Online/Offline)"]
+      },
+      {
+        "domainName": "Market Research Analytics",
+        "expertiseLevel": "Expert",
+        "subDomains": ["Quantitative & Qualitative Research", "Business Intelligence (BI) & Reporting", "AI-Powered Data Validation & Fraud Detection", "Sentimetrics (Social Media Sentiment Analysis)"]
+      },
+      {
+        "domainName": "Service Excellence Consulting",
+        "expertiseLevel": "Advanced",
+        "subDomains": ["Process Mapping & Re-engineering", "Data Warehouse & Data Mart Solutions", "Financial Impact Analysis & ROI Metrics"]
+      }
+    ]
+  },
+  {
     "companyName": "Solaris Microgrids GmbH",
     "organizationType": "SME",
     "country": "Germany",

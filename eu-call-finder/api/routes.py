@@ -394,6 +394,7 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
                             "suggested_partners": call.get("suggested_partners", []),
                         }
                         for i, call in enumerate(analyzed_calls)
+                        if int(call.get("relevance_score", 0) * 10) >= 60
                     ],
                     "top_recommendations": [],
                     "total_calls": len(analyzed_calls),
@@ -401,12 +402,30 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
                     "generated_at": datetime.now().isoformat(),
                 }
 
+            # Debug: Check funding cards before sending
+            funding_cards = final_report.get("funding_cards", [])
+            if funding_cards:
+                first_card = funding_cards[0]
+                print(
+                    f"[API] First card being sent: id={first_card.get('id')}, has_project_summary={bool(first_card.get('project_summary'))}"
+                )
+                if first_card.get("project_summary"):
+                    print(
+                        f"[API]   project_summary.overview length={len(str(first_card['project_summary'].get('overview', '')))}"
+                    )
+                print(
+                    f"[API]   why_recommended length={len(str(first_card.get('why_recommended', '')))}"
+                )
+                print(
+                    f"[API]   key_benefits count={len(first_card.get('key_benefits', []))}"
+                )
+
             # Return the complete report structure
             final_result = {
                 "company_profile": final_report.get("company_profile", {}),
                 "company_summary": final_report.get("company_summary", {}),
                 "overall_assessment": final_report.get("overall_assessment", {}),
-                "funding_cards": final_report.get("funding_cards", []),
+                "funding_cards": funding_cards,
                 "top_recommendations": final_report.get("top_recommendations", []),
                 "total_calls": final_report.get("total_calls", 0),
                 "report_type": final_report.get("report_type", "unknown"),

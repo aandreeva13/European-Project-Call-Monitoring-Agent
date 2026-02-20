@@ -743,14 +743,18 @@ def reporter_node(state: WorkflowState) -> WorkflowState:
         # Sort by match percentage
         funding_cards.sort(key=lambda x: x["match_percentage"], reverse=True)
 
-        # Count priorities
+        # Apply final visibility threshold (only show 60%+ matches in results)
+        funding_cards = [
+            c for c in funding_cards if c.get("match_percentage", 0) >= 60
+        ]
+
+        # Count priorities (after threshold)
         high_priority = len([c for c in funding_cards if c["match_percentage"] >= 80])
         medium_priority = len(
             [c for c in funding_cards if 60 <= c["match_percentage"] < 80]
         )
         low_priority = len([c for c in funding_cards if c["match_percentage"] < 60])
-
-        # Build fallback report
+# Build fallback report
         report = {
             "company_profile": {
                 "name": company.get("name", "Unknown"),
