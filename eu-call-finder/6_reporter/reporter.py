@@ -313,10 +313,21 @@ IMPORTANT INSTRUCTIONS:
 
 
 def generate_llm_report(analyzed_calls: list, company_input: dict) -> dict:
-    """Generate comprehensive LLM-powered report with detailed cards and individual project summaries."""
+    """Generate comprehensive LLM-powered report with detailed cards and individual project summaries.
+
+    NOTE: Only processes calls with >=60% match to avoid wasting LLM time on low matches.
+    """
+
+    # Filter to only high/medium matches (>=60%) early to save LLM processing time
+    visible_calls = []
+    for call in analyzed_calls:
+        relevance = call.get("relevance_score", 0) or 0
+        match_pct = int(relevance * 10)
+        if match_pct >= 60:
+            visible_calls.append(call)
 
     print(
-        f"[REPORTER] Generating LLM-powered report for {len(analyzed_calls)} projects..."
+        f"[REPORTER] Generating LLM-powered report for {len(visible_calls)} projects (filtered from {len(analyzed_calls)})..."
     )
 
     # Prepare company profile
@@ -337,17 +348,15 @@ def generate_llm_report(analyzed_calls: list, company_input: dict) -> dict:
         ],
     }
 
-    # Generate individual summaries for ALL analyzed calls
+    # Generate individual summaries only for visible calls (>=60% match)
     print(
-        f"[REPORTER] Generating individual summaries for {len(analyzed_calls)} projects..."
+        f"[REPORTER] Generating individual summaries for {len(visible_calls)} projects..."
     )
     project_summaries = {}
 
-    for idx, call in enumerate(analyzed_calls):
+    for idx, call in enumerate(visible_calls):
         call_id = call.get("id", f"unknown_{idx}")
-        print(
-            f"[REPORTER] Analyzing project {idx + 1}/{len(analyzed_calls)}: {call_id}"
-        )
+        print(f"[REPORTER] Analyzing project {idx + 1}/{len(visible_calls)}: {call_id}")
 
         summary = generate_project_summary(call, company_summary)
         project_summaries[call_id] = summary
@@ -359,7 +368,7 @@ def generate_llm_report(analyzed_calls: list, company_input: dict) -> dict:
         )
 
     # Prepare top calls for overall LLM report analysis
-    top_calls = analyzed_calls[:5] if len(analyzed_calls) > 5 else analyzed_calls
+    top_calls = visible_calls[:5] if len(visible_calls) > 5 else visible_calls
 
     calls_for_llm = []
     for call in top_calls:
@@ -407,7 +416,7 @@ def generate_llm_report(analyzed_calls: list, company_input: dict) -> dict:
         )
 
     # Build LLM prompt
-    prompt = build_llm_prompt(company_summary, calls_for_llm, len(analyzed_calls))
+    prompt = build_llm_prompt(company_summary, calls_for_llm, len(visible_calls))
 
     # Call LLM
     if LLM_PROVIDER == "openai":
@@ -431,7 +440,7 @@ def generate_llm_report(analyzed_calls: list, company_input: dict) -> dict:
 
         if not content:
             print("[REPORTER] LLM returned empty response, using fallback")
-            return generate_fallback_report(analyzed_calls, company_input)
+            return generate_fallback_report(visible_calls, company_input)
 
         # Save raw LLM response to file for debugging
         debug_file = f"reporter_debug_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
@@ -441,7 +450,7 @@ def generate_llm_report(analyzed_calls: list, company_input: dict) -> dict:
                     "timestamp": datetime.now().isoformat(),
                     "company_name": company_summary.get("name"),
                     "llm_raw_response": content,
-                    "analyzed_calls_count": len(analyzed_calls),
+                    "analyzed_calls_count": len(visible_calls),
                 },
                 f,
                 indent=2,
@@ -489,11 +498,11 @@ def generate_llm_report(analyzed_calls: list, company_input: dict) -> dict:
                     raise ValueError("No JSON object found in response")
             except Exception as extract_error:
                 print(f"[REPORTER] JSON extraction failed: {extract_error}")
-                return generate_fallback_report(analyzed_calls, company_input)
+                return generate_fallback_report(visible_calls, company_input)
 
         # Build funding cards with project summaries
         funding_cards = build_funding_cards(
-            analyzed_calls,
+            visible_calls,
             llm_report.get("top_recommendations", []),
             project_summaries,
         )
@@ -523,14 +532,14 @@ def generate_llm_report(analyzed_calls: list, company_input: dict) -> dict:
             "top_recommendations": llm_report.get("top_recommendations", []),
             "overall_assessment": llm_report.get("overall_assessment", {}),
             "funding_cards": funding_cards,
-            "total_calls": len(analyzed_calls),
+            "total_calls": len(visible_calls),
         }
 
         return final_report
     else:
         # Handle unsupported LLM providers
         print(f"[REPORTER] Unsupported LLM provider: {LLM_PROVIDER}")
-        return generate_fallback_report(analyzed_calls, company_input)
+        return generate_fallback_report(visible_calls, company_input)
 
 
 def build_llm_prompt(
@@ -824,25 +833,35 @@ def build_funding_cards(
 
 
 def generate_fallback_report(analyzed_calls: list, company_input: dict) -> dict:
-    """Generate a fallback report without LLM using rule-based logic."""
+    """Generate a fallback report without LLM using rule-based logic.
+
+    NOTE: The UI/Final Report should not include low matches (<60%). Those low
+    matches also shouldn't be passed through reporter enrichment (saves time).
+    """
 
     print("[REPORTER] Generating fallback report...")
 
     company = company_input.get("company", {})
 
+    # Apply final visibility threshold early to avoid wasting time on low matches.
+    visible_calls = []
+    for call in analyzed_calls:
+        relevance = call.get("relevance_score", 0) or 0
+        match_pct = int(relevance * 10)
+        if match_pct >= 60:
+            visible_calls.append(call)
+
     # Build basic cards without using qualitative analysis match_summary
     cards = []
-    for call in analyzed_calls:
+    for call in visible_calls:
         relevance = call.get("relevance_score", 0)
         match_pct = int(relevance * 10)
 
         # Determine priority based on score
         if match_pct >= 80:
             priority = "high"
-        elif match_pct >= 60:
-            priority = "medium"
         else:
-            priority = "low"
+            priority = "medium"  # 60-79
 
         # Generate a rule-based summary instead of using match_summary
         description = call.get("raw_data", {}).get("description", "")
@@ -903,11 +922,7 @@ def generate_fallback_report(analyzed_calls: list, company_input: dict) -> dict:
                 "Check eligibility requirements",
                 "Note deadline: " + call.get("deadline", "TBD"),
             ],
-            "success_probability": "high"
-            if match_pct >= 80
-            else "medium"
-            if match_pct >= 60
-            else "low",
+            "success_probability": "high" if match_pct >= 80 else "medium",
             "domain_matches": domain_matches,
             "suggested_partners": call.get("suggested_partners", []),
         }
@@ -915,10 +930,10 @@ def generate_fallback_report(analyzed_calls: list, company_input: dict) -> dict:
 
     cards.sort(key=lambda x: x["match_percentage"], reverse=True)
 
-    # Count priorities
+    # Count priorities (after threshold)
     high_priority = len([c for c in cards if c["match_percentage"] >= 80])
     medium_priority = len([c for c in cards if 60 <= c["match_percentage"] < 80])
-    low_priority = len([c for c in cards if c["match_percentage"] < 60])
+    low_priority = 0
 
     # Get domain names for strengths
     domains = company.get("domains", [])
@@ -953,13 +968,13 @@ def generate_fallback_report(analyzed_calls: list, company_input: dict) -> dict:
             for i, c in enumerate(cards[:3])
         ],
         "overall_assessment": {
-            "total_opportunities": len(analyzed_calls),
+            "total_opportunities": len(visible_calls),
             "high_priority_count": high_priority,
             "medium_priority_count": medium_priority,
             "low_priority_count": low_priority,
-            "summary_text": f"Found {len(analyzed_calls)} funding opportunities matching the company profile. {high_priority} high-priority opportunities identified.",
+            "summary_text": f"Found {len(visible_calls)} funding opportunities matching the company profile. {high_priority} high-priority opportunities identified.",
             "strategic_advice": "Focus on high-priority opportunities (80%+ match) first. Prepare applications well before deadlines. Consider forming consortiums for larger projects.",
         },
         "funding_cards": cards,
-        "total_calls": len(analyzed_calls),
+        "total_calls": len(visible_calls),
     }
