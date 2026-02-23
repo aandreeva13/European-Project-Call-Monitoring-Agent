@@ -144,9 +144,9 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
 
     const normalized = String(budget).replace(/\s+/g, ' ').trim();
 
-    // Prefer big numbers from the text (e.g., "35 000 000") and format them.
+    // Prefer big numbers from the text (e.g. "35 000 000") and format them.
     // The current UI bug (showing "€4") happens because we were matching small numbers first
-    // (e.g., the "2027" year or "1" from "Showing 1–11").
+    // (e.g. the "2027" year or "1" from "Showing 1–11").
     const matches = normalized.match(/\d[\d\s,.]*/g) || [];
     const parsed = matches
       .map(m => {
@@ -216,6 +216,71 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
     }
     
     return entries.length > 0 ? entries : null;
+  };
+
+  const parseObjectivesFromText = (text: string): { summary: string; objectives: string[] } => {
+    if (!text) return { summary: '', objectives: [] };
+    
+    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+    const summary = sentences.slice(0, 2).join(' ').trim();
+    const remainingText = sentences.slice(2).join(' ');
+    const objectives: string[] = [];
+    
+    const objectivePatterns = [
+      /(?:aims?|objectives?|goals?|focus(?:es)?|seeks?|will)\s+(?:to\s+)?([^.,;]+)/gi,
+      /(?:develop|create|establish|implement|support|enhance|improve)\s+([^.,;]+)/gi,
+    ];
+    
+    objectivePatterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(remainingText)) !== null) {
+        const objective = match[0].trim();
+        if (objective.length > 10 && !objectives.includes(objective)) {
+          objectives.push(objective);
+        }
+      }
+    });
+    
+    if (objectives.length === 0 && remainingText.length > 20) {
+      const chunks = remainingText.split(/[.!?]/).filter(s => s.trim().length > 15);
+      objectives.push(...chunks.slice(0, 5).map(s => s.trim()));
+    }
+    
+    return { summary, objectives: objectives.slice(0, 5) };
+  };
+
+  const highlightTechnologiesAndStrengths = (text: string): JSX.Element => {
+    if (!text) return <span>{text}</span>;
+    
+    const techPatterns = [
+      'artificial intelligence', 'AI', 'machine learning', 'ML', 'deep learning',
+      'data analytics', 'big data', 'cloud computing', 'IoT', 'blockchain',
+      'cybersecurity', 'renewable energy', 'sustainability', 'digital transformation',
+      'research and development', 'R&D', 'innovation', 'technology',
+      'software', 'hardware', 'automation', 'robotics', 'sensors',
+      'algorithms', 'models', 'platforms', 'systems', 'infrastructure'
+    ];
+    
+    const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`\\b(${techPatterns.map(escapeRegExp).join('|')})\\b`, 'gi');
+    
+    const parts = text.split(pattern);
+    const matches = text.match(pattern) || [];
+    
+    return (
+      <>
+        {parts.map((part, i) => (
+          <React.Fragment key={i}>
+            {part}
+            {matches[i] && (
+              <strong className="text-slate-800 dark:text-slate-200 font-semibold">
+                {matches[i]}
+              </strong>
+            )}
+          </React.Fragment>
+        ))}
+      </>
+    );
   };
 
   if (loading) {
@@ -623,19 +688,24 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
       {/* Full Details Modal */}
       {selectedCard && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedCard(null)}>
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="p-8">
               {/* Modal Header */}
               <div className="flex justify-between items-start mb-6">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
+                <div className="flex-1 pr-4">
+                  <div className="flex items-center gap-3 mb-3">
                     <span className={`px-3 py-1 rounded-full text-sm font-bold border ${getMatchColor(selectedCard.match_percentage)}`}>
                       {selectedCard.match_percentage}% Match
                     </span>
+                    {selectedCard.eligibility_passed && (
+                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">
+                        Eligible
+                      </span>
+                    )}
                   </div>
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{selectedCard.title}</h2>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight">{selectedCard.title}</h2>
                   {selectedCard.programme && (
-                    <p className="text-slate-500 mt-1">{selectedCard.programme}</p>
+                    <p className="text-slate-500 mt-2 text-sm">{selectedCard.programme}</p>
                   )}
                 </div>
                 <button 
@@ -646,57 +716,110 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                 </button>
               </div>
 
-              {/* Key Info */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
-                  <div className="flex items-center gap-2 text-slate-500 mb-1">
-                    <span className="material-icons text-sm">euro</span>
-                    <span className="text-xs font-bold uppercase">Budget</span>
-                  </div>
-                  <div className="text-xl font-bold text-slate-900 dark:text-white">{formatBudget(selectedCard.budget)}</div>
-                </div>
-                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
-                  <div className="flex items-center gap-2 text-slate-500 mb-1">
-                    <span className="material-icons text-sm">event</span>
-                    <span className="text-xs font-bold uppercase">Deadline</span>
-                  </div>
-                  <div className="text-xl font-bold text-red-600">{selectedCard.deadline}</div>
-                </div>
+              {/* Summary Table - Budget & Deadline */}
+              <div className="mb-8 bg-slate-50 dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-100 dark:bg-slate-700">
+                    <tr>
+                      <th className="text-left py-3 px-4 font-bold text-slate-700 dark:text-slate-300 uppercase text-xs tracking-wider">Budget</th>
+                      <th className="text-left py-3 px-4 font-bold text-slate-700 dark:text-slate-300 uppercase text-xs tracking-wider">Deadline</th>
+                      <th className="text-left py-3 px-4 font-bold text-slate-700 dark:text-slate-300 uppercase text-xs tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-t border-slate-200 dark:border-slate-700">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl font-bold text-slate-900 dark:text-white">{formatBudget(selectedCard.budget)}</span>
+                        </div>
+                        {selectedCard.contribution && selectedCard.contribution !== 'N/A' && (
+                          <div className="text-xs text-slate-500 mt-1">{selectedCard.contribution} per project</div>
+                        )}
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <span className="material-icons text-red-500 text-lg">event</span>
+                          <span className="text-lg font-bold text-red-600">{selectedCard.deadline}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-sm font-medium rounded-full">
+                          <span className="material-icons text-sm">info</span>
+                          {selectedCard.status || 'Open'}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
 
-              {/* Description */}
-              <div className="mb-6">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">About This Opportunity</h3>
-                <div className="text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto">
-                  {selectedCard.project_summary?.overview || selectedCard.content?.description || selectedCard.description || selectedCard.short_summary || 'No detailed description available.'}
-                </div>
-              </div>
+              {/* About This Opportunity */}
+              {(() => {
+                const aboutText = selectedCard.project_summary?.overview || selectedCard.content?.description || selectedCard.description || selectedCard.short_summary || '';
+                const { summary, objectives } = parseObjectivesFromText(aboutText);
+                
+                return (
+                  <div className="mb-8">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                      <span className="material-icons text-primary">description</span>
+                      About This Opportunity
+                    </h3>
+                    
+                    {summary ? (
+                      <div className="space-y-4">
+                        <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-base">
+                          {summary}
+                        </p>
+                        
+                        {objectives.length > 0 && (
+                          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                            <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wider">Key Objectives</h4>
+                            <ul className="space-y-2">
+                              {objectives.map((objective, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                  <span className="material-icons text-primary text-sm mt-0.5">arrow_right</span>
+                                  <span className="text-slate-700 dark:text-slate-300 capitalize">{objective}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-slate-500 italic">No detailed description available.</p>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Full Budget Table */}
               {selectedCard.content?.budget_overview && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">Budget Information</h3>
-                  <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg overflow-x-auto">
+                <div className="mb-8">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <span className="material-icons text-primary">account_balance</span>
+                    Budget Information
+                  </h3>
+                  <div className="bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
                     {(() => {
                       const budgetEntries = parseBudgetTable(selectedCard.content.budget_overview);
                       if (budgetEntries && budgetEntries.length > 0) {
                         return (
                           <table className="w-full text-sm">
-                            <thead>
-                              <tr className="border-b-2 border-slate-300 dark:border-slate-700">
-                                <th className="text-left py-2 px-3 font-bold text-slate-700 dark:text-slate-300">Topic</th>
-                                <th className="text-right py-2 px-3 font-bold text-slate-700 dark:text-slate-300">Budget</th>
-                                <th className="text-center py-2 px-3 font-bold text-slate-700 dark:text-slate-300">Stage</th>
-                                <th className="text-center py-2 px-3 font-bold text-slate-700 dark:text-slate-300">Deadline</th>
+                            <thead className="bg-slate-100 dark:bg-slate-700">
+                              <tr>
+                                <th className="text-left py-3 px-4 font-bold text-slate-700 dark:text-slate-300 uppercase text-xs tracking-wider">Topic</th>
+                                <th className="text-right py-3 px-4 font-bold text-slate-700 dark:text-slate-300 uppercase text-xs tracking-wider">Budget</th>
+                                <th className="text-center py-3 px-4 font-bold text-slate-700 dark:text-slate-300 uppercase text-xs tracking-wider">Stage</th>
+                                <th className="text-center py-3 px-4 font-bold text-slate-700 dark:text-slate-300 uppercase text-xs tracking-wider">Deadline</th>
                               </tr>
                             </thead>
                             <tbody>
                               {budgetEntries.map((entry, idx) => (
-                                <tr key={idx} className="border-b border-slate-200 dark:border-slate-700">
-                                  <td className="py-2 px-3 text-slate-700 dark:text-slate-300 max-w-[300px] truncate" title={entry.topic}>{entry.topic}</td>
-                                  <td className="py-2 px-3 text-right font-semibold text-green-600">{entry.budget}</td>
-                                  <td className="py-2 px-3 text-center text-slate-600">{entry.stage}</td>
-                                  <td className="py-2 px-3 text-center text-slate-600">{entry.deadline}</td>
+                                <tr key={idx} className="border-t border-slate-200 dark:border-slate-700">
+                                  <td className="py-3 px-4 text-slate-700 dark:text-slate-300 max-w-[300px] truncate" title={entry.topic}>{entry.topic}</td>
+                                  <td className="py-3 px-4 text-right font-semibold text-green-600">{entry.budget}</td>
+                                  <td className="py-3 px-4 text-center text-slate-600">{entry.stage}</td>
+                                  <td className="py-3 px-4 text-center text-slate-600">{entry.deadline}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -704,7 +827,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                         );
                       }
                       return (
-                        <pre className="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-wrap">
+                        <pre className="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-wrap p-4">
                           {selectedCard.content.budget_overview}
                         </pre>
                       );
@@ -713,23 +836,31 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                 </div>
               )}
 
-              {/* Why Recommended */}
-              <div className="mb-6">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">Why This Matches Your Profile</h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {selectedCard.why_recommended}
-                </p>
+              {/* Why This Matches Your Profile */}
+              <div className="mb-8">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span className="material-icons text-primary">person_check</span>
+                  Why This Matches Your Profile
+                </h3>
+                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-5 border-l-4 border-green-500">
+                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                    {highlightTechnologiesAndStrengths(selectedCard.why_recommended)}
+                  </p>
+                </div>
               </div>
 
               {/* Key Benefits */}
               {selectedCard.key_benefits.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">Key Benefits</h3>
-                  <ul className="space-y-2">
+                <div className="mb-8">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <span className="material-icons text-primary">stars</span>
+                    Key Benefits
+                  </h3>
+                  <ul className="space-y-3">
                     {selectedCard.key_benefits.map((benefit, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="material-icons text-green-500 text-sm mt-0.5">check_circle</span>
-                        <span className="text-slate-600 dark:text-slate-400">{benefit}</span>
+                      <li key={i} className="flex items-start gap-3 bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                        <span className="material-icons text-green-500 text-lg">check_circle</span>
+                        <span className="text-slate-700 dark:text-slate-300">{benefit}</span>
                       </li>
                     ))}
                   </ul>
@@ -738,47 +869,59 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
 
               {/* Action Items */}
               {selectedCard.action_items.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">Recommended Actions</h3>
-                  <ul className="space-y-2">
+                <div className="mb-8">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <span className="material-icons text-primary">task_alt</span>
+                    Recommended Actions
+                  </h3>
+                  <div className="space-y-3">
                     {selectedCard.action_items.map((action, i) => (
+                      <div key={i} className="flex items-start gap-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border-l-4 border-amber-500">
+                        <span className="material-icons text-amber-600 text-lg">arrow_forward</span>
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">{action}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Suggested Partners */}
+              {selectedCard.suggested_partners.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <span className="material-icons text-primary">groups</span>
+                    Suggested Partners
+                  </h3>
+                  <ul className="space-y-2">
+                    {selectedCard.suggested_partners.map((partner, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <span className="material-icons text-primary text-sm mt-0.5">arrow_right</span>
-                        <span className="text-slate-600 dark:text-slate-400">{action}</span>
+                        <span className="material-icons text-primary text-sm mt-0.5">group</span>
+                        <span className="text-slate-600 dark:text-slate-400">{partner}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
 
-              {/* Suggested Partners */}
-              {selectedCard.suggested_partners.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">Suggested Partners</h3>
+              {/* Tags */}
+              {selectedCard.tags.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <span className="material-icons text-primary">label</span>
+                    Tags
+                  </h3>
                   <div className="flex flex-wrap gap-2">
-                    {selectedCard.suggested_partners.map((partner, i) => (
-                      <span key={i} className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm rounded-full">
-                        {partner}
+                    {selectedCard.tags.map((tag, i) => (
+                      <span key={i} className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm rounded-lg font-medium">
+                        #{tag}
                       </span>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Tags */}
-              <div className="mb-8">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedCard.tags.map((tag, i) => (
-                    <span key={i} className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
               {/* Action Buttons */}
-              <div className="flex gap-4">
+              <div className="flex gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
                 {selectedCard.url && (
                   <a 
                     href={selectedCard.url}
@@ -792,7 +935,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                 )}
                 <button 
                   onClick={() => setSelectedCard(null)}
-                  className="px-6 py-3 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                  className="px-8 py-3 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
                 >
                   Close
                 </button>
