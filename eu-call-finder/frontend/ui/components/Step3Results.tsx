@@ -305,8 +305,11 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   const safeCompanyProfile = company_profile || { name: 'Unknown', type: '', country: '', employees: 0, description: '', domains: [] };
   const safeCompanySummary = company_summary || { profile_overview: '', key_strengths: [], recommended_focus_areas: [] };
   const safeOverallAssessment = overall_assessment || { total_opportunities: 0, high_priority_count: 0, medium_priority_count: 0, low_priority_count: 0, summary_text: '', strategic_advice: '' };
-  const safeFundingCards = funding_cards || [];
-  const safeTopRecommendations = top_recommendations || [];
+
+  // UI filtering: do not show suggestions below 60% profile match.
+  // Keeps the results page focused on relevant opportunities.
+  const safeFundingCards = (funding_cards || []).filter(card => (card?.match_percentage ?? 0) >= 60);
+  const safeTopRecommendations = (top_recommendations || []).filter(rec => (rec?.match_percentage ?? 0) >= 60);
 
   return (
     <div className="max-w-7xl mx-auto">

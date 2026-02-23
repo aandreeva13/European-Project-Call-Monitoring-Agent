@@ -337,16 +337,33 @@ def generate_llm_report(analyzed_calls: list, company_input: dict) -> dict:
         ],
     }
 
-    # Generate individual summaries for ALL analyzed calls
+    # Generate individual summaries only for sufficiently-matching calls.
+    # Policy: for projects under 60% match, do NOT generate LLM analysis/summary.
     print(
-        f"[REPORTER] Generating individual summaries for {len(analyzed_calls)} projects..."
+        f"[REPORTER] Generating individual summaries (>=60% match) for {len(analyzed_calls)} projects..."
     )
     project_summaries = {}
 
     for idx, call in enumerate(analyzed_calls):
         call_id = call.get("id", f"unknown_{idx}")
+        relevance_score = call.get("relevance_score", 0)  # expected 0..10
+        match_pct = int(relevance_score * 10)
+
+        if match_pct < 60:
+            project_summaries[call_id] = {
+                "project_overview": "Not summarized because match is below 60%.",
+                "company_fit_assessment": f"This project is below the 60% match threshold ({match_pct}%).",
+                "key_alignment_points": [],
+                "potential_challenges": [],
+                "recommendation": "Skipped detailed analysis due to low match.",
+            }
+            print(
+                f"[REPORTER] Skipping summary for low-match project {idx + 1}/{len(analyzed_calls)}: {call_id} ({match_pct}%)"
+            )
+            continue
+
         print(
-            f"[REPORTER] Analyzing project {idx + 1}/{len(analyzed_calls)}: {call_id}"
+            f"[REPORTER] Analyzing project {idx + 1}/{len(analyzed_calls)}: {call_id} ({match_pct}%)"
         )
 
         summary = generate_project_summary(call, company_summary)
