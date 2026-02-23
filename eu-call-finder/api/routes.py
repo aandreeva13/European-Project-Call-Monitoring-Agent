@@ -382,7 +382,7 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
                         "url": call.get("url", ""),
                         "status": call.get("status", ""),
                         "tags": call.get("keyword_hits", []),
-                        "why_recommended": call.get("match_summary", "")[:100],
+                        "why_recommended": call.get("match_summary", ""),
                         "key_benefits": [],
                         "action_items": [],
                         "success_probability": "medium",

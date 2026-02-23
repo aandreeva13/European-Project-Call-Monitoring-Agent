@@ -725,7 +725,7 @@ def reporter_node(state: WorkflowState) -> WorkflowState:
                 "url": call.get("url", ""),
                 "status": call.get("status", ""),
                 "tags": call.get("keyword_hits", []),
-                "why_recommended": call.get("match_summary", "")[:150]
+                "why_recommended": call.get("match_summary", "")
                 if call.get("match_summary")
                 else f"Match score: {relevance}/10",
                 "key_benefits": [f"Relevance score: {relevance}/10"]
@@ -794,7 +794,7 @@ def reporter_node(state: WorkflowState) -> WorkflowState:
                     "call_id": c["id"],
                     "priority_rank": i + 1,
                     "match_percentage": c["match_percentage"],
-                    "why_recommended": c["why_recommended"][:100],
+                    "why_recommended": c["why_recommended"],
                     "success_probability": c["success_probability"],
                 }
                 for i, c in enumerate(funding_cards[:3])
