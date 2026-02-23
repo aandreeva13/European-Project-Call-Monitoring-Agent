@@ -406,17 +406,26 @@ QUERY 6: "clinical decision support"
                     )
                 queries.append(cleaned)
 
-        # If no queries found, try to extract quoted strings with AND/OR
-        if not queries:
-            pattern = r'"[^"]+"\s+AND\s+"[^"]+"'
-            queries = re.findall(pattern, content)
-            # Truncate if needed
-            queries = [
-                q[:MAX_QUERY_LENGTH] if len(q) > MAX_QUERY_LENGTH else q
-                for q in queries
-            ]
+        # Clean any remaining AND/OR operators from queries
+        cleaned_queries = []
+        for q in queries:
+            # Remove AND/OR operators
+            q = re.sub(r"\s+AND\s+", " ", q)
+            q = re.sub(r"\s+OR\s+", " ", q)
+            q = re.sub(r"[()]", "", q)  # Remove parentheses
+            q = q.strip()
+            if len(q) > MAX_QUERY_LENGTH:
+                q = q[:MAX_QUERY_LENGTH].rsplit(" ", 1)[
+                    0
+                ]  # Cut at last space before limit
+            if len(q) > 10:
+                cleaned_queries.append(q)
 
-        return queries[:6] if queries else ["artificial intelligence AND SME"]
+        # Default fallback
+        if not cleaned_queries:
+            return ["artificial intelligence SME"]
+
+        return cleaned_queries[:6]
 
     def _generate_rule_based_queries(
         self, analysis: Dict, previous_feedback: str = None
@@ -437,58 +446,58 @@ QUERY 6: "clinical decision support"
 
         # Strategy 1: Primary Technology + Application (most specific)
         if techs and apps:
-            queries.append(f'"{techs[0]}" AND "{apps[0]}"')
+            queries.append(f'"{techs[0]}" {apps[0]}')
 
         # Strategy 2: Technology + Company Type + Country
         if techs and country:
-            queries.append(f'"{techs[0]}" AND "{company_type}" AND "{country}"')
+            queries.append(f'"{techs[0]}" {company_type} {country}')
         elif techs:
-            queries.append(f'"{techs[0]}" AND "{company_type}"')
+            queries.append(f'"{techs[0]}" {company_type}')
 
         # Strategy 3: Two core technologies combined
         if len(techs) >= 2:
-            queries.append(f'"{techs[0]}" AND "{techs[1]}"')
+            queries.append(f'"{techs[0]}" {techs[1]}')
 
         # Strategy 4: Domain competency + Application
         if competencies and apps:
             comp_domain = competencies[0].get("domain", "")
             if comp_domain:
-                queries.append(f'"{comp_domain}" AND "{apps[0]}"')
+                queries.append(f'"{comp_domain}" {apps[0]}')
 
         # Strategy 5: Company size-appropriate keywords
         if employees < 50:
             # SME-specific queries
             if techs and apps:
-                queries.append(f'"SME" AND "{techs[0]}" AND "{apps[0]}"')
+                queries.append(f'SME "{techs[0]}" {apps[0]}')
             elif techs:
-                queries.append(f'"SME" AND "{techs[0]}"')
+                queries.append(f'SME "{techs[0]}"')
         else:
             # Larger company queries
             if techs:
-                queries.append(f'"enterprise" AND "{techs[0]}"')
+                queries.append(f'enterprise "{techs[0]}"')
 
         # Strategy 6: Extract industry from company name
         name_lower = name.lower()
         if any(word in name_lower for word in ["health", "medical", "bio"]):
             if techs:
-                queries.append(f'"healthcare" AND "{techs[0]}"')
+                queries.append(f'healthcare "{techs[0]}"')
         elif any(word in name_lower for word in ["tech", "digital", "soft"]):
             if techs:
-                queries.append(f'"digital" AND "{techs[0]}"')
+                queries.append(f'digital "{techs[0]}"')
         elif any(word in name_lower for word in ["green", "eco", "env"]):
             if techs:
-                queries.append(f'"sustainability" AND "{techs[0]}"')
+                queries.append(f'sustainability "{techs[0]}"')
 
         # Strategy 7: Country-specific innovation
         if country and len(queries) < 5:
             if techs:
-                queries.append(f'"innovation" AND "{country}" AND "{techs[0]}"')
+                queries.append(f'innovation {country} "{techs[0]}"')
             else:
-                queries.append(f'"innovation" AND "{country}"')
+                queries.append(f"innovation {country}")
 
         # Strategy 8: Top keywords combination
         if len(keywords) >= 2:
-            queries.append(f'"{keywords[0]}" AND "{keywords[1]}"')
+            queries.append(f'"{keywords[0]}" {keywords[1]}')
 
         # Apply feedback-based refinement
         if previous_feedback:
@@ -497,13 +506,13 @@ QUERY 6: "clinical decision support"
         # Ensure minimum queries with fallback
         while len(queries) < 3:
             if techs and apps:
-                queries.append(f'"{techs[0]}" AND "{apps[0]}"')
+                queries.append(f'"{techs[0]}" {apps[0]}')
             elif techs:
-                queries.append(f'"{techs[0]}" AND "innovation"')
+                queries.append(f'"{techs[0]}" innovation')
             elif apps:
-                queries.append(f'"{apps[0]}" AND "technology"')
+                queries.append(f"{apps[0]} technology")
             else:
-                queries.append(f'"{company_type}" AND "innovation"')
+                queries.append(f"{company_type} innovation")
 
         # Remove duplicates while preserving order
         seen = set()
@@ -527,7 +536,7 @@ QUERY 6: "clinical decision support"
             apps = analysis.get("applications", [])
             for q in queries[:3]:
                 if apps and not any(app in q.lower() for app in apps):
-                    refined.append(f'{q} AND "{apps[0]}"')
+                    refined.append(f"{q} {apps[0]}")
                 else:
                     refined.append(q)
 
@@ -535,9 +544,7 @@ QUERY 6: "clinical decision support"
         if "keyword" in feedback_lower:
             keywords = analysis.get("keywords", [])
             if len(keywords) >= 3:
-                refined.append(
-                    f'"{keywords[0]}" AND "{keywords[1]}" AND "{keywords[2]}"'
-                )
+                refined.append(f'"{keywords[0]}" {keywords[1]} {keywords[2]}')
 
         # If not refined, add a specific competency-based query
         if not refined:
@@ -545,7 +552,7 @@ QUERY 6: "clinical decision support"
             if analysis.get("competencies") and analysis.get("applications"):
                 comp = analysis["competencies"][0]
                 app = analysis["applications"][0]
-                specific = f'"{comp["domain"]}" AND "{app}" AND application'
+                specific = f"{comp['domain']} {app} application"
                 refined.insert(0, specific)
 
         return refined[:6]
@@ -570,6 +577,20 @@ QUERY 6: "clinical decision support"
             print(f"   [REFINING] Applying feedback: {previous_feedback[:60]}...")
 
         queries = self.generate_queries_with_llm(analysis, previous_feedback)
+
+        # Final cleanup: Remove any remaining AND/OR operators from all queries
+        import re
+
+        cleaned_queries = []
+        for q in queries:
+            # Remove AND/OR operators and parentheses
+            q = re.sub(r"\s+AND\s+", " ", q, flags=re.IGNORECASE)
+            q = re.sub(r"\s+OR\s+", " ", q, flags=re.IGNORECASE)
+            q = re.sub(r"[()]", "", q)
+            q = q.strip()
+            if len(q) > 10:
+                cleaned_queries.append(q)
+        queries = cleaned_queries
 
         # Step 3: Build plan with same structure as before
         plan = {

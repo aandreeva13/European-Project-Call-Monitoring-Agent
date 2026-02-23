@@ -286,6 +286,15 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
                 result = master_agent.run_workflow(company_input)
                 result_holder["result"] = result
                 print("\n[API] Workflow completed successfully")
+                # Send final progress update
+                progress_queue.put(
+                    {
+                        "agent": "Reporter",
+                        "progress": 100,
+                        "message": f"Completed! Found {result.get('total_calls', 0)} opportunities",
+                        "status": "completed",
+                    }
+                )
             finally:
                 builtins.print = original_print
 
@@ -309,6 +318,12 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
 
         while workflow_thread.is_alive() or not progress_queue.empty():
             try:
+                # Check if client disconnected
+                if await request.is_disconnected():
+                    print("[API] Client disconnected, stopping workflow")
+                    # Note: We can't actually kill the thread, but we can stop streaming
+                    break
+
                 # Check for progress updates (non-blocking)
                 while not progress_queue.empty():
                     update = progress_queue.get_nowait()
@@ -327,6 +342,10 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
                 continue
 
         # Workflow completed, send result
+        print(
+            f"[API] Workflow thread ended. Result exists: {result_holder['result'] is not None}, Error exists: {result_holder['error'] is not None}"
+        )
+
         if result_holder["error"]:
             yield f"event: error\ndata: {json.dumps({'error': result_holder['error']})}\n\n"
         elif result_holder["result"]:
@@ -343,6 +362,50 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
                     else {}
                 )
 
+                # Build funding cards first
+                funding_cards = [
+                    {
+                        "id": call.get("id", str(i)),
+                        "title": call.get("title", "Untitled"),
+                        "programme": call.get("programme", ""),
+                        "description": call.get("raw_data", {}).get("description", "")[
+                            :300
+                        ]
+                        if call.get("raw_data")
+                        else "",
+                        "short_summary": call.get("match_summary", ""),
+                        "match_percentage": int(call.get("relevance_score", 0) * 10),
+                        "relevance_score": call.get("relevance_score", 0),
+                        "eligibility_passed": call.get("eligibility_passed", False),
+                        "budget": call.get("budget", "N/A"),
+                        "deadline": call.get("deadline", "N/A"),
+                        "url": call.get("url", ""),
+                        "status": call.get("status", ""),
+                        "tags": call.get("keyword_hits", []),
+                        "why_recommended": call.get("match_summary", "")[:100],
+                        "key_benefits": [],
+                        "action_items": [],
+                        "success_probability": "medium",
+                        "domain_matches": call.get("domain_matches", []),
+                        "suggested_partners": call.get("suggested_partners", []),
+                    }
+                    for i, call in enumerate(analyzed_calls)
+                    if int(call.get("relevance_score", 0) * 10) >= 60
+                ]
+
+                # Calculate priority counts based on match percentages
+                # High: 80+, Medium: 70-79, Low: 60-69
+                high_priority = len(
+                    [c for c in funding_cards if c["match_percentage"] >= 80]
+                )
+                medium_priority = len(
+                    [c for c in funding_cards if 70 <= c["match_percentage"] < 80]
+                )
+                low_priority = len(
+                    [c for c in funding_cards if 60 <= c["match_percentage"] < 70]
+                )
+                total_matching = high_priority + medium_priority + low_priority
+
                 final_report = {
                     "company_profile": {
                         "name": company.get("name", "Unknown"),
@@ -358,44 +421,14 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
                         "recommended_focus_areas": [],
                     },
                     "overall_assessment": {
-                        "total_opportunities": len(analyzed_calls),
-                        "high_priority_count": 0,
-                        "medium_priority_count": 0,
-                        "low_priority_count": 0,
-                        "summary_text": f"Found {len(analyzed_calls)} opportunities",
-                        "strategic_advice": "Review results below",
+                        "total_opportunities": total_matching,
+                        "high_priority_count": high_priority,
+                        "medium_priority_count": medium_priority,
+                        "low_priority_count": low_priority,
+                        "summary_text": f"Found {total_matching} funding opportunities matching the company profile (60%+ match). {high_priority} high-priority opportunities identified.",
+                        "strategic_advice": "Focus on high-priority opportunities (80%+ match) first, then medium (70-79%). Low priority (60-69%) may require additional consortium partners.",
                     },
-                    "funding_cards": [
-                        {
-                            "id": call.get("id", str(i)),
-                            "title": call.get("title", "Untitled"),
-                            "programme": call.get("programme", ""),
-                            "description": call.get("raw_data", {}).get(
-                                "description", ""
-                            )[:300]
-                            if call.get("raw_data")
-                            else "",
-                            "short_summary": call.get("match_summary", ""),
-                            "match_percentage": int(
-                                call.get("relevance_score", 0) * 10
-                            ),
-                            "relevance_score": call.get("relevance_score", 0),
-                            "eligibility_passed": call.get("eligibility_passed", False),
-                            "budget": call.get("budget", "N/A"),
-                            "deadline": call.get("deadline", "N/A"),
-                            "url": call.get("url", ""),
-                            "status": call.get("status", ""),
-                            "tags": call.get("keyword_hits", []),
-                            "why_recommended": call.get("match_summary", "")[:100],
-                            "key_benefits": [],
-                            "action_items": [],
-                            "success_probability": "medium",
-                            "domain_matches": call.get("domain_matches", []),
-                            "suggested_partners": call.get("suggested_partners", []),
-                        }
-                        for i, call in enumerate(analyzed_calls)
-                        if int(call.get("relevance_score", 0) * 10) >= 60
-                    ],
+                    "funding_cards": funding_cards,
                     "top_recommendations": [],
                     "total_calls": len(analyzed_calls),
                     "report_type": "fallback_direct",
@@ -446,7 +479,42 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
 
             final_result = convert_datetime(final_result)
 
+            print(
+                f"[API] Sending complete event with {len(funding_cards)} funding cards"
+            )
             yield f"event: complete\ndata: {json.dumps(final_result, cls=DateTimeEncoder)}\n\n"
+        else:
+            # Neither result nor error - this shouldn't happen, but handle it gracefully
+            print("[API] WARNING: Workflow completed but no result or error was set!")
+            error_result = {
+                "company_profile": {
+                    "name": "Unknown",
+                    "type": "",
+                    "country": "",
+                    "employees": 0,
+                    "description": "",
+                    "domains": [],
+                },
+                "company_summary": {
+                    "profile_overview": "Error occurred",
+                    "key_strengths": [],
+                    "recommended_focus_areas": [],
+                },
+                "overall_assessment": {
+                    "total_opportunities": 0,
+                    "high_priority_count": 0,
+                    "medium_priority_count": 0,
+                    "low_priority_count": 0,
+                    "summary_text": "An error occurred while processing your request.",
+                    "strategic_advice": "Please try again.",
+                },
+                "funding_cards": [],
+                "top_recommendations": [],
+                "total_calls": 0,
+                "report_type": "error",
+                "generated_at": datetime.now().isoformat(),
+            }
+            yield f"event: complete\ndata: {json.dumps(error_result, cls=DateTimeEncoder)}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 

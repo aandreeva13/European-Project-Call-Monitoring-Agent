@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CompanyData, SearchResult, FundingCard, CompanySummary, CompanyProfile } from '../types';
 import { searchFundingCallsStream, ProgressUpdate } from '../services/apiService';
 
@@ -29,8 +29,15 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   });
   const [completedAgents, setCompletedAgents] = useState<string[]>(cachedResult ? AGENTS.map(a => a.name) : []);
   const [selectedCard, setSelectedCard] = useState<FundingCard | null>(null);
+  const hasStartedSearch = useRef(false);
 
   useEffect(() => {
+    // Prevent duplicate searches (React StrictMode double-mount)
+    if (hasStartedSearch.current) {
+      console.log('Search already started, skipping duplicate');
+      return;
+    }
+    
     // If we have cached results, use them directly without searching
     // Check for valid SearchResult structure (must have company_profile)
     if (cachedResult && cachedResult.company_profile) {
@@ -42,6 +49,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
     }
     
     console.log('No cached result found, running search. cachedResult:', cachedResult);
+    hasStartedSearch.current = true;
 
     // Otherwise, run the search
     setLoading(true);
@@ -102,23 +110,33 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
       }
     );
 
-    return cleanup;
+    return () => {
+      cleanup();
+      // Reset the flag on unmount so future searches work
+      hasStartedSearch.current = false;
+    };
   }, [company, cachedResult, onResultComplete]);
 
   const getMatchColor = (percentage: number) => {
-    if (percentage >= 80) return 'text-green-600 bg-green-50 border-green-200';
-    if (percentage >= 60) return 'text-blue-600 bg-blue-50 border-blue-200';
-    if (percentage >= 40) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+    if (percentage >= 80) return 'text-green-700 bg-green-50 border-green-200';
+    if (percentage >= 70) return 'text-blue-700 bg-blue-50 border-blue-200';
+    if (percentage >= 60) return 'text-yellow-700 bg-yellow-50 border-yellow-200';
     return 'text-red-600 bg-red-50 border-red-200';
   };
 
   const getProbabilityColor = (probability: string) => {
     switch (probability) {
-      case 'high': return 'text-green-600 bg-green-100';
-      case 'medium': return 'text-yellow-600 bg-yellow-100';
-      case 'low': return 'text-red-600 bg-red-100';
+      case 'high': return 'text-green-700 bg-green-100';
+      case 'medium': return 'text-blue-700 bg-blue-100';
+      case 'low': return 'text-yellow-700 bg-yellow-100';
       default: return 'text-gray-600 bg-gray-100';
     }
+  };
+
+  const getRankColor = (matchPercentage: number) => {
+    if (matchPercentage >= 80) return 'bg-green-400 hover:bg-green-500';
+    if (matchPercentage >= 70) return 'bg-blue-400 hover:bg-blue-500';
+    return 'bg-yellow-400 hover:bg-yellow-500';
   };
 
   const formatBudget = (budget: string) => {
@@ -310,6 +328,12 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   // Keeps the results page focused on relevant opportunities.
   const safeFundingCards = (funding_cards || []).filter(card => (card?.match_percentage ?? 0) >= 60);
   const safeTopRecommendations = (top_recommendations || []).filter(rec => (rec?.match_percentage ?? 0) >= 60);
+  
+  // Calculate counts based on ACTUAL displayed cards (not backend totals)
+  const displayedTotal = safeFundingCards.length;
+  const displayedHigh = safeFundingCards.filter(c => c.match_percentage >= 80).length;
+  const displayedMedium = safeFundingCards.filter(c => c.match_percentage >= 70 && c.match_percentage < 80).length;
+  const displayedLow = safeFundingCards.filter(c => c.match_percentage >= 60 && c.match_percentage < 70).length;
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -322,7 +346,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
           Your EU Funding Matches
         </h1>
         <p className="text-lg text-slate-600 dark:text-slate-400">
-          We found <span className="font-bold text-primary">{safeOverallAssessment.total_opportunities}</span> funding opportunities for {safeCompanyProfile.name}
+          We found <span className="font-bold text-primary">{displayedTotal}</span> funding opportunities for {safeCompanyProfile.name}
         </p>
       </div>
 
@@ -382,18 +406,22 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                   <span className="material-icons text-primary text-base">assessment</span>
                   Results Summary
                 </h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-lg text-center">
-                    <div className="text-3xl font-bold text-green-700 dark:text-green-400">{safeOverallAssessment.high_priority_count}</div>
-                    <div className="text-sm text-green-700 dark:text-green-400 font-medium mt-1">High Priority</div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-green-700 dark:text-green-400">{displayedHigh}</div>
+                    <div className="text-xs text-green-700 dark:text-green-400 font-medium mt-1">High Priority<br/>80%+</div>
                   </div>
-                  <div className="bg-blue-100 dark:bg-blue-900/30 p-4 rounded-lg text-center">
-                    <div className="text-3xl font-bold text-blue-700 dark:text-blue-400">{safeOverallAssessment.medium_priority_count}</div>
-                    <div className="text-sm text-blue-700 dark:text-blue-400 font-medium mt-1">Medium Priority</div>
+                  <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">{displayedMedium}</div>
+                    <div className="text-xs text-blue-700 dark:text-blue-400 font-medium mt-1">Medium Priority<br/>70-79%</div>
+                  </div>
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-center border border-yellow-200 dark:border-yellow-800">
+                    <div className="text-2xl font-bold text-yellow-700 dark:text-yellow-400">{displayedLow}</div>
+                    <div className="text-xs text-yellow-700 dark:text-yellow-400 font-medium mt-1">Low Priority<br/>60-69%</div>
                   </div>
                 </div>
                 <div className="mt-4 text-center">
-                  <span className="text-2xl font-bold text-slate-800 dark:text-slate-200">{safeOverallAssessment.total_opportunities}</span>
+                  <span className="text-2xl font-bold text-slate-800 dark:text-slate-200">{displayedTotal}</span>
                   <span className="text-slate-600 dark:text-slate-400 ml-2">Total Opportunities Found</span>
                 </div>
               </div>
@@ -422,21 +450,24 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {safeTopRecommendations.slice(0, 3).map((rec, i) => (
-                  <div key={i} className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs font-bold">
+                  <div key={i} className="bg-white dark:bg-slate-800 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className={`w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors ${getRankColor(rec.match_percentage)}`}>
                         {rec.priority_rank}
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getProbabilityColor(rec.success_probability)}`}>
+                        {rec.success_probability} success
                       </span>
                     </div>
 
-                    <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1" title="Profile match based on your inputs and the call text. Not a funding success prediction.">
+                    <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2" title="Profile match based on your inputs and the call text. Not a funding success prediction.">
                       {rec.match_percentage}%
-                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-2 align-middle">
+                      <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 ml-2 align-middle">
                         Profile match
                       </span>
                     </div>
 
-                    <div className="text-xs text-slate-500 line-clamp-2">
+                    <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-h-24 overflow-y-auto">
                       {rec.why_recommended}
                     </div>
                   </div>

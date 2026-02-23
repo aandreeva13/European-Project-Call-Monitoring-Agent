@@ -531,13 +531,34 @@ def generate_llm_report(analyzed_calls: list, company_input: dict) -> dict:
                 f"[REPORTER] First card action_items count={len(first_card.get('action_items', []))}"
             )
 
+        # Ensure we always have top 3 recommendations if enough cards exist
+        top_recs = llm_report.get("top_recommendations", [])
+        if len(top_recs) < 3 and len(funding_cards) >= 3:
+            # Supplement with top cards from funding_cards
+            existing_ids = {r.get("call_id") for r in top_recs}
+            for i, card in enumerate(funding_cards):
+                if len(top_recs) >= 3:
+                    break
+                if card["id"] not in existing_ids:
+                    top_recs.append(
+                        {
+                            "call_id": card["id"],
+                            "priority_rank": len(top_recs) + 1,
+                            "match_percentage": card["match_percentage"],
+                            "why_recommended": card.get("why_recommended", "")[:150],
+                            "success_probability": card.get(
+                                "success_probability", "medium"
+                            ),
+                        }
+                    )
+
         # Build final report with enriched cards using individual project summaries
         final_report = {
             "report_type": "llm_enhanced",
             "generated_at": datetime.now().isoformat(),
             "company_profile": company_summary,
             "company_summary": llm_report.get("company_summary", {}),
-            "top_recommendations": llm_report.get("top_recommendations", []),
+            "top_recommendations": top_recs[:3],  # Ensure max 3
             "overall_assessment": llm_report.get("overall_assessment", {}),
             "funding_cards": funding_cards,
             "total_calls": len(analyzed_calls),
@@ -932,10 +953,11 @@ def generate_fallback_report(analyzed_calls: list, company_input: dict) -> dict:
 
     cards.sort(key=lambda x: x["match_percentage"], reverse=True)
 
-    # Count priorities
+    # Count priorities based on project scores/match percentages
+    # High: 80+, Medium: 70-79, Low: 60-69
     high_priority = len([c for c in cards if c["match_percentage"] >= 80])
-    medium_priority = len([c for c in cards if 60 <= c["match_percentage"] < 80])
-    low_priority = len([c for c in cards if c["match_percentage"] < 60])
+    medium_priority = len([c for c in cards if 70 <= c["match_percentage"] < 80])
+    low_priority = len([c for c in cards if 60 <= c["match_percentage"] < 70])
 
     # Get domain names for strengths
     domains = company.get("domains", [])
@@ -970,12 +992,12 @@ def generate_fallback_report(analyzed_calls: list, company_input: dict) -> dict:
             for i, c in enumerate(cards[:3])
         ],
         "overall_assessment": {
-            "total_opportunities": len(analyzed_calls),
+            "total_opportunities": high_priority + medium_priority + low_priority,
             "high_priority_count": high_priority,
             "medium_priority_count": medium_priority,
             "low_priority_count": low_priority,
-            "summary_text": f"Found {len(analyzed_calls)} funding opportunities matching the company profile. {high_priority} high-priority opportunities identified.",
-            "strategic_advice": "Focus on high-priority opportunities (80%+ match) first. Prepare applications well before deadlines. Consider forming consortiums for larger projects.",
+            "summary_text": f"Found {high_priority + medium_priority + low_priority} funding opportunities matching the company profile (60%+ match). {high_priority} high-priority opportunities identified.",
+            "strategic_advice": "Focus on high-priority opportunities (80%+ match) first, then medium (70-79%). Low priority (60-69%) may require additional consortium partners.",
         },
         "funding_cards": cards,
         "total_calls": len(analyzed_calls),

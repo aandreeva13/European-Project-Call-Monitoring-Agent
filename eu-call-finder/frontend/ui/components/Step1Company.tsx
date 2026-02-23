@@ -74,6 +74,35 @@ const Step1Company: React.FC<Step1Props> = ({ data, onChange, onNext }) => {
     });
   };
 
+  // Debug function to fill in sample data (Healthcare / AI Diagnostics)
+  const fillDebugDataHealthAI = () => {
+    onChange({
+      companyName: 'MedVision AI',
+      orgType: 'SME',
+      description: 'We develop AI-powered medical imaging and diagnostic solutions for early disease detection. Our technology uses deep learning algorithms to analyze X-rays, MRIs, and CT scans with high accuracy, assisting radiologists and clinicians in making faster, more reliable diagnoses. We specialize in oncology screening, cardiovascular health monitoring, and neurological disorder detection.',
+      employees: 32,
+      country: 'Netherlands',
+      city: 'Amsterdam',
+      domains: [
+        {
+          name: 'Artificial Intelligence',
+          sub_domains: ['Deep Learning', 'Medical Image Analysis', 'Neural Networks', 'Pattern Recognition'],
+          level: 'expert'
+        },
+        {
+          name: 'Healthcare Technology',
+          sub_domains: ['Medical Imaging', 'Diagnostic Tools', 'Clinical Decision Support', 'Digital Health'],
+          level: 'advanced'
+        },
+        {
+          name: 'Biomedical Engineering',
+          sub_domains: ['Medical Devices', 'Healthcare Software', 'Patient Monitoring Systems'],
+          level: 'intermediate'
+        }
+      ]
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onNext();
@@ -166,6 +195,14 @@ const Step1Company: React.FC<Step1Props> = ({ data, onChange, onNext }) => {
                 >
                   <span className="material-icons text-sm">bug_report</span>
                   <span>Fill Debug Data (Shopmetrics)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={fillDebugDataHealthAI}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg font-medium hover:bg-primary hover:text-white transition-all border border-primary/30"
+                >
+                  <span className="material-icons text-sm">bug_report</span>
+                  <span>Fill Debug Data (Health AI)</span>
                 </button>
                 <button
                   type="button"
