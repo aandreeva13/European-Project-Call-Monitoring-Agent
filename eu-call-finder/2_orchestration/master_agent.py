@@ -572,11 +572,17 @@ def analysis_node(state: WorkflowState) -> WorkflowState:
             "contribution": topic.get("contribution", "N/A"),
             # Keep the full budget table accessible to the frontend
             "content": {
-                **(topic.get("content", {}) if isinstance(topic.get("content"), dict) else {}),
+                **(
+                    topic.get("content", {})
+                    if isinstance(topic.get("content"), dict)
+                    else {}
+                ),
                 "budget_overview": (
-                    (topic.get("content", {}) if isinstance(topic.get("content"), dict) else {}).get(
-                        "budget_overview"
-                    )
+                    (
+                        topic.get("content", {})
+                        if isinstance(topic.get("content"), dict)
+                        else {}
+                    ).get("budget_overview")
                     or ""
                 ),
             },
@@ -744,17 +750,18 @@ def reporter_node(state: WorkflowState) -> WorkflowState:
         funding_cards.sort(key=lambda x: x["match_percentage"], reverse=True)
 
         # Apply final visibility threshold (only show 60%+ matches in results)
-        funding_cards = [
-            c for c in funding_cards if c.get("match_percentage", 0) >= 60
-        ]
+        funding_cards = [c for c in funding_cards if c.get("match_percentage", 0) >= 60]
 
         # Count priorities (after threshold)
+        # High: 80+, Medium: 70-79, Low: 60-69
         high_priority = len([c for c in funding_cards if c["match_percentage"] >= 80])
         medium_priority = len(
-            [c for c in funding_cards if 60 <= c["match_percentage"] < 80]
+            [c for c in funding_cards if 70 <= c["match_percentage"] < 80]
         )
-        low_priority = len([c for c in funding_cards if c["match_percentage"] < 60])
-# Build fallback report
+        low_priority = len(
+            [c for c in funding_cards if 60 <= c["match_percentage"] < 70]
+        )
+        # Build fallback report
         report = {
             "company_profile": {
                 "name": company.get("name", "Unknown"),
@@ -774,12 +781,12 @@ def reporter_node(state: WorkflowState) -> WorkflowState:
                 "recommended_focus_areas": [],
             },
             "overall_assessment": {
-                "total_opportunities": len(analyzed_calls),
+                "total_opportunities": high_priority + medium_priority + low_priority,
                 "high_priority_count": high_priority,
                 "medium_priority_count": medium_priority,
                 "low_priority_count": low_priority,
-                "summary_text": f"Found {len(analyzed_calls)} relevant EU funding calls matching your profile.",
-                "strategic_advice": "Focus on high-priority opportunities (80%+ match) first.",
+                "summary_text": f"Found {high_priority + medium_priority + low_priority} relevant EU funding calls matching your profile (60%+ match).",
+                "strategic_advice": "Focus on high-priority opportunities (80%+ match) first, then medium (70-79%).",
             },
             "funding_cards": funding_cards,
             "top_recommendations": [

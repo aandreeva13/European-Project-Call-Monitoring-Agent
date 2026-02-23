@@ -140,6 +140,21 @@ const App: React.FC = () => {
     }
   };
 
+  const deleteSession = (sessionId: string) => {
+    try {
+      const raw = localStorage.getItem(HISTORY_SESSIONS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return;
+      
+      const filtered = parsed.filter((entry: any) => entry.id !== sessionId);
+      localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(filtered));
+      setSessionsVersion(v => v + 1);
+    } catch {
+      // ignore
+    }
+  };
+
   return (
     <Layout
       step={currentStep}
@@ -147,6 +162,8 @@ const App: React.FC = () => {
       historySessions={sessions}
       onSelectHistory={selectSession}
       onClearHistory={clearSessions}
+      onDeleteHistoryItem={deleteSession}
+      onStartNewSearch={reset}
     >
       {currentStep === 1 && (
         <Step1Company
