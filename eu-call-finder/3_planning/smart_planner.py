@@ -308,6 +308,9 @@ class SmartPlanner:
             )
 
             content = response.choices[0].message.content
+            if not content:
+                print("[WARNING] LLM returned empty content, using fallback")
+                return self._generate_rule_based_queries(analysis, previous_feedback)
             return self._parse_llm_queries(content)
 
         except Exception as e:
@@ -387,6 +390,10 @@ QUERY 6: "clinical decision support"
         """Parse queries from LLM response and enforce length limits."""
         queries = []
         MAX_QUERY_LENGTH = 100  # EU API limit
+
+        # Guard against None or empty content
+        if not content:
+            return queries
 
         # Look for patterns like "QUERY X:" or numbered lists
         lines = content.strip().split("\n")

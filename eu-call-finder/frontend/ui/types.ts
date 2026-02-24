@@ -57,6 +57,7 @@ export interface CompanyProfile {
   name: string;
   type: string;
   country: string;
+  city: string;
   employees: number;
   description: string;
   domains: Domain[];

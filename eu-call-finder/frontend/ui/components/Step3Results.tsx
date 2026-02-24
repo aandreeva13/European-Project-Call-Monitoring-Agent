@@ -1,12 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CompanyData, SearchResult, FundingCard, CompanySummary, CompanyProfile } from '../types';
 import { searchFundingCallsStream, ProgressUpdate } from '../services/apiService';
+import { exportProjectToPDF } from '../utils/pdfExport';
+
+interface LikedProject extends FundingCard {
+  searchContext?: {
+    companyName: string;
+    sessionId?: string;
+    searchedAt?: number;
+  };
+}
 
 interface Step3Props {
   company: CompanyData;
   onReset: () => void;
   cachedResult?: SearchResult;
   onResultComplete?: (result: SearchResult) => void;
+  likedProjects?: LikedProject[];
+  onToggleLikedProject?: (project: FundingCard) => void;
+  isProjectLiked?: (projectId: string) => boolean;
+  showLikedOnly?: boolean;
 }
 
 const AGENTS = [
@@ -17,7 +30,7 @@ const AGENTS = [
   { name: 'Reporter', icon: 'summarize', color: 'text-indigo-500', bgColor: 'bg-indigo-500' }
 ];
 
-const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, onResultComplete }) => {
+const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, onResultComplete, likedProjects = [], onToggleLikedProject, isProjectLiked, showLikedOnly = false }) => {
   const [loading, setLoading] = useState(!cachedResult);
   const [result, setResult] = useState<SearchResult | null>(cachedResult || null);
   const [error, setError] = useState<string | null>(null);
@@ -30,13 +43,28 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   const [completedAgents, setCompletedAgents] = useState<string[]>(cachedResult ? AGENTS.map(a => a.name) : []);
   const [selectedCard, setSelectedCard] = useState<FundingCard | null>(null);
   const hasStartedSearch = useRef(false);
+  
+  // Store onResultComplete in ref to avoid triggering useEffect when it changes
+  const onResultCompleteRef = useRef(onResultComplete);
+  onResultCompleteRef.current = onResultComplete;
 
   useEffect(() => {
+    // If showing liked projects only, don't run a search - just show the liked projects
+    if (showLikedOnly) {
+      console.log('Showing liked projects only, skipping search');
+      setLoading(false);
+      setCompletedAgents(AGENTS.map(a => a.name));
+      return;
+    }
+    
     // Prevent duplicate searches (React StrictMode double-mount)
     if (hasStartedSearch.current) {
       console.log('Search already started, skipping duplicate');
       return;
     }
+    
+    // Set the flag immediately to prevent any race conditions
+    hasStartedSearch.current = true;
     
     // If we have cached results, use them directly without searching
     // Check for valid SearchResult structure (must have company_profile)
@@ -49,7 +77,6 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
     }
     
     console.log('No cached result found, running search. cachedResult:', cachedResult);
-    hasStartedSearch.current = true;
 
     // Otherwise, run the search
     setLoading(true);
@@ -98,9 +125,9 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
         setResult(typedResult);
         setLoading(false);
         setCompletedAgents(AGENTS.map(a => a.name));
-        // Persist the result to the session
-        if (onResultComplete) {
-          onResultComplete(typedResult);
+        // Persist the result to the session using ref to avoid re-triggering
+        if (onResultCompleteRef.current) {
+          onResultCompleteRef.current(typedResult);
         }
       },
       (errorMsg) => {
@@ -115,7 +142,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
       // Reset the flag on unmount so future searches work
       hasStartedSearch.current = false;
     };
-  }, [company, cachedResult, onResultComplete]);
+  }, [company, cachedResult, showLikedOnly]);
 
   const getMatchColor = (percentage: number) => {
     if (percentage >= 80) return 'text-green-700 bg-green-50 border-green-200';
@@ -249,7 +276,33 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
     return { summary, objectives: objectives.slice(0, 5) };
   };
 
-  const highlightTechnologiesAndStrengths = (text: string): JSX.Element => {
+  // Helper function to get icon based on partner type
+  const getPartnerIcon = (partner: string): string => {
+    const lowerPartner = partner.toLowerCase();
+    if (lowerPartner.includes('universit') || lowerPartner.includes('academic') || lowerPartner.includes('college')) {
+      return 'school';
+    } else if (lowerPartner.includes('research') || lowerPartner.includes('institute') || lowerPartner.includes('fraunhofer') || lowerPartner.includes('max planck')) {
+      return 'science';
+    } else if (lowerPartner.includes('hospital') || lowerPartner.includes('medical') || lowerPartner.includes('clinic') || lowerPartner.includes('health')) {
+      return 'local_hospital';
+    } else if (lowerPartner.includes('sme') || lowerPartner.includes('startup') || lowerPartner.includes('small')) {
+      return 'store';
+    } else if (lowerPartner.includes('industry') || lowerPartner.includes('manufacturing') || lowerPartner.includes('factory')) {
+      return 'factory';
+    } else if (lowerPartner.includes('tech') || lowerPartner.includes('software') || lowerPartner.includes('it ') || lowerPartner.includes('digital')) {
+      return 'computer';
+    } else if (lowerPartner.includes('consult') || lowerPartner.includes('advisor')) {
+      return 'support_agent';
+    } else if (lowerPartner.includes('government') || lowerPartner.includes('public') || lowerPartner.includes('authority')) {
+      return 'account_balance';
+    } else if (lowerPartner.includes('ngo') || lowerPartner.includes('non-profit') || lowerPartner.includes('association')) {
+      return 'volunteer_activism';
+    } else {
+      return 'business';
+    }
+  };
+
+  const highlightTechnologiesAndStrengths = (text: string): React.ReactElement => {
     if (!text) return <span>{text}</span>;
     
     const techPatterns = [
@@ -264,23 +317,35 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
     const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const pattern = new RegExp(`\\b(${techPatterns.map(escapeRegExp).join('|')})\\b`, 'gi');
     
-    const parts = text.split(pattern);
-    const matches = text.match(pattern) || [];
+    const parts: Array<string | React.ReactElement> = [];
+    let lastIndex = 0;
+    let match;
     
-    return (
-      <>
-        {parts.map((part, i) => (
-          <React.Fragment key={i}>
-            {part}
-            {matches[i] && (
-              <strong className="text-slate-800 dark:text-slate-200 font-semibold">
-                {matches[i]}
-              </strong>
-            )}
-          </React.Fragment>
-        ))}
-      </>
-    );
+    // Reset regex
+    pattern.lastIndex = 0;
+    
+    while ((match = pattern.exec(text)) !== null) {
+      // Add text before the match
+      if (match.index > lastIndex) {
+        parts.push(text.slice(lastIndex, match.index));
+      }
+      
+      // Add the matched word as bold
+      parts.push(
+        <strong key={match.index} className="text-slate-800 dark:text-slate-200 font-semibold">
+          {match[0]}
+        </strong>
+      );
+      
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex));
+    }
+    
+    return <>{parts}</>;
   };
 
   if (loading) {
@@ -360,11 +425,26 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
         <p className="mt-8 text-sm text-slate-400">
           Analyzing opportunities for <span className="font-semibold text-slate-600 dark:text-slate-300">{company.companyName}</span>
         </p>
+
+        {/* Cancel Button */}
+        <button
+          onClick={() => {
+            // Reset to stop the search and go back
+            hasStartedSearch.current = false;
+            setLoading(false);
+            onReset();
+          }}
+          className="mt-6 px-4 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-2 mx-auto"
+        >
+          <span className="material-icons text-sm">close</span>
+          Cancel Search
+        </button>
       </div>
     );
   }
 
-  if (error || !result) {
+  // Only show error state if there's an actual error, or if no result AND not showing liked projects
+  if (error || (!result && !showLikedOnly)) {
     return (
       <div className="text-center py-24">
         <div className="inline-flex items-center justify-center p-4 bg-red-100 rounded-full mb-6">
@@ -385,7 +465,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   const { company_profile, company_summary, overall_assessment, funding_cards, top_recommendations } = result || {};
   
   // Ensure all required data exists with defaults
-  const safeCompanyProfile = company_profile || { name: 'Unknown', type: '', country: '', employees: 0, description: '', domains: [] };
+  const safeCompanyProfile = company_profile || { name: 'Unknown', type: '', country: '', city: '', employees: 0, description: '', domains: [] };
   const safeCompanySummary = company_summary || { profile_overview: '', key_strengths: [], recommended_focus_areas: [] };
   const safeOverallAssessment = overall_assessment || { total_opportunities: 0, high_priority_count: 0, medium_priority_count: 0, low_priority_count: 0, summary_text: '', strategic_advice: '' };
 
@@ -394,29 +474,37 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   const safeFundingCards = (funding_cards || []).filter(card => (card?.match_percentage ?? 0) >= 60);
   const safeTopRecommendations = (top_recommendations || []).filter(rec => (rec?.match_percentage ?? 0) >= 60);
   
+  // When showing liked only, display ALL liked projects from all searches
+  const displayCards = showLikedOnly ? likedProjects : safeFundingCards;
+  
   // Calculate counts based on ACTUAL displayed cards (not backend totals)
-  const displayedTotal = safeFundingCards.length;
-  const displayedHigh = safeFundingCards.filter(c => c.match_percentage >= 80).length;
-  const displayedMedium = safeFundingCards.filter(c => c.match_percentage >= 70 && c.match_percentage < 80).length;
-  const displayedLow = safeFundingCards.filter(c => c.match_percentage >= 60 && c.match_percentage < 70).length;
+  const displayedTotal = displayCards.length;
+  const displayedHigh = displayCards.filter(c => c.match_percentage >= 80).length;
+  const displayedMedium = displayCards.filter(c => c.match_percentage >= 70 && c.match_percentage < 80).length;
+  const displayedLow = displayCards.filter(c => c.match_percentage >= 60 && c.match_percentage < 70).length;
 
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center p-2 mb-4 bg-green-500/10 rounded-full">
-          <span className="material-icons text-green-500 text-3xl">verified</span>
+          <span className="material-icons text-green-500 text-3xl">{showLikedOnly ? 'star' : 'verified'}</span>
         </div>
         <h1 className="text-4xl font-extrabold text-eu-blue dark:text-white mb-3">
-          Your EU Funding Matches
+          {showLikedOnly ? 'Your Liked Projects' : 'Your EU Funding Matches'}
         </h1>
         <p className="text-lg text-slate-600 dark:text-slate-400">
-          We found <span className="font-bold text-primary">{displayedTotal}</span> funding opportunities for {safeCompanyProfile.name}
+          {showLikedOnly ? (
+            <>You have <span className="font-bold text-primary">{displayedTotal}</span> liked projects</>
+          ) : (
+            <>We found <span className="font-bold text-primary">{displayedTotal}</span> funding opportunities for {safeCompanyProfile.name}</>
+          )}
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-8">
         {/* Company Profile Card - Displayed First */}
+        {!showLikedOnly && (
         <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 p-8">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
@@ -424,7 +512,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
             </div>
             <div>
               <h3 className="font-bold text-xl text-slate-900 dark:text-white">{safeCompanyProfile.name}</h3>
-              <p className="text-base text-slate-500">{safeCompanyProfile.type} • {safeCompanyProfile.country} • {safeCompanyProfile.employees} employees</p>
+              <p className="text-base text-slate-500">{safeCompanyProfile.type} • {safeCompanyProfile.city}{safeCompanyProfile.city && safeCompanyProfile.country ? ', ' : ''}{safeCompanyProfile.country} • {safeCompanyProfile.employees} employees</p>
             </div>
           </div>
 
@@ -503,11 +591,12 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
             </div>
           </div>
         </div>
+        )}
 
         {/* Funding Cards */}
         <div className="space-y-6">
-          {/* Top Recommendations Banner */}
-          {safeTopRecommendations.length > 0 && (
+          {/* Top Recommendations Banner - Hidden in liked-only mode */}
+          {!showLikedOnly && safeTopRecommendations.length > 0 && (
             <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-6 border border-primary/20">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <span className="material-icons text-primary">star</span>
@@ -543,7 +632,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
 
           {/* Funding Cards Grid */}
           <div className="grid grid-cols-1 gap-6">
-            {safeFundingCards.map((card) => (
+            {displayCards.map((card) => (
               <div 
                 key={card.id} 
                 className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-xl transition-all cursor-pointer group"
@@ -572,7 +661,48 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                       {card.programme && (
                         <p className="text-sm text-slate-500 mt-1">{card.programme}</p>
                       )}
+                      {/* Search Context Badge - Only shown when viewing liked projects from all searches */}
+                      {showLikedOnly && (card as LikedProject).searchContext && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full">
+                            <span className="material-icons text-xs">search</span>
+                            Found for {(card as LikedProject).searchContext!.companyName}
+                          </span>
+                        </div>
+                      )}
                     </div>
+                    {/* PDF Export Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        exportProjectToPDF(card, company.companyName);
+                      }}
+                      className="p-1 text-slate-400 hover:text-primary transition-all hover:scale-110"
+                      title="Export to PDF"
+                    >
+                      <span className="material-icons">ios_share</span>
+                    </button>
+                    
+                    {/* Star Button */}
+                    {onToggleLikedProject && isProjectLiked && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleLikedProject(card);
+                        }}
+                        className={`p-1 transition-all hover:scale-110 ${
+                          isProjectLiked(card.id)
+                            ? 'text-yellow-500'
+                            : 'text-slate-400 hover:text-yellow-500'
+                        }`}
+                        title={isProjectLiked(card.id) ? 'Remove from liked projects' : 'Add to liked projects'}
+                      >
+                        <span className="material-icons">
+                          {isProjectLiked(card.id) ? 'star' : 'star_border'}
+                        </span>
+                      </button>
+                    )}
                   </div>
 
                   {/* Budget & Deadline */}
@@ -654,7 +784,9 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                   </div>
 
                   {/* Action Button */}
-                  <button className="w-full py-2 bg-primary/10 text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2">
+                  <button 
+                    className="w-full py-2 bg-primary/10 text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2"
+                  >
                     <span>View Full Details</span>
                     <span className="material-icons text-sm">arrow_forward</span>
                   </button>
@@ -664,11 +796,11 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
           </div>
 
           {/* No Results */}
-          {safeFundingCards.length === 0 && (
+          {displayCards.length === 0 && (
             <div className="text-center py-12 bg-slate-50 dark:bg-slate-800 rounded-xl">
               <span className="material-icons text-4xl text-slate-400 mb-4">search_off</span>
-              <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">No matches found</h3>
-              <p className="text-slate-500">Try adjusting your company profile or search criteria.</p>
+              <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">{showLikedOnly ? 'No liked projects yet' : 'No matches found'}</h3>
+              <p className="text-slate-500">{showLikedOnly ? 'Star projects from your searches to see them here.' : 'Try adjusting your company profile or search criteria.'}</p>
             </div>
           )}
 
@@ -892,11 +1024,13 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                     <span className="material-icons text-primary">groups</span>
                     Suggested Partners
                   </h3>
-                  <ul className="space-y-2">
+                  <ul className="space-y-3">
                     {selectedCard.suggested_partners.map((partner, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="material-icons text-primary text-sm mt-0.5">group</span>
-                        <span className="text-slate-600 dark:text-slate-400">{partner}</span>
+                      <li key={i} className="flex items-start gap-3 rounded-lg p-3">
+                        <span className="material-icons text-slate-400 text-lg mt-0.5">
+                          {getPartnerIcon(partner)}
+                        </span>
+                        <span className="text-slate-700 dark:text-slate-300">{partner}</span>
                       </li>
                     ))}
                   </ul>

@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Layout from './components/Layout';
 import Step1Company from './components/Step1Company';
 import Step3Results from './components/Step3Results';
-import { CompanyData, SearchResult } from './types';
+import { CompanyData, SearchResult, FundingCard } from './types';
 
 const HISTORY_SESSIONS_KEY = 'eurofundfinder:sessions:v1';
+const LIKED_PROJECTS_KEY = 'eurofundfinder:liked:v1';
 const MAX_SESSIONS = 20;
 
 type SessionEntry = {
@@ -12,6 +13,14 @@ type SessionEntry = {
   createdAt: number;
   company: CompanyData;
   result?: SearchResult;
+};
+
+type LikedProject = FundingCard & {
+  searchContext?: {
+    companyName: string;
+    sessionId?: string;
+    searchedAt?: number;
+  };
 };
 
 const readSessions = (): SessionEntry[] => {
@@ -35,6 +44,18 @@ const readSessions = (): SessionEntry[] => {
   }
 };
 
+const readLikedProjects = (): LikedProject[] => {
+  try {
+    const raw = localStorage.getItem(LIKED_PROJECTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((x) => x && typeof x === 'object' && x.id);
+  } catch {
+    return [];
+  }
+};
+
 const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [companyData, setCompanyData] = useState<CompanyData>({
@@ -48,12 +69,18 @@ const App: React.FC = () => {
   });
   const [cachedResult, setCachedResult] = useState<SearchResult | undefined>(undefined);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [likedProjects, setLikedProjects] = useState<LikedProject[]>([]);
+  const [showLikedOnly, setShowLikedOnly] = useState(false);
+  const [sessionsVersion, setSessionsVersion] = useState(0);
+
+  // Load liked projects on mount
+  useEffect(() => {
+    setLikedProjects(readLikedProjects());
+  }, []);
 
   const handleCompanyChange = (updates: Partial<CompanyData>) => {
     setCompanyData(prev => ({ ...prev, ...updates }));
   };
-
-  const [sessionsVersion, setSessionsVersion] = useState(0);
 
   const sessions = useMemo((): SessionEntry[] => {
     return readSessions();
@@ -83,6 +110,50 @@ const App: React.FC = () => {
     }
   };
 
+  const toggleLikedProject = (project: FundingCard) => {
+    try {
+      const current = readLikedProjects();
+      const isLiked = current.some(p => p.id === project.id);
+      let next: LikedProject[];
+      
+      if (isLiked) {
+        next = current.filter(p => p.id !== project.id);
+      } else {
+        // Add search context when liking a project
+        const projectWithContext: LikedProject = {
+          ...project,
+          searchContext: {
+            companyName: companyData.companyName || 'Unknown Company',
+            sessionId: currentSessionId || undefined,
+            searchedAt: Date.now()
+          }
+        };
+        next = [projectWithContext, ...current];
+      }
+      
+      localStorage.setItem(LIKED_PROJECTS_KEY, JSON.stringify(next));
+      setLikedProjects(next);
+    } catch (e) {
+      console.warn('[likes] failed to toggle project', e);
+    }
+  };
+
+  const isProjectLiked = (projectId: string): boolean => {
+    return likedProjects.some(p => p.id === projectId);
+  };
+
+  const handleShowLikedProjects = () => {
+    setShowLikedOnly(true);
+    // Always go to step 2 when showing liked projects (needed when on step 1)
+    if (currentStep === 1) {
+      setCurrentStep(2);
+    }
+  };
+
+  const handleShowAllProjects = () => {
+    setShowLikedOnly(false);
+  };
+
   const nextStep = () => {
     setCurrentStep(prev => Math.min(prev + 1, 2));
     setCachedResult(undefined); // Clear cached result for new search
@@ -92,6 +163,7 @@ const App: React.FC = () => {
   const reset = () => {
     setCurrentStep(1);
     setCachedResult(undefined);
+    setShowLikedOnly(false);
     setCompanyData({
       companyName: '',
       orgType: '',
@@ -107,8 +179,13 @@ const App: React.FC = () => {
     setCompanyData(company);
     setCachedResult(result);
     setCurrentSessionId(sessionId || null);
+    setShowLikedOnly(false);
     setCurrentStep(2);
   };
+
+  // Use ref to always have latest currentSessionId without causing re-renders
+  const currentSessionIdRef = useRef(currentSessionId);
+  currentSessionIdRef.current = currentSessionId;
 
   const persistSessionResult = (result: SearchResult) => {
     try {
@@ -117,15 +194,16 @@ const App: React.FC = () => {
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed)) return;
       
-      // Find the session by ID
+      // Find the session by ID using ref to get latest value
       const updated = parsed.map((entry: any) => {
-        if (entry.id === currentSessionId) {
+        if (entry.id === currentSessionIdRef.current) {
           return { ...entry, result };
         }
         return entry;
       });
       
       localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(updated));
+      setSessionsVersion(v => v + 1);
     } catch {
       // ignore
     }
@@ -164,6 +242,10 @@ const App: React.FC = () => {
       onClearHistory={clearSessions}
       onDeleteHistoryItem={deleteSession}
       onStartNewSearch={reset}
+      likedProjectsCount={likedProjects.length}
+      onShowLikedProjects={handleShowLikedProjects}
+      showLikedOnly={showLikedOnly}
+      onShowAllProjects={handleShowAllProjects}
     >
       {currentStep === 1 && (
         <Step1Company
@@ -178,6 +260,10 @@ const App: React.FC = () => {
           onReset={reset}
           cachedResult={cachedResult}
           onResultComplete={persistSessionResult}
+          likedProjects={likedProjects}
+          onToggleLikedProject={toggleLikedProject}
+          isProjectLiked={isProjectLiked}
+          showLikedOnly={showLikedOnly}
         />
       )}
     </Layout>

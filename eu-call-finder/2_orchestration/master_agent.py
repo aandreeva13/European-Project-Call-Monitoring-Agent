@@ -767,6 +767,7 @@ def reporter_node(state: WorkflowState) -> WorkflowState:
                 "name": company.get("name", "Unknown"),
                 "type": company.get("type", ""),
                 "country": company.get("country", ""),
+                "city": company.get("city", ""),
                 "employees": company.get("employees", 0),
                 "description": company.get("description", ""),
                 "domains": company.get("domains", []),

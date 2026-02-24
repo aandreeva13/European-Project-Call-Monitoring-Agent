@@ -657,10 +657,32 @@ Generate a JSON report with this exact structure. Use professional, business-app
       "call_id": "USE THE EXACT ID FROM ABOVE",
       "priority_rank": 1,
       "match_percentage": 95,
-      "project_overview": "A detailed, professional explanation of what this funding project is about, its goals, target beneficiaries, and expected outcomes. Write 3-4 sentences using the FULL PROJECT DESCRIPTION provided above.",
+      "project_overview": "A detailed, professional analysis explaining what this funding project is about, its goals, target beneficiaries, and expected outcomes. Write 3-4 sentences using the FULL PROJECT DESCRIPTION provided above.",
       "why_recommended": "A thorough analysis explaining why this company is a good match. Reference specific elements from the company's profile and the project's requirements. Be specific about synergies.",
       "key_benefits": ["Specific benefit 1 with context", "Specific benefit 2 with context", "Specific benefit 3 with context"],
       "action_items": ["Specific actionable step 1", "Specific actionable step 2", "Specific actionable step 3"],
+      "success_probability": "high/medium/low",
+      "project_url": "USE THE URL FROM ABOVE"
+    }},
+    {{
+      "call_id": "USE THE EXACT ID FROM ABOVE - 2ND BEST MATCH",
+      "priority_rank": 2,
+      "match_percentage": 88,
+      "project_overview": "Detailed analysis of the second best matching project...",
+      "why_recommended": "Explanation of why this is the second best match...",
+      "key_benefits": ["Benefit 1", "Benefit 2", "Benefit 3"],
+      "action_items": ["Step 1", "Step 2", "Step 3"],
+      "success_probability": "high/medium/low",
+      "project_url": "USE THE URL FROM ABOVE"
+    }},
+    {{
+      "call_id": "USE THE EXACT ID FROM ABOVE - 3RD BEST MATCH",
+      "priority_rank": 3,
+      "match_percentage": 82,
+      "project_overview": "Detailed analysis of the third best matching project...",
+      "why_recommended": "Explanation of why this is the third best match...",
+      "key_benefits": ["Benefit 1", "Benefit 2", "Benefit 3"],
+      "action_items": ["Step 1", "Step 2", "Step 3"],
       "success_probability": "high/medium/low",
       "project_url": "USE THE URL FROM ABOVE"
     }}
@@ -676,12 +698,13 @@ Generate a JSON report with this exact structure. Use professional, business-app
 }}
 
 IMPORTANT INSTRUCTIONS:
-1. Use the FULL PROJECT DESCRIPTION provided to write detailed project_overviews
-2. Reference specific eligibility conditions and requirements
-3. Make connections between the company's expertise and project goals
-4. Write in professional business language, not casual
-5. Include specific details from the data provided, don't be generic
-6. The call_id must match the exact ID field from the calls above
+1. CRITICAL: Include EXACTLY 3 items in top_recommendations array when 3 or more funding opportunities are provided. Never return fewer than 3 if 3+ opportunities exist.
+2. Use the FULL PROJECT DESCRIPTION provided to write detailed project_overviews
+3. Reference specific eligibility conditions and requirements
+4. Make connections between the company's expertise and project goals
+5. Write in professional business language, not casual
+6. Include specific details from the data provided, don't be generic
+7. The call_id must match the exact ID field from the calls above
 
 Return ONLY valid JSON, no markdown formatting."""
 
