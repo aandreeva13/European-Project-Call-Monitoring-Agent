@@ -10,11 +10,47 @@ import json
 import asyncio
 import threading
 import queue
+import hashlib
+import time
 from typing import Dict, Any, AsyncGenerator
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
+
+# Request deduplication cache to prevent duplicate workflow executions
+_recent_requests: Dict[str, float] = {}
+_request_lock = threading.Lock()
+_request_ttl = 30  # Keep requests in cache for 30 seconds
+
+
+def _clean_old_requests():
+    """Clean up old request entries from cache."""
+    current_time = time.time()
+    with _request_lock:
+        expired = [
+            k for k, v in _recent_requests.items() if current_time - v > _request_ttl
+        ]
+        for k in expired:
+            del _recent_requests[k]
+
+
+def _is_duplicate_request(request_data: dict) -> bool:
+    """Check if this is a duplicate request (same company within TTL)."""
+    _clean_old_requests()
+
+    # Create a hash of the company name and description
+    company = request_data.get("company", {})
+    name = company.get("name", "")
+    description = company.get("description", "")[:100]  # First 100 chars
+
+    request_hash = hashlib.md5(f"{name}:{description}".encode()).hexdigest()
+
+    with _request_lock:
+        if request_hash in _recent_requests:
+            return True
+        _recent_requests[request_hash] = time.time()
+        return False
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -102,6 +138,17 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
         data = json.loads(body)
         request_data = SearchRequest(**data)
         print(f"Parsed request for company: {request_data.company.name}")
+
+        # Check for duplicate request
+        if _is_duplicate_request(data):
+            print(
+                f"[DEDUP] Duplicate request detected for {request_data.company.name}, skipping..."
+            )
+
+            async def duplicate_stream():
+                yield f"event: error\ndata: {json.dumps({'error': 'Duplicate request - workflow already in progress'})}\n\n"
+
+            return StreamingResponse(duplicate_stream(), media_type="text/event-stream")
     except Exception as e:
         print(f"ERROR parsing request: {e}")
 

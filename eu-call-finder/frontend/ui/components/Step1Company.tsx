@@ -15,6 +15,37 @@ const Step1Company: React.FC<Step1Props> = ({ data, onChange, onNext }) => {
   });
   const [newSubDomain, setNewSubDomain] = useState('');
 
+  // Major cities by EU country
+  const citiesByCountry: Record<string, string[]> = {
+    'Austria': ['Vienna', 'Graz', 'Linz', 'Salzburg', 'Innsbruck'],
+    'Belgium': ['Brussels', 'Antwerp', 'Ghent', 'Charleroi', 'Liège'],
+    'Bulgaria': ['Sofia', 'Plovdiv', 'Varna', 'Burgas', 'Ruse'],
+    'Croatia': ['Zagreb', 'Split', 'Rijeka', 'Osijek', 'Zadar'],
+    'Cyprus': ['Nicosia', 'Limassol', 'Larnaca', 'Famagusta', 'Paphos'],
+    'Czech Republic': ['Prague', 'Brno', 'Ostrava', 'Plzen', 'Liberec'],
+    'Denmark': ['Copenhagen', 'Aarhus', 'Odense', 'Aalborg', 'Esbjerg'],
+    'Estonia': ['Tallinn', 'Tartu', 'Narva', 'Pärnu', 'Kohtla-Järve'],
+    'Finland': ['Helsinki', 'Espoo', 'Tampere', 'Vantaa', 'Oulu'],
+    'France': ['Paris', 'Marseille', 'Lyon', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg', 'Montpellier', 'Bordeaux', 'Lille'],
+    'Germany': ['Berlin', 'Hamburg', 'Munich', 'Cologne', 'Frankfurt', 'Stuttgart', 'Düsseldorf', 'Leipzig', 'Dortmund', 'Essen'],
+    'Greece': ['Athens', 'Thessaloniki', 'Patras', 'Heraklion', 'Larissa'],
+    'Hungary': ['Budapest', 'Debrecen', 'Szeged', 'Miskolc', 'Pécs'],
+    'Ireland': ['Dublin', 'Cork', 'Limerick', 'Galway', 'Waterford'],
+    'Italy': ['Rome', 'Milan', 'Naples', 'Turin', 'Palermo', 'Genoa', 'Bologna', 'Florence', 'Bari', 'Catania'],
+    'Latvia': ['Riga', 'Daugavpils', 'Liepaja', 'Jelgava', 'Jurmala'],
+    'Lithuania': ['Vilnius', 'Kaunas', 'Klaipeda', 'Siauliai', 'Panevezys'],
+    'Luxembourg': ['Luxembourg City', 'Esch-sur-Alzette', 'Differdange', 'Dudelange', 'Ettelbruck'],
+    'Malta': ['Valletta', 'Birkirkara', 'Mosta', 'Qormi', 'Sliema'],
+    'Netherlands': ['Amsterdam', 'Rotterdam', 'The Hague', 'Utrecht', 'Eindhoven', 'Tilburg', 'Groningen', 'Almere', 'Breda', 'Nijmegen'],
+    'Poland': ['Warsaw', 'Krakow', 'Lodz', 'Wroclaw', 'Poznan', 'Gdansk', 'Szczecin', 'Bydgoszcz', 'Lublin', 'Katowice'],
+    'Portugal': ['Lisbon', 'Porto', 'Vila Nova de Gaia', 'Amadora', 'Braga'],
+    'Romania': ['Bucharest', 'Cluj-Napoca', 'Timisoara', 'Iasi', 'Constanta'],
+    'Slovakia': ['Bratislava', 'Kosice', 'Presov', 'Zilina', 'Nitra'],
+    'Slovenia': ['Ljubljana', 'Maribor', 'Celje', 'Kranj', 'Velenje'],
+    'Spain': ['Madrid', 'Barcelona', 'Valencia', 'Seville', 'Zaragoza', 'Malaga', 'Murcia', 'Palma', 'Las Palmas', 'Bilbao'],
+    'Sweden': ['Stockholm', 'Gothenburg', 'Malmö', 'Uppsala', 'Västerås']
+  };
+
   // Debug function to fill in sample data
   const fillDebugData = () => {
     onChange({
@@ -152,15 +183,55 @@ const Step1Company: React.FC<Step1Props> = ({ data, onChange, onNext }) => {
     <div>
       {/* Hero Section */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center p-2 mb-4 bg-eu-blue/5 rounded-full">
-          <span className="material-icons text-eu-blue text-3xl">auto_awesome</span>
+        <div className="relative inline-flex items-center justify-center mb-4">
+          {/* Soft rotating ring (slightly stronger) */}
+          <div
+            className="absolute -inset-4 rounded-full bg-gradient-to-r from-eu-blue/45 via-eu-yellow/35 to-eu-blue/45 blur-2xl opacity-80 animate-[spin_14s_linear_infinite]"
+            aria-hidden="true"
+          />
+
+          {/* Secondary shimmer ring to add depth */}
+          <div
+            className="absolute -inset-2 rounded-full bg-gradient-to-r from-white/25 via-eu-yellow/15 to-white/25 blur-xl opacity-60 animate-[spin_22s_linear_infinite_reverse]"
+            aria-hidden="true"
+          />
+
+          {/* Gentle floating glow */}
+          <div
+            className="absolute -inset-1 rounded-full bg-eu-blue/18 blur-lg opacity-90 animate-[float_5.5s_ease-in-out_infinite]"
+            aria-hidden="true"
+          />
+
+          {/* Icon container (keeps your fade-in) */}
+          <div className="relative inline-flex items-center justify-center p-3 bg-gradient-to-br from-primary/10 via-eu-yellow/5 to-primary/10 rounded-full opacity-0 animate-fade-in shadow-lg shadow-primary/20 border border-eu-yellow/20">
+            {/* Animated glow ring */}
+            <div className="absolute inset-0 rounded-full animate-ping-slow opacity-25 bg-gradient-to-r from-primary/20 to-eu-yellow/20"></div>
+            
+            {/* Shimmer effect overlay */}
+            <div className="absolute inset-0 rounded-full overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-eu-yellow/20 to-transparent -translate-x-full animate-shimmer"></div>
+            </div>
+
+            <span className="material-icons text-primary text-3xl drop-shadow-[0_0_10px_rgba(255,204,0,0.4)] relative z-10">
+              auto_awesome
+            </span>
+          </div>
         </div>
-        <h1 className="text-4xl font-extrabold text-eu-blue dark:text-white mb-3">
+
+        <h1 className="text-4xl font-extrabold text-eu-blue dark:text-white mb-3 opacity-0 animate-fade-in-delay">
           EU Funding Matcher
         </h1>
         <p className="text-lg text-slate-600 dark:text-slate-400">
           Tell us about your organization to find matching grants using AI.
         </p>
+
+        {/* Local keyframes to keep the animation self-contained */}
+        <style>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+          }
+        `}</style>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
@@ -300,7 +371,13 @@ const Step1Company: React.FC<Step1Props> = ({ data, onChange, onNext }) => {
                   className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none" 
                   id="country"
                   value={data.country}
-                  onChange={(e) => onChange({ country: e.target.value })}
+                  onChange={(e) => {
+                    const newCountry = e.target.value;
+                    onChange({ 
+                      country: newCountry,
+                      city: '' // Clear city when country changes
+                    });
+                  }}
                 >
                   <option value="">Select country</option>
                   <option value="Austria">Austria</option>
@@ -340,14 +417,20 @@ const Step1Company: React.FC<Step1Props> = ({ data, onChange, onNext }) => {
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2" htmlFor="city">
                   City
                 </label>
-                <input 
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none" 
-                  id="city" 
-                  placeholder="e.g. Sofia" 
-                  type="text"
+                <select 
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed" 
+                  id="city"
                   value={data.city}
                   onChange={(e) => onChange({ city: e.target.value })}
-                />
+                  disabled={!data.country}
+                >
+                  <option value="">
+                    {data.country ? 'Select city' : 'Select country first'}
+                  </option>
+                  {data.country && citiesByCountry[data.country]?.map((city) => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2" htmlFor="employees">
