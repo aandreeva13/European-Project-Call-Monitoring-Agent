@@ -1,0 +1,39 @@
+{
+  "companyName": "Danube Green Hydrogen Systems SRL",
+  "organizationType": "SME",
+  "country": "Romania",
+  "city": "Constanța",
+  "numberOfEmployees": 56,
+  "coreActivitiesAndMission": "We design, integrate, and operate modular PEM electrolyser skids and hydrogen storage solutions for industrial decarbonisation and port logistics. We focus on high-efficiency balance-of-plant, digital twins for predictive maintenance, and safety-compliant system integration.",
+  "domainsOfExpertise": [
+    {
+      "domainName": "Energy",
+      "expertiseLevel": "Advanced",
+      "subDomains": [
+        "Green Hydrogen",
+        "Electrolysers (PEM)",
+        "Power Electronics",
+        "Energy System Integration"
+      ]
+    },
+    {
+      "domainName": "Software",
+      "expertiseLevel": "Intermediate",
+      "subDomains": [
+        "Digital Twins",
+        "Predictive Maintenance",
+        "IoT Monitoring",
+        "Optimization"
+      ]
+    },
+    {
+      "domainName": "Industry",
+      "expertiseLevel": "Intermediate",
+      "subDomains": [
+        "Industrial Decarbonisation",
+        "Safety & Compliance",
+        "Pilot Demonstrations"
+      ]
+    }
+  ]
+}
