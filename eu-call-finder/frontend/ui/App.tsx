@@ -73,6 +73,28 @@ const App: React.FC = () => {
   const [showLikedOnly, setShowLikedOnly] = useState(false);
   const [sessionsVersion, setSessionsVersion] = useState(0);
 
+  // Deep links: if URL contains #project=<id>, jump directly to results step.
+  // We do NOT force liked-only mode here because share links should work for any
+  // project visible in results (not only liked projects).
+  useEffect(() => {
+    const syncFromHash = () => {
+      try {
+        const hash = window.location.hash || '';
+        const m = hash.match(/(?:^|#|&)project=([^&]+)/);
+        const pid = m ? decodeURIComponent(m[1]) : null;
+        if (pid) {
+          setCurrentStep(2);
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    syncFromHash();
+    window.addEventListener('hashchange', syncFromHash);
+    return () => window.removeEventListener('hashchange', syncFromHash);
+  }, []);
+
   // Load liked projects on mount
   useEffect(() => {
     setLikedProjects(readLikedProjects());

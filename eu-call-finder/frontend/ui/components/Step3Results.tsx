@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { CompanyData, SearchResult, FundingCard, CompanySummary, CompanyProfile } from '../types';
 import { searchFundingCallsStream, ProgressUpdate } from '../services/apiService';
 import { exportProjectToPDF } from '../utils/pdfExport';
+import { buildFundingDeadlineICS, downloadICS } from '../utils/ics';
 
 interface LikedProject extends FundingCard {
   searchContext?: {
@@ -42,6 +43,8 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   });
   const [completedAgents, setCompletedAgents] = useState<string[]>(cachedResult ? AGENTS.map(a => a.name) : []);
   const [selectedCard, setSelectedCard] = useState<FundingCard | null>(null);
+  const [sharedProjectId, setSharedProjectId] = useState<string | null>(null);
+  const [copiedProjectId, setCopiedProjectId] = useState<string | null>(null);
   const hasStartedSearch = useRef(false);
   
   // Store onResultComplete in ref to avoid triggering useEffect when it changes
@@ -49,23 +52,108 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   onResultCompleteRef.current = onResultComplete;
 
   useEffect(() => {
+    const readSharedProjectIdFromHash = () => {
+      // Read shared project id from URL hash: #project=<id>
+      try {
+        const hash = window.location.hash || '';
+        const m = hash.match(/(?:^|#|&)project=([^&]+)/);
+        const pid = m ? decodeURIComponent(m[1]) : null;
+        setSharedProjectId(pid);
+      } catch {
+        setSharedProjectId(null);
+      }
+    };
+
+    // Read immediately on mount...
+    readSharedProjectIdFromHash();
+    // ...and keep it in sync when user pastes a share URL in the same tab.
+    window.addEventListener('hashchange', readSharedProjectIdFromHash);
+
     // If showing liked projects only, don't run a search - just show the liked projects
     if (showLikedOnly) {
       console.log('Showing liked projects only, skipping search');
       setLoading(false);
       setCompletedAgents(AGENTS.map(a => a.name));
-      return;
+      return () => window.removeEventListener('hashchange', readSharedProjectIdFromHash);
     }
-    
+
+    // If a share link is opened (#project=<id>), do NOT force liked-only.
+    // Instead, attempt to load the matching project from the user's cached sessions.
+    // If found, show it via cachedResult; otherwise fall back to normal behavior.
+    const hash = window.location.hash || '';
+    const m = hash.match(/(?:^|#|&)project=([^&]+)/);
+    const pid = m ? decodeURIComponent(m[1]) : null;
+    if (pid) {
+      setSharedProjectId(pid);
+
+      try {
+        const raw = localStorage.getItem('eurofundfinder:sessions:v1');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            for (const entry of parsed) {
+              const cards = entry?.result?.funding_cards;
+              if (Array.isArray(cards)) {
+                const found = cards.find((c: any) => c?.id === pid);
+                if (found) {
+                  // Build a minimal SearchResult so the UI can render the single card.
+                  const fallbackCompany = entry?.result?.company_profile || {
+                    name: entry?.company?.companyName || company.companyName || 'Unknown',
+                    type: entry?.company?.orgType || company.orgType || '',
+                    country: entry?.company?.country || company.country || '',
+                    city: entry?.company?.city || company.city || '',
+                    employees: entry?.company?.employees || company.employees || 0,
+                    description: entry?.company?.description || company.description || '',
+                    domains: entry?.company?.domains || company.domains || [],
+                  };
+
+                  const minimalResult: any = {
+                    company_profile: fallbackCompany,
+                    company_summary: entry?.result?.company_summary || {
+                      profile_overview: '',
+                      key_strengths: [],
+                      recommended_focus_areas: []
+                    },
+                    overall_assessment: entry?.result?.overall_assessment || {
+                      total_opportunities: 1,
+                      high_priority_count: 0,
+                      medium_priority_count: 0,
+                      low_priority_count: 0,
+                      summary_text: '',
+                      strategic_advice: ''
+                    },
+                    funding_cards: [found],
+                    top_recommendations: []
+                  };
+
+                  setResult(minimalResult);
+                  setLoading(false);
+                  setCompletedAgents(AGENTS.map(a => a.name));
+                  return () => window.removeEventListener('hashchange', readSharedProjectIdFromHash);
+                }
+              }
+            }
+          }
+        }
+      } catch {
+        // ignore parsing errors; fallback to normal behavior
+      }
+
+      // No cached session contained this project id; show the normal landing/results behavior.
+      setLoading(false);
+      setCompletedAgents(AGENTS.map(a => a.name));
+      return () => window.removeEventListener('hashchange', readSharedProjectIdFromHash);
+    }
+
     // Prevent duplicate searches (React StrictMode double-mount)
     if (hasStartedSearch.current) {
       console.log('Search already started, skipping duplicate');
-      return;
+      return () => window.removeEventListener('hashchange', readSharedProjectIdFromHash);
     }
-    
+
     // Set the flag immediately to prevent any race conditions
     hasStartedSearch.current = true;
-    
+
     // If we have cached results, use them directly without searching
     // Check for valid SearchResult structure (must have company_profile)
     if (cachedResult && cachedResult.company_profile) {
@@ -73,32 +161,32 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
       setResult(cachedResult);
       setLoading(false);
       setCompletedAgents(AGENTS.map(a => a.name));
-      return;
+      return () => window.removeEventListener('hashchange', readSharedProjectIdFromHash);
     }
-    
+
     console.log('No cached result found, running search. cachedResult:', cachedResult);
 
     // Otherwise, run the search
     setLoading(true);
     setResult(null);
     setCompletedAgents([]);
-    
+
     const cleanup = searchFundingCallsStream(
       company,
       (update) => {
         console.log('Progress update:', update);
         setProgress(update);
-        
+
         // Track completed agents based on progress
         const currentProgress = update.progress;
         const newlyCompleted: string[] = [];
-        
+
         if (currentProgress >= 15) newlyCompleted.push('Safety Guard');
         if (currentProgress >= 35) newlyCompleted.push('Smart Planner');
         if (currentProgress >= 55) newlyCompleted.push('Retriever');
         if (currentProgress >= 80) newlyCompleted.push('Analyzer');
         if (currentProgress >= 95) newlyCompleted.push('Reporter');
-        
+
         setCompletedAgents(prev => {
           const combined = [...new Set([...prev, ...newlyCompleted])];
           return combined;
@@ -476,12 +564,17 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   
   // When showing liked only, display ALL liked projects from all searches
   const displayCards = showLikedOnly ? likedProjects : safeFundingCards;
+
+  // If a share link is opened (#project=<id>), only show that project (if present).
+  const shareFilteredCards = sharedProjectId
+    ? displayCards.filter(c => c.id === sharedProjectId)
+    : displayCards;
   
   // Calculate counts based on ACTUAL displayed cards (not backend totals)
-  const displayedTotal = displayCards.length;
-  const displayedHigh = displayCards.filter(c => c.match_percentage >= 80).length;
-  const displayedMedium = displayCards.filter(c => c.match_percentage >= 70 && c.match_percentage < 80).length;
-  const displayedLow = displayCards.filter(c => c.match_percentage >= 60 && c.match_percentage < 70).length;
+  const displayedTotal = shareFilteredCards.length;
+  const displayedHigh = shareFilteredCards.filter(c => c.match_percentage >= 80).length;
+  const displayedMedium = shareFilteredCards.filter(c => c.match_percentage >= 70 && c.match_percentage < 80).length;
+  const displayedLow = shareFilteredCards.filter(c => c.match_percentage >= 60 && c.match_percentage < 70).length;
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -632,7 +725,18 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
 
           {/* Funding Cards Grid */}
           <div className="grid grid-cols-1 gap-6">
-            {displayCards.map((card) => (
+            {sharedProjectId && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                <div className="flex items-center gap-2 text-blue-800 dark:text-blue-200 font-semibold">
+                  <span className="material-icons text-sm">link</span>
+                  Share link view
+                </div>
+                <div className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                  Showing {shareFilteredCards.length} project(s) for id: <span className="font-mono">{sharedProjectId}</span>
+                </div>
+              </div>
+            )}
+            {shareFilteredCards.map((card) => (
               <div 
                 key={card.id} 
                 className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-xl transition-all cursor-pointer group"
@@ -671,6 +775,44 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                         </div>
                       )}
                     </div>
+                    {/* Share Button */}
+                    <button
+                      type="button"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+
+                        const shareUrl = `${window.location.origin}${window.location.pathname}#project=${encodeURIComponent(card.id)}`;
+
+                        try {
+                          // Always copy to clipboard and show an inline confirmation.
+                          if (navigator.clipboard?.writeText) {
+                            await navigator.clipboard.writeText(shareUrl);
+                          } else {
+                            window.prompt('Copy this link:', shareUrl);
+                          }
+
+                          setCopiedProjectId(card.id);
+                          window.setTimeout(() => {
+                            setCopiedProjectId((prev) => (prev === card.id ? null : prev));
+                          }, 1400);
+                        } catch (err) {
+                          console.warn('[share] failed', err);
+                        }
+                      }}
+                      className={`p-1 transition-all hover:scale-110 ${
+                        copiedProjectId === card.id
+                          ? 'text-emerald-600'
+                          : 'text-slate-400 hover:text-primary'
+                      }`}
+                      title={copiedProjectId === card.id ? 'Link copied' : 'Copy share link'}
+                      aria-label={copiedProjectId === card.id ? 'Link copied' : 'Copy share link'}
+                    >
+                      <span className="material-icons text-[20px]">
+                        {copiedProjectId === card.id ? 'done' : 'content_copy'}
+                      </span>
+
+                    </button>
+
                     {/* PDF Export Button */}
                     <button
                       type="button"
@@ -681,9 +823,23 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                       className="p-1 text-slate-400 hover:text-primary transition-all hover:scale-110"
                       title="Export to PDF"
                     >
-                      <span className="material-icons">ios_share</span>
+                      <span className="material-icons text-[20px]">picture_as_pdf</span>
                     </button>
-                    
+
+                    {/* Add to Calendar (.ics) */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const { ics, filename } = buildFundingDeadlineICS(card);
+                        downloadICS(filename, ics);
+                      }}
+                      className="p-1 text-slate-400 hover:text-primary transition-all hover:scale-110"
+                      title="Add deadline to Google Calendar (.ics)"
+                    >
+                      <span className="material-icons text-[20px]">event_available</span>
+                    </button>
+                     
                     {/* Star Button */}
                     {onToggleLikedProject && isProjectLiked && (
                       <button
@@ -698,7 +854,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                         }`}
                         title={isProjectLiked(card.id) ? 'Remove from liked projects' : 'Add to liked projects'}
                       >
-                        <span className="material-icons">
+                        <span className="material-icons text-[20px]">
                           {isProjectLiked(card.id) ? 'star' : 'star_border'}
                         </span>
                       </button>
@@ -796,11 +952,17 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
           </div>
 
           {/* No Results */}
-          {displayCards.length === 0 && (
+          {shareFilteredCards.length === 0 && (
             <div className="text-center py-12 bg-slate-50 dark:bg-slate-800 rounded-xl">
               <span className="material-icons text-4xl text-slate-400 mb-4">search_off</span>
-              <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">{showLikedOnly ? 'No liked projects yet' : 'No matches found'}</h3>
-              <p className="text-slate-500">{showLikedOnly ? 'Star projects from your searches to see them here.' : 'Try adjusting your company profile or search criteria.'}</p>
+              <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">
+                {sharedProjectId ? 'Shared project not found in this session' : (showLikedOnly ? 'No liked projects yet' : 'No matches found')}
+              </h3>
+              <p className="text-slate-500">
+                {sharedProjectId
+                  ? 'This link points to a project id, but your browser does not have the matching results cached. Run a search again or open the project URL directly.'
+                  : (showLikedOnly ? 'Star projects from your searches to see them here.' : 'Try adjusting your company profile or search criteria.')}
+              </p>
             </div>
           )}
 
