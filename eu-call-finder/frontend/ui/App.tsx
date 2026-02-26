@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Layout from './components/Layout';
 import Step1Company from './components/Step1Company';
 import Step3Results from './components/Step3Results';
+import SharedProjectView from './components/SharedProjectView';
 import { CompanyData, SearchResult, FundingCard } from './types';
 
 const HISTORY_SESSIONS_KEY = 'eurofundfinder:sessions:v1';
@@ -72,14 +73,26 @@ const App: React.FC = () => {
   const [likedProjects, setLikedProjects] = useState<LikedProject[]>([]);
   const [showLikedOnly, setShowLikedOnly] = useState(false);
   const [sessionsVersion, setSessionsVersion] = useState(0);
+  const [isSharedView, setIsSharedView] = useState(false);
+  const [sharedViewId, setSharedViewId] = useState<string | null>(null);
 
-  // Deep links: if URL contains #project=<id>, jump directly to results step.
-  // We do NOT force liked-only mode here because share links should work for any
-  // project visible in results (not only liked projects).
+  // Deep links: if URL contains #shared/<id>, render independent SharedProjectView.
+  // if URL contains #project=<id>, jump directly to results step.
   useEffect(() => {
     const syncFromHash = () => {
       try {
         const hash = window.location.hash || '';
+
+        const sharedMatch = hash.match(/(?:^|#|&)shared\/([^&]+)/);
+        if (sharedMatch) {
+          setIsSharedView(true);
+          setSharedViewId(decodeURIComponent(sharedMatch[1]));
+          return;
+        } else {
+          setIsSharedView(false);
+          setSharedViewId(null);
+        }
+
         const m = hash.match(/(?:^|#|&)project=([^&]+)/);
         const pid = m ? decodeURIComponent(m[1]) : null;
         if (pid) {
@@ -137,7 +150,7 @@ const App: React.FC = () => {
       const current = readLikedProjects();
       const isLiked = current.some(p => p.id === project.id);
       let next: LikedProject[];
-      
+
       if (isLiked) {
         next = current.filter(p => p.id !== project.id);
       } else {
@@ -152,7 +165,7 @@ const App: React.FC = () => {
         };
         next = [projectWithContext, ...current];
       }
-      
+
       localStorage.setItem(LIKED_PROJECTS_KEY, JSON.stringify(next));
       setLikedProjects(next);
     } catch (e) {
@@ -215,7 +228,7 @@ const App: React.FC = () => {
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed)) return;
-      
+
       // Find the session by ID using ref to get latest value
       const updated = parsed.map((entry: any) => {
         if (entry.id === currentSessionIdRef.current) {
@@ -223,7 +236,7 @@ const App: React.FC = () => {
         }
         return entry;
       });
-      
+
       localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(updated));
       setSessionsVersion(v => v + 1);
     } catch {
@@ -246,7 +259,7 @@ const App: React.FC = () => {
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed)) return;
-      
+
       const filtered = parsed.filter((entry: any) => entry.id !== sessionId);
       localStorage.setItem(HISTORY_SESSIONS_KEY, JSON.stringify(filtered));
       setSessionsVersion(v => v + 1);
@@ -254,6 +267,10 @@ const App: React.FC = () => {
       // ignore
     }
   };
+
+  if (isSharedView && sharedViewId) {
+    return <SharedProjectView projectId={sharedViewId} />;
+  }
 
   return (
     <Layout

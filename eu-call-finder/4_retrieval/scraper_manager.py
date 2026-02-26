@@ -165,6 +165,9 @@ def _make_driver(headless: bool) -> webdriver.Chrome:
         chrome_options.add_argument("--headless")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument(
         "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
     )
@@ -198,6 +201,7 @@ def scrape_topics_to_json(
     search_query: Optional[Dict[str, Any]] = None,
     headless: bool = DEFAULT_HEADLESS_MODE,
     max_topics: Optional[int] = None,
+    abort_event: Optional[Any] = None,
 ) -> List[Dict[str, Any]]:
     """Run API search + Selenium scraping and return a simple JSON-serializable list."""
     search_terms = resolve_search_terms(search_terms)
@@ -212,6 +216,10 @@ def scrape_topics_to_json(
 
     try:
         for item in topics_to_scrape:
+            if abort_event and abort_event.is_set():
+                print("\n[SCRAPER] Aborted by client")
+                break
+
             topic_id = item["identifier"]
             url = (
                 "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/"
@@ -417,13 +425,22 @@ def scrape_topics_to_json(
             }
             final_data.append(record)
 
+    except Exception as e:
+        print(f"\n[SCRAPER] Error during scraping: {e}")
+        import traceback
+        traceback.print_exc()
+        # Return whatever data was collected so far so the workflow can continue
+        pass
     finally:
-        driver.quit()
+        try:
+            driver.quit()
+        except:
+            pass
 
     return final_data
 
 
-def scrape_topics_node(state: Dict[str, Any]) -> Dict[str, Any]:
+def scrape_topics_node(state: Dict[str, Any], **kwargs) -> Dict[str, Any]:
     """LangGraph node.
 
     LangGraph nodes are just callables that:
@@ -444,12 +461,17 @@ def scrape_topics_node(state: Dict[str, Any]) -> Dict[str, Any]:
     search_query = state.get("search_query")
     headless = bool(state.get("headless", DEFAULT_HEADLESS_MODE))
     max_topics = state.get("max_topics")
+    
+    config = kwargs.get("config", {})
+    configurable = config.get("configurable", {})
+    abort_event = configurable.get("abort_event")
 
     data = scrape_topics_to_json(
         search_terms=search_terms,
         search_query=search_query,
         headless=headless,
         max_topics=max_topics,
+        abort_event=abort_event,
     )
 
     return {"scraped_topics": data}

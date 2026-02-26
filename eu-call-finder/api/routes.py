@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field
 # Request deduplication cache to prevent duplicate workflow executions
 _recent_requests: Dict[str, float] = {}
 _request_lock = threading.Lock()
-_request_ttl = 30  # Keep requests in cache for 30 seconds
+_request_ttl = 5  # Keep requests in cache for 5 seconds to block immediate double-clicks
 
 
 def _clean_old_requests():
@@ -35,9 +35,26 @@ def _clean_old_requests():
             del _recent_requests[k]
 
 
-def _is_duplicate_request(request_data: dict) -> bool:
-    """Check if this is a duplicate request (same company within TTL)."""
+def _remove_request(request_hash: str):
+    """Explicitly remove a request from the deduplication cache."""
+    with _request_lock:
+        if request_hash in _recent_requests:
+            del _recent_requests[request_hash]
+
+
+def _get_request_hash(request_data: dict) -> str:
+    """Generate a hash for the request data."""
+    company = request_data.get("company", {})
+    name = company.get("name", "")
+    description = company.get("description", "")[:100]  # First 100 chars
+    return hashlib.md5(f"{name}:{description}".encode()).hexdigest()
+
+
+def _is_duplicate_request(request_data: dict) -> tuple[bool, str]:
+    """Check if this is a duplicate request (same company within TTL). Returns (is_duplicate, hash)."""
     _clean_old_requests()
+
+    request_hash = _get_request_hash(request_data)
 
     # Create a hash of the company name and description
     company = request_data.get("company", {})
@@ -48,9 +65,9 @@ def _is_duplicate_request(request_data: dict) -> bool:
 
     with _request_lock:
         if request_hash in _recent_requests:
-            return True
+            return True, request_hash
         _recent_requests[request_hash] = time.time()
-        return False
+        return False, request_hash
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -140,7 +157,8 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
         print(f"Parsed request for company: {request_data.company.name}")
 
         # Check for duplicate request
-        if _is_duplicate_request(data):
+        is_duplicate, request_hash = _is_duplicate_request(data)
+        if is_duplicate:
             print(
                 f"[DEDUP] Duplicate request detected for {request_data.company.name}, skipping..."
             )
@@ -174,6 +192,9 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
         "retriever_done": False,
         "analyzer_done": False,
     }
+
+    # Create abort event for cancellation
+    abort_event = threading.Event()
 
     def run_workflow_with_progress():
         """Run workflow and emit progress updates."""
@@ -330,7 +351,7 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
 
             try:
                 print("\n[API] Starting workflow execution...")
-                result = master_agent.run_workflow(company_input)
+                result = master_agent.run_workflow(company_input, abort_event=abort_event)
                 result_holder["result"] = result
                 print("\n[API] Workflow completed successfully")
                 # Send final progress update
@@ -363,205 +384,210 @@ async def search_calls_stream(request: Request) -> StreamingResponse:
         # Send initial progress
         yield f"event: progress\ndata: {json.dumps({'agent': 'Initializing', 'progress': 5, 'message': 'Starting workflow...', 'status': 'running'})}\n\n"
 
-        while workflow_thread.is_alive() or not progress_queue.empty():
-            try:
-                # Check if client disconnected
-                if await request.is_disconnected():
-                    print("[API] Client disconnected, stopping workflow")
-                    # Note: We can't actually kill the thread, but we can stop streaming
-                    break
+        try:
+            while workflow_thread.is_alive() or not progress_queue.empty():
+                try:
+                    # Check if client disconnected
+                    if await request.is_disconnected():
+                        print("[API] Client disconnected, stopping workflow")
+                        abort_event.set()
+                        break
 
-                # Check for progress updates (non-blocking)
-                while not progress_queue.empty():
-                    update = progress_queue.get_nowait()
+                    # Check for progress updates (non-blocking)
+                    while not progress_queue.empty():
+                        update = progress_queue.get_nowait()
 
-                    if update.get("type") == "error":
-                        yield f"event: error\ndata: {json.dumps({'error': update['data']})}\n\n"
-                        return
-                    else:
-                        yield f"event: progress\ndata: {json.dumps(update)}\n\n"
+                        if update.get("type") == "error":
+                            yield f"event: error\ndata: {json.dumps({'error': update['data']})}\n\n"
+                            return
+                        else:
+                            yield f"event: progress\ndata: {json.dumps(update)}\n\n"
 
-                # Small delay to prevent busy-waiting
-                await asyncio.sleep(0.1)
+                    # Small delay to prevent busy-waiting
+                    await asyncio.sleep(0.1)
 
-            except Exception as e:
-                print(f"[API] Stream error: {e}")
-                continue
+                except Exception as e:
+                    print(f"[API] Stream error: {e}")
+                    continue
 
-        # Workflow completed, send result
-        print(
-            f"[API] Workflow thread ended. Result exists: {result_holder['result'] is not None}, Error exists: {result_holder['error'] is not None}"
-        )
+            # Workflow completed, send result
+            print(
+                f"[API] Workflow thread ended. Result exists: {result_holder['result'] is not None}, Error exists: {result_holder['error'] is not None}"
+            )
 
-        if result_holder["error"]:
-            yield f"event: error\ndata: {json.dumps({'error': result_holder['error']})}\n\n"
-        elif result_holder["result"]:
-            result = result_holder["result"]
-            final_report = result.get("final_report") or {}
-
-            # If final_report is still empty/missing, build from analyzed_calls
-            if not final_report:
-                analyzed_calls = result.get("analyzed_calls", [])
-                company_input = result.get("company_input", {})
-                company = (
-                    company_input.get("company", {})
-                    if isinstance(company_input, dict)
-                    else {}
-                )
-
-                # Build funding cards first
-                funding_cards = [
-                    {
-                        "id": call.get("id", str(i)),
-                        "title": call.get("title", "Untitled"),
-                        "programme": call.get("programme", ""),
-                        "description": call.get("raw_data", {}).get("description", "")[
-                            :300
-                        ]
-                        if call.get("raw_data")
-                        else "",
-                        "short_summary": call.get("match_summary", ""),
-                        "match_percentage": int(call.get("relevance_score", 0) * 10),
-                        "relevance_score": call.get("relevance_score", 0),
-                        "eligibility_passed": call.get("eligibility_passed", False),
-                        "budget": call.get("budget", "N/A"),
-                        "deadline": call.get("deadline", "N/A"),
-                        "url": call.get("url", ""),
-                        "status": call.get("status", ""),
-                        "tags": call.get("keyword_hits", []),
-                        "why_recommended": call.get("match_summary", ""),
-                        "key_benefits": [],
-                        "action_items": [],
-                        "success_probability": "medium",
-                        "domain_matches": call.get("domain_matches", []),
-                        "suggested_partners": call.get("suggested_partners", []),
+            if result_holder["error"]:
+                yield f"event: error\ndata: {json.dumps({'error': result_holder['error']})}\n\n"
+            elif result_holder["result"]:
+                result = result_holder["result"]
+                final_report = result.get("final_report") or {}
+    
+                # If final_report is still empty/missing, build from analyzed_calls
+                if not final_report:
+                    analyzed_calls = result.get("analyzed_calls", [])
+                    company_input = result.get("company_input", {})
+                    company = (
+                        company_input.get("company", {})
+                        if isinstance(company_input, dict)
+                        else {}
+                    )
+    
+                    # Build funding cards first
+                    funding_cards = [
+                        {
+                            "id": call.get("id", str(i)),
+                            "title": call.get("title", "Untitled"),
+                            "programme": call.get("programme", ""),
+                            "description": call.get("raw_data", {}).get("description", "")[
+                                :300
+                            ]
+                            if call.get("raw_data")
+                            else "",
+                            "short_summary": call.get("match_summary", ""),
+                            "match_percentage": int(call.get("relevance_score", 0) * 10),
+                            "relevance_score": call.get("relevance_score", 0),
+                            "eligibility_passed": call.get("eligibility_passed", False),
+                            "budget": call.get("budget", "N/A"),
+                            "deadline": call.get("deadline", "N/A"),
+                            "url": call.get("url", ""),
+                            "status": call.get("status", ""),
+                            "tags": call.get("keyword_hits", []),
+                            "why_recommended": call.get("match_summary", ""),
+                            "key_benefits": [],
+                            "action_items": [],
+                            "success_probability": "medium",
+                            "domain_matches": call.get("domain_matches", []),
+                            "suggested_partners": call.get("suggested_partners", []),
+                        }
+                        for i, call in enumerate(analyzed_calls)
+                        if int(call.get("relevance_score", 0) * 10) >= 60
+                    ]
+    
+                    # Calculate priority counts based on match percentages
+                    # High: 80+, Medium: 70-79, Low: 60-69
+                    high_priority = len(
+                        [c for c in funding_cards if c["match_percentage"] >= 80]
+                    )
+                    medium_priority = len(
+                        [c for c in funding_cards if 70 <= c["match_percentage"] < 80]
+                    )
+                    low_priority = len(
+                        [c for c in funding_cards if 60 <= c["match_percentage"] < 70]
+                    )
+                    total_matching = high_priority + medium_priority + low_priority
+    
+                    final_report = {
+                        "company_profile": {
+                            "name": company.get("name", "Unknown"),
+                            "type": company.get("type", ""),
+                            "country": company.get("country", ""),
+                            "employees": company.get("employees", 0),
+                            "description": company.get("description", ""),
+                            "domains": company.get("domains", []),
+                        },
+                        "company_summary": {
+                            "profile_overview": f"Company profile analysis",
+                            "key_strengths": [],
+                            "recommended_focus_areas": [],
+                        },
+                        "overall_assessment": {
+                            "total_opportunities": total_matching,
+                            "high_priority_count": high_priority,
+                            "medium_priority_count": medium_priority,
+                            "low_priority_count": low_priority,
+                            "summary_text": f"Found {total_matching} funding opportunities matching the company profile (60%+ match). {high_priority} high-priority opportunities identified.",
+                            "strategic_advice": "Focus on high-priority opportunities (80%+ match) first, then medium (70-79%). Low priority (60-69%) may require additional consortium partners.",
+                        },
+                        "funding_cards": funding_cards,
+                        "top_recommendations": [],
+                        "total_calls": len(analyzed_calls),
+                        "report_type": "fallback_direct",
+                        "generated_at": datetime.now().isoformat(),
                     }
-                    for i, call in enumerate(analyzed_calls)
-                    if int(call.get("relevance_score", 0) * 10) >= 60
-                ]
-
-                # Calculate priority counts based on match percentages
-                # High: 80+, Medium: 70-79, Low: 60-69
-                high_priority = len(
-                    [c for c in funding_cards if c["match_percentage"] >= 80]
+    
+                # Debug: Check funding cards before sending
+                funding_cards = final_report.get("funding_cards", [])
+                if funding_cards:
+                    first_card = funding_cards[0]
+                    print(
+                        f"[API] First card being sent: id={first_card.get('id')}, has_project_summary={bool(first_card.get('project_summary'))}"
+                    )
+                    if first_card.get("project_summary"):
+                        print(
+                            f"[API]   project_summary.overview length={len(str(first_card['project_summary'].get('overview', '')))}"
+                        )
+                    print(
+                        f"[API]   why_recommended length={len(str(first_card.get('why_recommended', '')))}"
+                    )
+                    print(
+                        f"[API]   key_benefits count={len(first_card.get('key_benefits', []))}"
+                    )
+    
+                # Return the complete report structure
+                final_result = {
+                    "company_profile": final_report.get("company_profile", {}),
+                    "company_summary": final_report.get("company_summary", {}),
+                    "overall_assessment": final_report.get("overall_assessment", {}),
+                    "funding_cards": funding_cards,
+                    "top_recommendations": final_report.get("top_recommendations", []),
+                    "total_calls": final_report.get("total_calls", 0),
+                    "report_type": final_report.get("report_type", "unknown"),
+                    "generated_at": final_report.get(
+                        "generated_at", datetime.now().isoformat()
+                    ),
+                }
+    
+                # Ensure all datetime objects are converted to strings
+                def convert_datetime(obj):
+                    if isinstance(obj, datetime):
+                        return obj.isoformat()
+                    elif isinstance(obj, dict):
+                        return {k: convert_datetime(v) for k, v in obj.items()}
+                    elif isinstance(obj, list):
+                        return [convert_datetime(item) for item in obj]
+                    return obj
+    
+                final_result = convert_datetime(final_result)
+    
+                print(
+                    f"[API] Sending complete event with {len(funding_cards)} funding cards"
                 )
-                medium_priority = len(
-                    [c for c in funding_cards if 70 <= c["match_percentage"] < 80]
-                )
-                low_priority = len(
-                    [c for c in funding_cards if 60 <= c["match_percentage"] < 70]
-                )
-                total_matching = high_priority + medium_priority + low_priority
-
-                final_report = {
+                yield f"event: complete\ndata: {json.dumps(final_result, cls=DateTimeEncoder)}\n\n"
+            else:
+                # Neither result nor error - this shouldn't happen, but handle it gracefully
+                print("[API] WARNING: Workflow completed but no result or error was set!")
+                error_result = {
                     "company_profile": {
-                        "name": company.get("name", "Unknown"),
-                        "type": company.get("type", ""),
-                        "country": company.get("country", ""),
-                        "employees": company.get("employees", 0),
-                        "description": company.get("description", ""),
-                        "domains": company.get("domains", []),
+                        "name": "Unknown",
+                        "type": "",
+                        "country": "",
+                        "employees": 0,
+                        "description": "",
+                        "domains": [],
                     },
                     "company_summary": {
-                        "profile_overview": f"Company profile analysis",
+                        "profile_overview": "Error occurred",
                         "key_strengths": [],
                         "recommended_focus_areas": [],
                     },
                     "overall_assessment": {
-                        "total_opportunities": total_matching,
-                        "high_priority_count": high_priority,
-                        "medium_priority_count": medium_priority,
-                        "low_priority_count": low_priority,
-                        "summary_text": f"Found {total_matching} funding opportunities matching the company profile (60%+ match). {high_priority} high-priority opportunities identified.",
-                        "strategic_advice": "Focus on high-priority opportunities (80%+ match) first, then medium (70-79%). Low priority (60-69%) may require additional consortium partners.",
+                        "total_opportunities": 0,
+                        "high_priority_count": 0,
+                        "medium_priority_count": 0,
+                        "low_priority_count": 0,
+                        "summary_text": "An error occurred while processing your request.",
+                        "strategic_advice": "Please try again.",
                     },
-                    "funding_cards": funding_cards,
+                    "funding_cards": [],
                     "top_recommendations": [],
-                    "total_calls": len(analyzed_calls),
-                    "report_type": "fallback_direct",
+                    "total_calls": 0,
+                    "report_type": "error",
                     "generated_at": datetime.now().isoformat(),
                 }
-
-            # Debug: Check funding cards before sending
-            funding_cards = final_report.get("funding_cards", [])
-            if funding_cards:
-                first_card = funding_cards[0]
-                print(
-                    f"[API] First card being sent: id={first_card.get('id')}, has_project_summary={bool(first_card.get('project_summary'))}"
-                )
-                if first_card.get("project_summary"):
-                    print(
-                        f"[API]   project_summary.overview length={len(str(first_card['project_summary'].get('overview', '')))}"
-                    )
-                print(
-                    f"[API]   why_recommended length={len(str(first_card.get('why_recommended', '')))}"
-                )
-                print(
-                    f"[API]   key_benefits count={len(first_card.get('key_benefits', []))}"
-                )
-
-            # Return the complete report structure
-            final_result = {
-                "company_profile": final_report.get("company_profile", {}),
-                "company_summary": final_report.get("company_summary", {}),
-                "overall_assessment": final_report.get("overall_assessment", {}),
-                "funding_cards": funding_cards,
-                "top_recommendations": final_report.get("top_recommendations", []),
-                "total_calls": final_report.get("total_calls", 0),
-                "report_type": final_report.get("report_type", "unknown"),
-                "generated_at": final_report.get(
-                    "generated_at", datetime.now().isoformat()
-                ),
-            }
-
-            # Ensure all datetime objects are converted to strings
-            def convert_datetime(obj):
-                if isinstance(obj, datetime):
-                    return obj.isoformat()
-                elif isinstance(obj, dict):
-                    return {k: convert_datetime(v) for k, v in obj.items()}
-                elif isinstance(obj, list):
-                    return [convert_datetime(item) for item in obj]
-                return obj
-
-            final_result = convert_datetime(final_result)
-
-            print(
-                f"[API] Sending complete event with {len(funding_cards)} funding cards"
-            )
-            yield f"event: complete\ndata: {json.dumps(final_result, cls=DateTimeEncoder)}\n\n"
-        else:
-            # Neither result nor error - this shouldn't happen, but handle it gracefully
-            print("[API] WARNING: Workflow completed but no result or error was set!")
-            error_result = {
-                "company_profile": {
-                    "name": "Unknown",
-                    "type": "",
-                    "country": "",
-                    "employees": 0,
-                    "description": "",
-                    "domains": [],
-                },
-                "company_summary": {
-                    "profile_overview": "Error occurred",
-                    "key_strengths": [],
-                    "recommended_focus_areas": [],
-                },
-                "overall_assessment": {
-                    "total_opportunities": 0,
-                    "high_priority_count": 0,
-                    "medium_priority_count": 0,
-                    "low_priority_count": 0,
-                    "summary_text": "An error occurred while processing your request.",
-                    "strategic_advice": "Please try again.",
-                },
-                "funding_cards": [],
-                "top_recommendations": [],
-                "total_calls": 0,
-                "report_type": "error",
-                "generated_at": datetime.now().isoformat(),
-            }
-            yield f"event: complete\ndata: {json.dumps(error_result, cls=DateTimeEncoder)}\n\n"
+                yield f"event: complete\ndata: {json.dumps(error_result, cls=DateTimeEncoder)}\n\n"
+        finally:
+            # Ensure cleanup happens even if client disconnects abruptly (CancelledError)
+            abort_event.set()
+            _remove_request(request_hash)
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 

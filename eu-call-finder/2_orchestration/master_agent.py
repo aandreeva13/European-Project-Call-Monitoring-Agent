@@ -120,11 +120,8 @@ generate_comprehensive_report = _reporter_module.generate_comprehensive_report
 # ==================== NODE IMPLEMENTATIONS ====================
 
 
-def safety_check_node(state: WorkflowState) -> WorkflowState:
-    """
-    Node 1: Safety Check & Input Validation
-    Validates user input for security threats and structural correctness.
-    """
+def safety_check_node(state: WorkflowState, **kwargs) -> Dict[str, Any]:
+    """Validate company input and check for safety or eligibility issues."""
     print("\n" + "=" * 70)
     print("STEP 1: SAFETY CHECK & VALIDATION")
     print("=" * 70)
@@ -281,15 +278,22 @@ def safety_check_node(state: WorkflowState) -> WorkflowState:
         }
 
 
-def planner_node(state: WorkflowState) -> WorkflowState:
-    """
-    Node 2: Planner
-    Creates execution plan from company profile.
-    Can be called multiple times (loop with analysis).
-    """
+def planner_node(state: WorkflowState, **kwargs) -> Dict[str, Any]:
+    """Analyze company profile and generate search query."""
+
     print("\n" + "=" * 70)
     print(f"STEP 2: PLANNING (Iteration {state.get('planner_iterations', 0) + 1})")
     print("=" * 70)
+
+    # Extract abort_event from LangGraph config if present
+    config = kwargs.get("config", {})
+    configurable = config.get("configurable", {})
+    abort_event = configurable.get("abort_event")
+
+    # Fast abort check
+    if abort_event and abort_event.is_set():
+        print("[PLANNER] Aborted by client before planning starts")
+        return {"workflow_status": "failed", "error_message": "Aborted by client"}
 
     company_input = state.get("company_input")
     plan_feedback = state.get("plan_feedback")
@@ -387,11 +391,8 @@ def planner_node(state: WorkflowState) -> WorkflowState:
         }
 
 
-def retrieval_node(state: WorkflowState) -> WorkflowState:
-    """
-    Node 3: Retrieval / Web Scraping
-    Executes the scraper with the planned search terms.
-    """
+def retrieval_node(state: WorkflowState, **kwargs) -> Dict[str, Any]:
+    """Identify query parameters and scrape the portals."""
     print("\n" + "=" * 70)
     print("STEP 3: RETRIEVAL / WEB SCRAPING")
     print("=" * 70)
@@ -438,18 +439,18 @@ def retrieval_node(state: WorkflowState) -> WorkflowState:
         }
 
 
-def analysis_node(state: WorkflowState) -> WorkflowState:
-    """
-    Node 4: Analysis
-    Analyzes scraped topics using real analysis modules:
-    - Scorer: Calculates weighted relevance scores
-    - Eligibility: Checks hard constraints (country, type, budget, etc.)
-    - LLM Critic: Provides qualitative analysis
-    - Reflection: Decides whether to loop back or continue
-    """
+def analysis_node(state: WorkflowState, **kwargs) -> Dict[str, Any]:
+    """Analyze and score the retrieved calls against company profile."""
+
     print("\n" + "=" * 70)
     print("STEP 4: ANALYSIS")
     print("=" * 70)
+
+    # Extract abort_event from LangGraph config if present
+    # kwargs["config"]["configurable"]["abort_event"]
+    config = kwargs.get("config", {})
+    configurable = config.get("configurable", {})
+    abort_event = configurable.get("abort_event")
 
     scraped_topics = state.get("scraped_topics", [])
     company_input = state.get("company_input", {})
@@ -490,6 +491,10 @@ def analysis_node(state: WorkflowState) -> WorkflowState:
     print(f"\n[SEARCH] Running detailed analysis on {len(scraped_topics)} calls...")
 
     for i, topic in enumerate(scraped_topics, 1):
+        if abort_event and abort_event.is_set():
+            print("\n[ANALYSIS] Aborted by client")
+            break
+
         print(
             f"\n  [{i}/{len(scraped_topics)}] Analyzing: {topic.get('title', 'N/A')[:50]}..."
         )
@@ -645,11 +650,8 @@ def analysis_node(state: WorkflowState) -> WorkflowState:
         }
 
 
-def reporter_node(state: WorkflowState) -> WorkflowState:
-    """
-    Node 5: Reporter
-    Generates comprehensive LLM-powered report with card-based structure.
-    """
+def reporter_node(state: WorkflowState, **kwargs) -> Dict[str, Any]:
+    """Generate final report for the approved calls."""
     print("\n" + "=" * 70)
     print("STEP 5: REPORTING")
     print("=" * 70)
@@ -899,7 +901,7 @@ def compile_workflow(checkpointer=None):
 
 
 def run_workflow(
-    company_input: Dict[str, Any], thread_id: str = None
+    company_input: Dict[str, Any], thread_id: str = None, abort_event: Any = None
 ) -> Dict[str, Any]:
     """
     Run the complete workflow for a company.
@@ -907,6 +909,7 @@ def run_workflow(
     Args:
         company_input: Company profile data
         thread_id: Optional thread ID for persistence
+        abort_event: Optional threading.Event to cancel execution
 
     Returns:
         Final workflow state with results
@@ -918,7 +921,12 @@ def run_workflow(
     app = compile_workflow()
 
     # Configure thread
-    config = {"configurable": {"thread_id": thread_id or "default"}}
+    config = {
+        "configurable": {
+            "thread_id": thread_id or "default",
+            "abort_event": abort_event
+        }
+    }
 
     # Run workflow
     print("\n" + "=" * 70)
@@ -926,6 +934,13 @@ def run_workflow(
     print("=" * 70)
 
     for event in app.stream(initial_state, config):
+        if abort_event and abort_event.is_set():
+            print("\n[API] Workflow aborted by client")
+            return {
+                "workflow_status": "failed",
+                "error_message": "Workflow aborted by client",
+                "current_step": "failed"
+            }
         # Events are streamed as nodes complete
         pass
 
@@ -941,7 +956,11 @@ def run_workflow(
     if final_state.values.get("error_message"):
         print(f"Error: {final_state.values['error_message']}")
 
-    return final_state.values
+    # Remove non-serializable objects before returning
+    result_values = dict(final_state.values)
+    result_values.pop("abort_event", None)
+
+    return result_values
 
 
 def get_workflow_graph():

@@ -46,7 +46,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   const [sharedProjectId, setSharedProjectId] = useState<string | null>(null);
   const [copiedProjectId, setCopiedProjectId] = useState<string | null>(null);
   const hasStartedSearch = useRef(false);
-  
+
   // Store onResultComplete in ref to avoid triggering useEffect when it changes
   const onResultCompleteRef = useRef(onResultComplete);
   onResultCompleteRef.current = onResultComplete;
@@ -145,14 +145,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
       return () => window.removeEventListener('hashchange', readSharedProjectIdFromHash);
     }
 
-    // Prevent duplicate searches (React StrictMode double-mount)
-    if (hasStartedSearch.current) {
-      console.log('Search already started, skipping duplicate');
-      return () => window.removeEventListener('hashchange', readSharedProjectIdFromHash);
-    }
 
-    // Set the flag immediately to prevent any race conditions
-    hasStartedSearch.current = true;
 
     // If we have cached results, use them directly without searching
     // Check for valid SearchResult structure (must have company_profile)
@@ -195,7 +188,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
       (searchResult) => {
         console.log('Search complete:', searchResult);
         const typedResult = searchResult as unknown as SearchResult;
-        
+
         // Debug: Log first funding card details
         if (typedResult.funding_cards && typedResult.funding_cards.length > 0) {
           const firstCard = typedResult.funding_cards[0];
@@ -209,7 +202,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
             actionItemsCount: firstCard.action_items?.length,
           });
         }
-        
+
         setResult(typedResult);
         setLoading(false);
         setCompletedAgents(AGENTS.map(a => a.name));
@@ -220,6 +213,11 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
       },
       (errorMsg) => {
         console.error('Search error:', errorMsg);
+        
+        // If this is the phantom secondary StrictMode request getting blocked, 
+        // ignore the error so we don't break the UI of the primary active request!
+        if (errorMsg.includes('Duplicate request')) return;
+
         setError(errorMsg);
         setLoading(false);
       }
@@ -227,8 +225,6 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
 
     return () => {
       cleanup();
-      // Reset the flag on unmount so future searches work
-      hasStartedSearch.current = false;
     };
   }, [company, cachedResult, showLikedOnly]);
 
@@ -292,10 +288,10 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
 
   const parseBudgetTable = (budgetText: string) => {
     if (!budgetText || budgetText === 'N/A') return null;
-    
+
     const lines = budgetText.split('\n').filter(line => line.trim());
-    const entries: Array<{topic: string, budget: string, stage: string, opening: string, deadline: string, contribution: string, grants: string}> = [];
-    
+    const entries: Array<{ topic: string, budget: string, stage: string, opening: string, deadline: string, contribution: string, grants: string }> = [];
+
     // Look for lines that start with HORIZON (topic IDs)
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -303,7 +299,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
         // Found a topic line, next lines contain the data
         const topicMatch = line.match(/(HORIZON-[\w-]+)/);
         const topic = topicMatch ? topicMatch[1] : line.substring(0, 60);
-        
+
         // Try to find budget info in this line or next lines
         let budget = 'N/A';
         let stage = 'N/A';
@@ -311,7 +307,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
         let deadline = 'N/A';
         let contribution = 'N/A';
         let grants = 'N/A';
-        
+
         // Look for numbers in this line
         const budgetMatch = line.match(/(\d[\d\s,]+\d|\d+)/);
         if (budgetMatch) {
@@ -325,27 +321,27 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
             budget = `€${num}`;
           }
         }
-        
-        entries.push({topic, budget, stage, opening, deadline, contribution, grants});
+
+        entries.push({ topic, budget, stage, opening, deadline, contribution, grants });
       }
     }
-    
+
     return entries.length > 0 ? entries : null;
   };
 
   const parseObjectivesFromText = (text: string): { summary: string; objectives: string[] } => {
     if (!text) return { summary: '', objectives: [] };
-    
+
     const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
     const summary = sentences.slice(0, 2).join(' ').trim();
     const remainingText = sentences.slice(2).join(' ');
     const objectives: string[] = [];
-    
+
     const objectivePatterns = [
       /(?:aims?|objectives?|goals?|focus(?:es)?|seeks?|will)\s+(?:to\s+)?([^.,;]+)/gi,
       /(?:develop|create|establish|implement|support|enhance|improve)\s+([^.,;]+)/gi,
     ];
-    
+
     objectivePatterns.forEach(pattern => {
       let match;
       while ((match = pattern.exec(remainingText)) !== null) {
@@ -355,12 +351,12 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
         }
       }
     });
-    
+
     if (objectives.length === 0 && remainingText.length > 20) {
       const chunks = remainingText.split(/[.!?]/).filter(s => s.trim().length > 15);
       objectives.push(...chunks.slice(0, 5).map(s => s.trim()));
     }
-    
+
     return { summary, objectives: objectives.slice(0, 5) };
   };
 
@@ -392,7 +388,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
 
   const highlightTechnologiesAndStrengths = (text: string): React.ReactElement => {
     if (!text) return <span>{text}</span>;
-    
+
     const techPatterns = [
       'artificial intelligence', 'AI', 'machine learning', 'ML', 'deep learning',
       'data analytics', 'big data', 'cloud computing', 'IoT', 'blockchain',
@@ -401,38 +397,38 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
       'software', 'hardware', 'automation', 'robotics', 'sensors',
       'algorithms', 'models', 'platforms', 'systems', 'infrastructure'
     ];
-    
+
     const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const pattern = new RegExp(`\\b(${techPatterns.map(escapeRegExp).join('|')})\\b`, 'gi');
-    
+
     const parts: Array<string | React.ReactElement> = [];
     let lastIndex = 0;
     let match;
-    
+
     // Reset regex
     pattern.lastIndex = 0;
-    
+
     while ((match = pattern.exec(text)) !== null) {
       // Add text before the match
       if (match.index > lastIndex) {
         parts.push(text.slice(lastIndex, match.index));
       }
-      
+
       // Add the matched word as bold
       parts.push(
         <strong key={match.index} className="text-slate-800 dark:text-slate-200 font-semibold">
           {match[0]}
         </strong>
       );
-      
+
       lastIndex = match.index + match[0].length;
     }
-    
+
     // Add remaining text
     if (lastIndex < text.length) {
       parts.push(text.slice(lastIndex));
     }
-    
+
     return <>{parts}</>;
   };
 
@@ -440,7 +436,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
     const currentAgentName = progress.agent || 'Initializing';
     const currentProgress = progress.progress || 5;
     const currentMessage = progress.message || 'Processing...';
-    
+
     const currentAgentConfig = AGENTS.find(a => a.name === currentAgentName) || {
       name: 'Initializing',
       icon: 'power_settings_new',
@@ -467,7 +463,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
 
         <div className="max-w-md mx-auto mb-4">
           <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-            <div 
+            <div
               className={`h-full ${currentAgentConfig.bgColor} transition-all duration-500 ease-out`}
               style={{ width: `${currentProgress}%` }}
             ></div>
@@ -479,19 +475,17 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
           {AGENTS.map((agent, index) => {
             const isCompleted = completedAgents.includes(agent.name);
             const isCurrent = currentAgentName === agent.name;
-            
+
             return (
               <React.Fragment key={agent.name}>
-                <div className={`flex flex-col items-center transition-all duration-300 ${
-                  isCurrent ? 'opacity-100 scale-110' : isCompleted ? 'opacity-100' : 'opacity-40'
-                }`}>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-1 ${
-                    isCompleted 
-                      ? 'bg-green-500 text-white' 
-                      : isCurrent 
-                        ? `${agent.bgColor} text-white ring-4 ring-offset-2 ring-offset-white dark:ring-offset-slate-900` 
-                        : 'bg-slate-200 dark:bg-slate-700 text-slate-400'
+                <div className={`flex flex-col items-center transition-all duration-300 ${isCurrent ? 'opacity-100 scale-110' : isCompleted ? 'opacity-100' : 'opacity-40'
                   }`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-1 ${isCompleted
+                    ? 'bg-green-500 text-white'
+                    : isCurrent
+                      ? `${agent.bgColor} text-white ring-4 ring-offset-2 ring-offset-white dark:ring-offset-slate-900`
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-400'
+                    }`}>
                     <span className="material-icons text-lg">
                       {isCompleted ? 'check' : agent.icon}
                     </span>
@@ -501,9 +495,8 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                   </span>
                 </div>
                 {index < AGENTS.length - 1 && (
-                  <div className={`w-6 h-0.5 transition-all duration-500 ${
-                    isCompleted ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
-                  }`}></div>
+                  <div className={`w-6 h-0.5 transition-all duration-500 ${isCompleted ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
+                    }`}></div>
                 )}
               </React.Fragment>
             );
@@ -540,7 +533,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
         </div>
         <h2 className="text-2xl font-bold mb-2">Something went wrong</h2>
         <p className="text-slate-500 mb-8">{error || 'No results found'}</p>
-        <button 
+        <button
           onClick={onReset}
           className="bg-primary text-white px-6 py-2 rounded-lg font-bold"
         >
@@ -551,7 +544,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   }
 
   const { company_profile, company_summary, overall_assessment, funding_cards, top_recommendations } = result || {};
-  
+
   // Ensure all required data exists with defaults
   const safeCompanyProfile = company_profile || { name: 'Unknown', type: '', country: '', city: '', employees: 0, description: '', domains: [] };
   const safeCompanySummary = company_summary || { profile_overview: '', key_strengths: [], recommended_focus_areas: [] };
@@ -561,7 +554,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   // Keeps the results page focused on relevant opportunities.
   const safeFundingCards = (funding_cards || []).filter(card => (card?.match_percentage ?? 0) >= 60);
   const safeTopRecommendations = (top_recommendations || []).filter(rec => (rec?.match_percentage ?? 0) >= 60);
-  
+
   // When showing liked only, display ALL liked projects from all searches
   const displayCards = showLikedOnly ? likedProjects : safeFundingCards;
 
@@ -569,7 +562,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   const shareFilteredCards = sharedProjectId
     ? displayCards.filter(c => c.id === sharedProjectId)
     : displayCards;
-  
+
   // Calculate counts based on ACTUAL displayed cards (not backend totals)
   const displayedTotal = shareFilteredCards.length;
   const displayedHigh = shareFilteredCards.filter(c => c.match_percentage >= 80).length;
@@ -598,92 +591,92 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
       <div className="grid grid-cols-1 gap-8">
         {/* Company Profile Card - Displayed First */}
         {!showLikedOnly && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 p-8">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-              <span className="material-icons text-primary text-3xl">business</span>
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 p-8">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                <span className="material-icons text-primary text-3xl">business</span>
+              </div>
+              <div>
+                <h3 className="font-bold text-xl text-slate-900 dark:text-white">{safeCompanyProfile.name}</h3>
+                <p className="text-base text-slate-500">{safeCompanyProfile.type} • {safeCompanyProfile.city}{safeCompanyProfile.city && safeCompanyProfile.country ? ', ' : ''}{safeCompanyProfile.country} • {safeCompanyProfile.employees} employees</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-xl text-slate-900 dark:text-white">{safeCompanyProfile.name}</h3>
-              <p className="text-base text-slate-500">{safeCompanyProfile.type} • {safeCompanyProfile.city}{safeCompanyProfile.city && safeCompanyProfile.country ? ', ' : ''}{safeCompanyProfile.country} • {safeCompanyProfile.employees} employees</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Left Column */}
+              <div className="space-y-6">
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-lg">
+                  <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <span className="material-icons text-primary text-base">info</span>
+                    Company Overview
+                  </h4>
+                  <p className="text-base text-slate-700 dark:text-slate-300 leading-relaxed">
+                    {safeCompanySummary.profile_overview || safeCompanyProfile.description}
+                  </p>
+                </div>
+
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-lg">
+                  <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <span className="material-icons text-primary text-base">stars</span>
+                    Key Strengths
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {safeCompanySummary.key_strengths?.length > 0 ? (
+                      safeCompanySummary.key_strengths.map((strength, i) => (
+                        <span key={i} className="px-3 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full">
+                          {strength}
+                        </span>
+                      ))
+                    ) : (
+                      safeCompanyProfile.domains?.map((domain, i) => (
+                        <span key={i} className="px-3 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full">
+                          {domain.name}
+                        </span>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-6">
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-lg">
+                  <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <span className="material-icons text-primary text-base">assessment</span>
+                    Results Summary
+                  </h4>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-green-700 dark:text-green-400">{displayedHigh}</div>
+                      <div className="text-xs text-green-700 dark:text-green-400 font-medium mt-1">High Priority<br />80%+</div>
+                    </div>
+                    <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">{displayedMedium}</div>
+                      <div className="text-xs text-blue-700 dark:text-blue-400 font-medium mt-1">Medium Priority<br />70-79%</div>
+                    </div>
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-center border border-yellow-200 dark:border-yellow-800">
+                      <div className="text-2xl font-bold text-yellow-700 dark:text-yellow-400">{displayedLow}</div>
+                      <div className="text-xs text-yellow-700 dark:text-yellow-400 font-medium mt-1">Low Priority<br />60-69%</div>
+                    </div>
+                  </div>
+                  <div className="mt-4 text-center">
+                    <span className="text-2xl font-bold text-slate-800 dark:text-slate-200">{displayedTotal}</span>
+                    <span className="text-slate-600 dark:text-slate-400 ml-2">Total Opportunities Found</span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-lg">
+                  <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <span className="material-icons text-primary text-base">lightbulb</span>
+                    Strategic Advice
+                  </h4>
+                  <p className="text-base text-slate-700 dark:text-slate-300 leading-relaxed italic">
+                    {safeOverallAssessment.strategic_advice}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Left Column */}
-            <div className="space-y-6">
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-lg">
-                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <span className="material-icons text-primary text-base">info</span>
-                  Company Overview
-                </h4>
-                <p className="text-base text-slate-700 dark:text-slate-300 leading-relaxed">
-                  {safeCompanySummary.profile_overview || safeCompanyProfile.description}
-                </p>
-              </div>
-
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-lg">
-                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <span className="material-icons text-primary text-base">stars</span>
-                  Key Strengths
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {safeCompanySummary.key_strengths?.length > 0 ? (
-                    safeCompanySummary.key_strengths.map((strength, i) => (
-                      <span key={i} className="px-3 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full">
-                        {strength}
-                      </span>
-                    ))
-                  ) : (
-                    safeCompanyProfile.domains?.map((domain, i) => (
-                      <span key={i} className="px-3 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full">
-                        {domain.name}
-                      </span>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column */}
-            <div className="space-y-6">
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-lg">
-                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <span className="material-icons text-primary text-base">assessment</span>
-                  Results Summary
-                </h4>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-green-700 dark:text-green-400">{displayedHigh}</div>
-                    <div className="text-xs text-green-700 dark:text-green-400 font-medium mt-1">High Priority<br/>80%+</div>
-                  </div>
-                  <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">{displayedMedium}</div>
-                    <div className="text-xs text-blue-700 dark:text-blue-400 font-medium mt-1">Medium Priority<br/>70-79%</div>
-                  </div>
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-center border border-yellow-200 dark:border-yellow-800">
-                    <div className="text-2xl font-bold text-yellow-700 dark:text-yellow-400">{displayedLow}</div>
-                    <div className="text-xs text-yellow-700 dark:text-yellow-400 font-medium mt-1">Low Priority<br/>60-69%</div>
-                  </div>
-                </div>
-                <div className="mt-4 text-center">
-                  <span className="text-2xl font-bold text-slate-800 dark:text-slate-200">{displayedTotal}</span>
-                  <span className="text-slate-600 dark:text-slate-400 ml-2">Total Opportunities Found</span>
-                </div>
-              </div>
-
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-lg">
-                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <span className="material-icons text-primary text-base">lightbulb</span>
-                  Strategic Advice
-                </h4>
-                <p className="text-base text-slate-700 dark:text-slate-300 leading-relaxed italic">
-                  {safeOverallAssessment.strategic_advice}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
         )}
 
         {/* Funding Cards */}
@@ -737,8 +730,8 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
               </div>
             )}
             {shareFilteredCards.map((card) => (
-              <div 
-                key={card.id} 
+              <div
+                key={card.id}
                 className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-xl transition-all cursor-pointer group"
                 onClick={() => setSelectedCard(card)}
               >
@@ -781,7 +774,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                       onClick={async (e) => {
                         e.stopPropagation();
 
-                        const shareUrl = `${window.location.origin}${window.location.pathname}#project=${encodeURIComponent(card.id)}`;
+                        const shareUrl = `${window.location.origin}${window.location.pathname}#shared/${encodeURIComponent(card.id)}`;
 
                         try {
                           // Always copy to clipboard and show an inline confirmation.
@@ -791,6 +784,9 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                             window.prompt('Copy this link:', shareUrl);
                           }
 
+                          // Open in a new tab immediately
+                          window.open(shareUrl, '_blank');
+
                           setCopiedProjectId(card.id);
                           window.setTimeout(() => {
                             setCopiedProjectId((prev) => (prev === card.id ? null : prev));
@@ -799,18 +795,16 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                           console.warn('[share] failed', err);
                         }
                       }}
-                      className={`p-1 transition-all hover:scale-110 ${
-                        copiedProjectId === card.id
+                      className={`p-1 transition-all hover:scale-110 ${copiedProjectId === card.id
                           ? 'text-emerald-600'
                           : 'text-slate-400 hover:text-primary'
-                      }`}
-                      title={copiedProjectId === card.id ? 'Link copied' : 'Copy share link'}
-                      aria-label={copiedProjectId === card.id ? 'Link copied' : 'Copy share link'}
+                        }`}
+                      title={copiedProjectId === card.id ? "Copied & Opened!" : "Share project in new tab"}
+                      aria-label={copiedProjectId === card.id ? "Copied & Opened!" : "Share project in new tab"}
                     >
                       <span className="material-icons text-[20px]">
-                        {copiedProjectId === card.id ? 'done' : 'content_copy'}
+                        {copiedProjectId === card.id ? "done" : "open_in_new"}
                       </span>
-
                     </button>
 
                     {/* PDF Export Button */}
@@ -839,7 +833,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                     >
                       <span className="material-icons text-[20px]">event_available</span>
                     </button>
-                     
+
                     {/* Star Button */}
                     {onToggleLikedProject && isProjectLiked && (
                       <button
@@ -847,11 +841,10 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                           e.stopPropagation();
                           onToggleLikedProject(card);
                         }}
-                        className={`p-1 transition-all hover:scale-110 ${
-                          isProjectLiked(card.id)
-                            ? 'text-yellow-500'
-                            : 'text-slate-400 hover:text-yellow-500'
-                        }`}
+                        className={`p-1 transition-all hover:scale-110 ${isProjectLiked(card.id)
+                          ? 'text-yellow-500'
+                          : 'text-slate-400 hover:text-yellow-500'
+                          }`}
                         title={isProjectLiked(card.id) ? 'Remove from liked projects' : 'Add to liked projects'}
                       >
                         <span className="material-icons text-[20px]">
@@ -940,7 +933,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                   </div>
 
                   {/* Action Button */}
-                  <button 
+                  <button
                     className="w-full py-2 bg-primary/10 text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2"
                   >
                     <span>View Full Details</span>
@@ -968,7 +961,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
 
           {/* Reset Button */}
           <div className="pt-6 flex justify-center">
-            <button 
+            <button
               onClick={onReset}
               className="text-slate-500 hover:text-primary font-semibold flex items-center gap-2 transition-colors"
             >
@@ -1002,7 +995,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                     <p className="text-slate-500 mt-2 text-sm">{selectedCard.programme}</p>
                   )}
                 </div>
-                <button 
+                <button
                   onClick={() => setSelectedCard(null)}
                   className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
                 >
@@ -1051,20 +1044,20 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
               {(() => {
                 const aboutText = selectedCard.project_summary?.overview || selectedCard.content?.description || selectedCard.description || selectedCard.short_summary || '';
                 const { summary, objectives } = parseObjectivesFromText(aboutText);
-                
+
                 return (
                   <div className="mb-8">
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                       <span className="material-icons text-primary">description</span>
                       About This Opportunity
                     </h3>
-                    
+
                     {summary ? (
                       <div className="space-y-4">
                         <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-base">
                           {summary}
                         </p>
-                        
+
                         {objectives.length > 0 && (
                           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                             <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wider">Key Objectives</h4>
@@ -1219,7 +1212,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
               {/* Action Buttons */}
               <div className="flex gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
                 {selectedCard.url && (
-                  <a 
+                  <a
                     href={selectedCard.url}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -1229,7 +1222,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                     <span className="material-icons text-sm">open_in_new</span>
                   </a>
                 )}
-                <button 
+                <button
                   onClick={() => setSelectedCard(null)}
                   className="px-8 py-3 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
                 >
