@@ -1,6 +1,20 @@
 # Shift Log / Handover Notes
 
 Project: **European-Project-Call-Monitoring-Agent** (EU Call Finder)  
+Date: **2026-02-26**
+
+---
+
+## Agent / Andi
+
+### ✅ Changes / Findings (2026-02-26)
+- **UI Hang on Initializing fixed:** Removed `React.StrictMode` from `index.tsx`. The strict-mode dual-mount cycle was causing the backend to abort the first long-running request before it even started, while the second request was incorrectly debounced. This left the user permanently stuck in an "Initializing" state while the backend was dead.
+- **Backend Hang on Duplicate Request fixed:** `apiService.tsx` was intercepting standard network errors incorrectly and setting `loading=false`. Updated error-catching to explicitly ignore duplicate request blocks coming from the new 5-second `_request_ttl` cache lock in `routes.py`, allowing the UI progress to continue natively.
+- **Selenium Hang fixed:** Chrome WebDriver in `scraper_manager.py` was hard-crashing silently when doing large queries because it ran out of memory, causing `ConnectionResetError`. Attached memory-safe execution options (`--no-sandbox`, `--disable-dev-shm-usage`, `--disable-gpu`) and added try-except block to return whatever data it could salvage instead of crashing the pipeline.
+- **Shared Project View enhanced:** Reworked `SharedProjectView.tsx` to stop displaying only the minimum portal data. The view now natively extracts the complex `SearchResult` object from localStorage and comprehensively presents the AI-generated `project.project_summary` (including overview, company fit assessment, potential challenges, and key strengths) instead of just the basic description.
+
+---
+
 Date: **2026-02-19**
 
 ---

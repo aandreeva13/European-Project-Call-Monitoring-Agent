@@ -553,7 +553,19 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
   // UI filtering: do not show suggestions below 60% profile match.
   // Keeps the results page focused on relevant opportunities.
   const safeFundingCards = (funding_cards || []).filter(card => (card?.match_percentage ?? 0) >= 60);
-  const safeTopRecommendations = (top_recommendations || []).filter(rec => (rec?.match_percentage ?? 0) >= 60);
+
+  // Dynamically generate top recommendations from the actual funding cards to ensure the percentages 
+  // perfectly match the highest available cards in the list, especially for cached historical results.
+  const safeTopRecommendations = [...safeFundingCards]
+    .sort((a, b) => (b.match_percentage || 0) - (a.match_percentage || 0))
+    .slice(0, 3)
+    .map((card, index) => ({
+      call_id: card.id,
+      priority_rank: index + 1,
+      match_percentage: card.match_percentage,
+      why_recommended: card.why_recommended || card.short_summary || '',
+      success_probability: card.success_probability || 'medium'
+    }));
 
   // When showing liked only, display ALL liked projects from all searches
   const displayCards = showLikedOnly ? likedProjects : safeFundingCards;
@@ -693,7 +705,7 @@ const Step3Results: React.FC<Step3Props> = ({ company, onReset, cachedResult, on
                   <div key={i} className="bg-white dark:bg-slate-800 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-3">
                       <span className={`w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors ${getRankColor(rec.match_percentage)}`}>
-                        {rec.priority_rank}
+                        {i + 1}
                       </span>
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getProbabilityColor(rec.success_probability)}`}>
                         {rec.success_probability} success
