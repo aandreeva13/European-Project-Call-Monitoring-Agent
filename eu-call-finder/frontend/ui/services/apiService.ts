@@ -8,7 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 const fetchWithTimeout = async (
   input: RequestInfo | URL,
   init?: RequestInit,
-  timeoutMs = 120_000
+  timeoutMs = 600_000 // 10 minutes (Workflows can take >2 mins)
 ) => {
   // If the caller already supplied an AbortSignal (e.g. the SSE stream cleanup controller),
   // do NOT add our own timeout abort controller. Otherwise we'd override the caller signal
