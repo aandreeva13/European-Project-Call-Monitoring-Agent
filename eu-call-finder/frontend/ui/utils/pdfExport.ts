@@ -2,37 +2,62 @@ import jsPDF from 'jspdf';
 import { FundingCard } from '../types';
 
 export const exportProjectToPDF = (card: FundingCard, companyName: string = 'Your Company') => {
-  const doc = new jsPDF();
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const pageWidth = doc.internal.pageSize.width;
-  const margin = 20;
+  const pageHeight = doc.internal.pageSize.height;
+  const margin = 18;
   const contentWidth = pageWidth - (margin * 2);
-  
+
   let yPos = 20;
-  
-  // Helper function to add section header
-  const addSectionHeader = (title: string) => {
-    yPos += 8;
-    doc.setFillColor(139, 184, 232); // Primary blue
-    doc.rect(margin, yPos - 5, contentWidth, 8, 'F');
-    doc.setFontSize(12);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.text(title, margin + 3, yPos);
-    yPos += 10;
+
+  const BRAND = {
+    primary: [37, 99, 235] as const, // blue-600
+    primaryDark: [30, 64, 175] as const, // blue-800
+    ink: [31, 41, 55] as const, // gray-800
+    muted: [107, 114, 128] as const, // gray-500
+    border: [226, 232, 240] as const, // slate-200
+    surface: [248, 250, 252] as const, // slate-50
+    danger: [220, 38, 38] as const, // red-600
+    success: [34, 197, 94] as const, // green-500
+    warn: [234, 179, 8] as const // amber-500
   };
-  
-  // Typography constants for a more "real PDF" look (consistent leading, margins)
+
+  // Typography constants
   const BASE_FONT = 10;
   const BASE_LEADING = 1.35; // line-height multiplier
 
   // Helper: ensure there's enough vertical space, otherwise start a new page.
-  const ensureSpace = (neededHeight: number, bottomMargin: number = 20) => {
-    const pageHeight = doc.internal.pageSize.height;
+  const ensureSpace = (neededHeight: number, bottomMargin: number = 18) => {
     if (yPos + neededHeight > pageHeight - bottomMargin) {
       doc.addPage();
       yPos = 20;
     }
   };
+
+  // Helper: visual divider
+  const addDivider = (gapTop: number = 4, gapBottom: number = 6) => {
+    yPos += gapTop;
+    doc.setDrawColor(...BRAND.border);
+    doc.setLineWidth(0.3);
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    yPos += gapBottom;
+  };
+
+  // Helper: section header (cleaner, modern)
+  const addSectionHeader = (title: string) => {
+    ensureSpace(14);
+    yPos += 6;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(...BRAND.primaryDark);
+    doc.text(title, margin, yPos);
+    yPos += 2;
+    doc.setDrawColor(...BRAND.primary);
+    doc.setLineWidth(0.8);
+    doc.line(margin, yPos, margin + Math.min(60, doc.getTextWidth(title) + 8), yPos);
+    yPos += 6;
+  };
+  
 
   // Helper function to add wrapped text with consistent leading and optional justification.
   // NOTE: jsPDF justification is approximate; we use it only for body paragraphs.
@@ -124,20 +149,30 @@ export const exportProjectToPDF = (card: FundingCard, companyName: string = 'You
   doc.roundedRect(margin, yPos, contentWidth, 35, 3, 3, 'S');
   
   // Match Score
-  doc.setFillColor(card.match_percentage >= 80 ? 34 : card.match_percentage >= 70 ? 59 : 234, 
-                   card.match_percentage >= 80 ? 197 : card.match_percentage >= 70 ? 130 : 179, 
-                   card.match_percentage >= 80 ? 94 : card.match_percentage >= 70 ? 246 : 8);
-  doc.roundedRect(margin + 5, yPos + 5, 50, 12, 2, 2, 'F');
+  doc.setFillColor(
+    card.match_percentage >= 80 ? 34 : card.match_percentage >= 70 ? 59 : 234,
+    card.match_percentage >= 80 ? 197 : card.match_percentage >= 70 ? 130 : 179,
+    card.match_percentage >= 80 ? 94 : card.match_percentage >= 70 ? 246 : 8
+  );
+  const matchX = margin + 5;
+  const matchY = yPos + 5;
+  const matchW = 50;
+  const matchH = 12;
+  doc.roundedRect(matchX, matchY, matchW, matchH, 2, 2, 'F');
   doc.setFontSize(11);
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.text(`${card.match_percentage}% Match`, margin + 8, yPos + 13);
-  
+  doc.text(`${card.match_percentage}% Match`, matchX + matchW / 2, matchY + matchH / 2 + 1.1, { align: 'center' });
+
   // Eligibility Badge
   if (card.eligibility_passed) {
+    const eligX = margin + 60;
+    const eligY = yPos + 5;
+    const eligW = 40;
+    const eligH = 12;
     doc.setFillColor(34, 197, 94);
-    doc.roundedRect(margin + 60, yPos + 5, 40, 12, 2, 2, 'F');
-    doc.text('ELIGIBLE', margin + 65, yPos + 13);
+    doc.roundedRect(eligX, eligY, eligW, eligH, 2, 2, 'F');
+    doc.text('ELIGIBLE', eligX + eligW / 2, eligY + eligH / 2 + 1.1, { align: 'center' });
   }
   
   // Budget & Deadline row
@@ -185,21 +220,7 @@ export const exportProjectToPDF = (card: FundingCard, companyName: string = 'You
     yPos += 3;
   }
   
-  // Tags
-  if (card.tags && card.tags.length > 0) {
-    yPos += 3;
-    doc.setFontSize(9);
-    doc.setTextColor(139, 184, 232);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Tags: ', margin, yPos);
-    doc.setTextColor(100, 100, 100);
-    doc.setFont('helvetica', 'normal');
-    const tagsText = card.tags.slice(0, 10).join(' • ');
-    const tagLines = doc.splitTextToSize(tagsText, contentWidth - 15);
-    doc.text(tagLines, margin + 12, yPos);
-    yPos += (tagLines.length * 4);
-  }
-  
+
   // Check for new page
   ensureSpace(40);
   
@@ -233,13 +254,13 @@ export const exportProjectToPDF = (card: FundingCard, companyName: string = 'You
     }
     
     if (card.project_summary.key_alignment_points && card.project_summary.key_alignment_points.length > 0) {
-      yPos += 5;
-      ensureSpace(18);
-      doc.setFontSize(10);
+      yPos += 3;
+      ensureSpace(14);
+      doc.setFontSize(10); // keep font size
       doc.setTextColor(34, 197, 94);
       doc.setFont('helvetica', 'bold');
       doc.text('✓ Key Alignment Points:', margin, yPos, { maxWidth: contentWidth });
-      yPos += 5;
+      yPos += 4; // less spacing after header
       doc.setTextColor(50, 50, 50);
       doc.setFont('helvetica', 'normal');
 
@@ -254,22 +275,22 @@ export const exportProjectToPDF = (card: FundingCard, companyName: string = 'You
         const lines = doc.splitTextToSize(p, bulletMaxWidth - bulletGap);
         ensureSpace(lines.length * bulletLineHeight + 2);
 
-        // bullet
         doc.text('•', margin + 5, yPos);
-        // wrapped text
         doc.text(lines, margin + 5 + bulletIndent, yPos, { maxWidth: bulletMaxWidth - bulletGap });
-        yPos += lines.length * bulletLineHeight + 1;
+        yPos += lines.length * bulletLineHeight; // remove extra +1
       });
+
+      yPos += 2; // normal separation to next block
     }
-    
+
     if (card.project_summary.potential_challenges && card.project_summary.potential_challenges.length > 0) {
-      yPos += 3;
-      ensureSpace(18);
-      doc.setFontSize(10);
+      yPos += 2;
+      ensureSpace(14);
+      doc.setFontSize(10); // keep font size
       doc.setTextColor(234, 179, 8);
       doc.setFont('helvetica', 'bold');
       doc.text('⚠ Potential Challenges:', margin, yPos, { maxWidth: contentWidth });
-      yPos += 5;
+      yPos += 4; // less spacing after header
       doc.setTextColor(50, 50, 50);
       doc.setFont('helvetica', 'normal');
 
@@ -286,8 +307,10 @@ export const exportProjectToPDF = (card: FundingCard, companyName: string = 'You
 
         doc.text('•', margin + 5, yPos);
         doc.text(lines, margin + 5 + bulletIndent, yPos, { maxWidth: bulletMaxWidth - bulletGap });
-        yPos += lines.length * bulletLineHeight + 1;
+        yPos += lines.length * bulletLineHeight; // remove extra +1
       });
+
+      yPos += 2;
     }
     
     if (card.project_summary.recommendation) {
@@ -416,15 +439,32 @@ export const exportProjectToPDF = (card: FundingCard, companyName: string = 'You
   // Success Probability
   if (card.success_probability) {
     yPos += 5;
-    const probColor = card.success_probability === 'high' ? [34, 197, 94] : 
-                     card.success_probability === 'medium' ? [59, 130, 246] : [234, 179, 8];
+
+    const probColor = card.success_probability === 'high'
+      ? [34, 197, 94]
+      : card.success_probability === 'medium'
+        ? [59, 130, 246]
+        : [234, 179, 8];
+
+    // Smaller badge + centered text
+    const badgeW = 70;
+    const badgeH = 14;
+    const badgeX = margin;
+    const badgeY = yPos;
+
     doc.setFillColor(probColor[0], probColor[1], probColor[2]);
-    doc.roundedRect(margin, yPos, 80, 20, 3, 3, 'F');
+    doc.roundedRect(badgeX, badgeY, badgeW, badgeH, 3, 3, 'F');
+
+    const label = `Success Probability: ${card.success_probability.toUpperCase()}`;
     doc.setFontSize(11);
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.text(`Success Probability: ${card.success_probability.toUpperCase()}`, margin + 5, yPos + 13);
-    yPos += 28;
+
+    const textX = badgeX + badgeW / 2;
+    const textY = badgeY + badgeH / 2 + 1.2; // visually center baseline
+    doc.text(label, textX, textY, { align: 'center' });
+
+    yPos += badgeH + 10;
   }
   
   // Check for new page before URL

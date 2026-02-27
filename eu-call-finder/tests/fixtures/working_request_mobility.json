@@ -1,0 +1,55 @@
+{
+  "company": {
+    "name": "Danube Smart Mobility SRL",
+    "country": "Romania",
+    "website": "https://example.com",
+    "size": "SME",
+    "sector": "Smart mobility & logistics",
+    "description": "SME building AI-assisted fleet routing and EV charging optimization for urban logistics in the Danube region."
+  },
+  "interests": {
+    "primary_topics": [
+      "Urban mobility",
+      "Clean transport",
+      "EV charging optimization",
+      "AI routing",
+      "Logistics decarbonisation"
+    ],
+    "secondary_topics": [
+      "Digital twins",
+      "IoT telematics",
+      "Public-private pilots"
+    ],
+    "preferred_programmes": [
+      "Horizon Europe",
+      "CEF Transport",
+      "Interreg Danube"
+    ],
+    "preferred_call_types": [
+      "Innovation Action",
+      "Research and Innovation Action",
+      "Pilot / Demonstration"
+    ]
+  },
+  "constraints": {
+    "geography": [
+      "EU",
+      "Danube region"
+    ],
+    "budget_eur": {
+      "min": 200000,
+      "max": 2500000
+    },
+    "time_horizon_months": 24,
+    "notes": "Looking for calls that support real-world pilots with municipalities and logistics operators."
+  },
+  "output": {
+    "language": "en",
+    "max_results": 15
+  },
+  "meta": {
+    "fixture": true,
+    "created_at": "2026-02-26",
+    "source": "synthetic test request"
+  }
+}
