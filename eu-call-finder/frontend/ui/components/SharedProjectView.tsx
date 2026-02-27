@@ -1,316 +1,291 @@
-import React, { useEffect, useMemo, useState } from "react";
-import type { FundingCard } from "../types";
+import React, { useEffect, useState } from 'react';
+import { FundingCard } from '../types';
 
-const HISTORY_SESSIONS_KEY = "eurofundfinder:sessions:v1";
-const LIKED_PROJECTS_KEY = "eurofundfinder:liked:v1";
-
-type SessionEntry = {
-  id: string;
-  createdAt: number;
-  company?: any;
-  result?: any;
-};
-
-type LikedProject = FundingCard & {
-  searchContext?: {
-    companyName: string;
-    sessionId?: string;
-    searchedAt?: number;
-  };
-};
-
-type Props = {
-  projectId: string;
-};
-
-function safeParseJson<T>(raw: string | null): T | null {
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as T;
-  } catch {
-    return null;
-  }
+interface SharedProjectViewProps {
+    projectId: string;
 }
 
-function findProjectInSessions(projectId: string): FundingCard | null {
-  const sessions = safeParseJson<SessionEntry[]>(localStorage.getItem(HISTORY_SESSIONS_KEY));
-  if (!Array.isArray(sessions)) return null;
+const HISTORY_SESSIONS_KEY = 'eurofundfinder:sessions:v1';
+const LIKED_PROJECTS_KEY = 'eurofundfinder:liked:v1';
 
-  for (const entry of sessions) {
-    const cards = entry?.result?.funding_cards;
-    if (Array.isArray(cards)) {
-      const found = cards.find((c: any) => c?.id === projectId);
-      if (found) return found as FundingCard;
-    }
-  }
+const SharedProjectView: React.FC<SharedProjectViewProps> = ({ projectId }) => {
+    const [project, setProject] = useState<FundingCard | null>(null);
 
-  return null;
-}
+    useEffect(() => {
+        let foundCard: FundingCard | null = null;
+        try {
+            // Check liked projects first
+            const likedRaw = localStorage.getItem(LIKED_PROJECTS_KEY);
+            if (likedRaw) {
+                const parsed = JSON.parse(likedRaw);
+                if (Array.isArray(parsed)) {
+                    foundCard = parsed.find(p => p && p.id === projectId) || null;
+                }
+            }
 
-function findProjectInLiked(projectId: string): FundingCard | null {
-  const liked = safeParseJson<LikedProject[]>(localStorage.getItem(LIKED_PROJECTS_KEY));
-  if (!Array.isArray(liked)) return null;
-  const found = liked.find((c) => c?.id === projectId);
-  return (found as FundingCard) || null;
-}
+            // Check sessions if not found
+            if (!foundCard) {
+                const sessionsRaw = localStorage.getItem(HISTORY_SESSIONS_KEY);
+                if (sessionsRaw) {
+                    const parsed = JSON.parse(sessionsRaw);
+                    if (Array.isArray(parsed)) {
+                        for (const entry of parsed) {
+                            const cards = entry?.result?.funding_cards;
+                            if (Array.isArray(cards)) {
+                                const found = cards.find(c => c && c.id === projectId);
+                                if (found) {
+                                    foundCard = found;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch {
+            // ignore parsing errors
+        }
 
-const formatBudget = (budget: string) => {
-  if (!budget || budget === "N/A") return "Budget N/A";
+        setProject(foundCard);
+    }, [projectId]);
 
-  const normalized = String(budget).replace(/\s+/g, " ").trim();
+    const handleReturnHome = () => {
+        window.location.hash = '';
+    };
 
-  const matches = normalized.match(/\d[\d\s,.]*/g) || [];
-  const parsed = matches
-    .map((m) => {
-      const digits = m.replace(/[^\d]/g, "");
-      if (!digits) return null;
-      const n = Number(digits);
-      return Number.isFinite(n) ? n : null;
-    })
-    .filter((n): n is number => n !== null);
-
-  const candidates = parsed.filter((n) => n >= 10000);
-
-  if (candidates.length > 0) {
-    const max = Math.max(...candidates);
-    if (max >= 1_000_000_000) return `€${(max / 1_000_000_000).toFixed(1)}B`;
-    if (max >= 1_000_000) return `€${(max / 1_000_000).toFixed(1)}M`;
-    if (max >= 1_000) return `€${(max / 1_000).toFixed(0)}K`;
-    return `€${max}`;
-  }
-
-  if (normalized.includes("€") || normalized.toLowerCase().includes("eur")) return normalized;
-  return `€${normalized}`;
-};
-
-function SectionCard({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) {
-  return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-6">
-      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-        <span className="material-icons text-primary">{icon}</span>
-        {title}
-      </h3>
-      {children}
-    </div>
-  );
-}
-
-export default function SharedProjectView({ projectId }: Props): React.ReactElement {
-  const [project, setProject] = useState<FundingCard | null>(null);
-
-  useEffect(() => {
-    // This view is opened in a new tab via `#shared/<id>`.
-    // We can only render data available locally (localStorage).
-    const fromSessions = findProjectInSessions(projectId);
-    const fromLiked = findProjectInLiked(projectId);
-    setProject(fromSessions || fromLiked);
-  }, [projectId]);
-
-  const shareUrl = useMemo(() => {
-    try {
-      return `${window.location.origin}${window.location.pathname}#shared/${encodeURIComponent(projectId)}`;
-    } catch {
-      return `#shared/${encodeURIComponent(projectId)}`;
-    }
-  }, [projectId]);
-
-  if (!project) {
-    return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="text-center py-20">
-          <div className="inline-flex items-center justify-center p-3 mb-6 bg-blue-500/10 rounded-full">
-            <span className="material-icons text-blue-600 text-4xl">link</span>
-          </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Shared project</h2>
-          <p className="mt-3 text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-            This project is not available in this browser yet.
-          </p>
-
-          <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-left">
-            <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-              Share URL
-            </div>
-            <div className="font-mono text-xs text-slate-700 dark:text-slate-200 break-all">{shareUrl}</div>
-          </div>
-
-          <p className="mt-6 text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-            This view loads the project from your local browser cache (stored results / liked projects).
-            Run a search in this browser first (or like the project), then open the share link again.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-5xl mx-auto p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200 text-xs font-semibold">
-              <span className="material-icons text-sm">link</span>
-              Shared project view
-            </div>
-            <h1 className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-white leading-tight">
-              {project.title || "Shared project"}
-            </h1>
-            <div className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              <span className="font-mono">id: {project.id}</span>
-            </div>
-          </div>
-
-          {project.url && (
-            <a
-              href={project.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-semibold flex items-center gap-2"
-            >
-              <span>Open official call</span>
-              <span className="material-icons text-[18px]">open_in_new</span>
-            </a>
-          )}
-        </div>
-
-        {/* Meta badges */}
-        <div className="mt-5 flex flex-wrap gap-3">
-          <span
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-semibold"
-            title="Profile match based on your inputs and the call text. Not a funding success prediction."
-          >
-            <span className="material-icons text-[18px] text-primary">verified</span>
-            {project.match_percentage}% Profile match
-          </span>
-
-          {project.eligibility_passed && (
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900 text-green-700 dark:text-green-300 text-sm font-semibold">
-              <span className="material-icons text-[18px]">check_circle</span>
-              Eligible
-            </span>
-          )}
-
-          {project.success_probability && (
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 text-blue-700 dark:text-blue-300 text-sm font-semibold">
-              <span className="material-icons text-[18px]">insights</span>
-              {project.success_probability} success
-            </span>
-          )}
-
-          {project.programme && (
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-900 text-purple-700 dark:text-purple-300 text-sm font-semibold">
-              <span className="material-icons text-[18px]">hub</span>
-              {project.programme}
-            </span>
-          )}
-
-          {project.budget && project.budget !== "N/A" && (
-            <span
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-semibold"
-              title="Total indicative topic budget (may be split across multiple grants)"
-            >
-              <span className="material-icons text-[18px]">account_balance</span>
-              {formatBudget(project.budget)}
-            </span>
-          )}
-
-          {project.deadline && (
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-sm font-semibold">
-              <span className="material-icons text-[18px]">event</span>
-              {project.deadline}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="grid grid-cols-1 gap-6">
-        <SectionCard title="Summary" icon="description">
-          <p className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-            {project.short_summary || project.description || ""}
-          </p>
-        </SectionCard>
-
-        {project.project_summary?.overview && (
-          <SectionCard title="Project overview" icon="description">
-            <p className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-              {project.project_summary.overview}
-            </p>
-          </SectionCard>
-        )}
-
-        {project.why_recommended && (
-          <SectionCard title="Why recommended" icon="person_check">
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-5 border-l-4 border-green-500">
-              <p className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                {project.why_recommended}
-              </p>
-            </div>
-          </SectionCard>
-        )}
-
-        {(project.key_benefits?.length ?? 0) > 0 && (
-          <SectionCard title="Key benefits" icon="stars">
-            <ul className="space-y-3">
-              {project.key_benefits.map((benefit, i) => (
-                <li key={i} className="flex items-start gap-3 bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
-                  <span className="material-icons text-green-500 text-lg">check_circle</span>
-                  <span className="text-slate-700 dark:text-slate-300">{benefit}</span>
-                </li>
-              ))}
-            </ul>
-          </SectionCard>
-        )}
-
-        {(project.action_items?.length ?? 0) > 0 && (
-          <SectionCard title="Recommended actions" icon="task_alt">
-            <div className="space-y-3">
-              {project.action_items.map((action, i) => (
-                <div key={i} className="flex items-start gap-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border-l-4 border-amber-500">
-                  <span className="material-icons text-amber-600 text-lg">arrow_forward</span>
-                  <span className="text-slate-700 dark:text-slate-300 font-medium">{action}</span>
+    if (!project) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+                <div className="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center max-w-md w-full">
+                    <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="material-icons text-3xl">error_outline</span>
+                    </div>
+                    <h2 className="text-xl font-bold text-slate-900 mb-2">Project Not Found</h2>
+                    <p className="text-slate-600 mb-6">
+                        The shared project could not be found. It may have been from a session that is no longer available on this device.
+                    </p>
+                    <button
+                        onClick={handleReturnHome}
+                        className="w-full py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                    >
+                        Return to App
+                    </button>
                 </div>
-              ))}
             </div>
-          </SectionCard>
-        )}
+        );
+    }
 
-        {(project.suggested_partners?.length ?? 0) > 0 && (
-          <SectionCard title="Suggested partners" icon="groups">
-            <ul className="space-y-3">
-              {project.suggested_partners.map((partner, i) => (
-                <li key={i} className="flex items-start gap-3 rounded-lg p-3">
-                  <span className="material-icons text-slate-400 text-lg mt-0.5">business</span>
-                  <span className="text-slate-700 dark:text-slate-300">{partner}</span>
-                </li>
-              ))}
-            </ul>
-          </SectionCard>
-        )}
+    // Format budget safely
+    const formatBudget = (budget: string) => {
+        if (!budget || budget === 'N/A') return 'Budget N/A';
+        const normalized = String(budget).replace(/\s+/g, ' ').trim();
+        const matches = normalized.match(/\d[\d\s,.]*/g) || [];
+        const parsed = matches
+            .map(m => {
+                const digits = m.replace(/[^\d]/g, '');
+                if (!digits) return null;
+                const n = Number(digits);
+                return Number.isFinite(n) ? n : null;
+            })
+            .filter((n): n is number => n !== null);
 
-        {(project.tags?.length ?? 0) > 0 && (
-          <SectionCard title="Tags" icon="label">
-            <div className="flex flex-wrap gap-2">
-              {project.tags.map((tag, i) => (
-                <span
-                  key={i}
-                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm rounded-lg font-medium"
-                >
-                  #{tag}
-                </span>
-              ))}
+        const candidates = parsed.filter(n => n >= 10000);
+
+        if (candidates.length > 0) {
+            const max = Math.max(...candidates);
+            if (max >= 1_000_000_000) return `€${(max / 1_000_000_000).toFixed(1)}B`;
+            if (max >= 1_000_000) return `€${(max / 1_000_000).toFixed(1)}M`;
+            if (max >= 1_000) return `€${(max / 1_000).toFixed(0)}K`;
+            return `€${max}`;
+        }
+        if (normalized.includes('€') || normalized.toLowerCase().includes('eur')) return normalized;
+        return `€${normalized}`;
+    };
+
+    return (
+        <div className="min-h-screen bg-slate-50 py-8 px-4">
+            <div className="max-w-4xl mx-auto space-y-6">
+
+                {/* Header navigation */}
+                <div className="flex items-center justify-between bg-white px-6 py-4 rounded-xl shadow-sm border border-slate-200">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                            <span className="material-icons">folder_shared</span>
+                        </div>
+                        <div>
+                            <h1 className="font-bold text-slate-900 leading-none">Shared Project View</h1>
+                            <span className="text-xs text-slate-500">EU Funding Matcher</span>
+                        </div>
+                    </div>
+                    <button
+                        onClick={handleReturnHome}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200 transition-colors"
+                    >
+                        <span className="material-icons text-sm">home</span>
+                        Back to App
+                    </button>
+                </div>
+
+                {/* Project Content */}
+                <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+                    <div className="p-8">
+                        {/* Header info */}
+                        <div className="flex items-start justify-between gap-4 mb-6">
+                            <div>
+                                {project.eligibility_passed && (
+                                    <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full mb-3">
+                                        Eligible call
+                                    </span>
+                                )}
+                                <h2 className="text-2xl font-bold text-slate-900 mb-2">{project.title}</h2>
+                                {project.programme && (
+                                    <p className="text-primary font-medium">{project.programme}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Quick Stats */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                                <span className="block text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Total Budget</span>
+                                <span className="font-bold text-slate-900">{formatBudget(project.budget)}</span>
+                            </div>
+                            <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                                <span className="block text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">EU Contribution</span>
+                                <span className="font-bold text-slate-900">{project.contribution && project.contribution !== 'N/A' ? formatBudget(project.contribution) : 'Varies'}</span>
+                            </div>
+                            <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                                <span className="block text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Deadline</span>
+                                <span className="font-bold text-slate-900">{project.deadline}</span>
+                            </div>
+                            <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                                <span className="block text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Status</span>
+                                <span className="font-bold text-slate-900 capitalize text-green-600">{project.status}</span>
+                            </div>
+                        </div>
+
+                        {/* Main Content Area */}
+                        <div className="space-y-8">
+
+                            {/* Description */}
+                            <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-3">
+                                    <span className="material-icons text-primary">description</span>
+                                    Project Overview
+                                </h3>
+                                <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-[15px]">
+                                    {(project.project_summary?.overview || project.description || 'No description available.').split('\n').map((paragraph, i) => (
+                                        <p key={i} className="mb-2">{paragraph}</p>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Company Fit */}
+                            {project.project_summary?.company_fit_assessment && (
+                                <div className="bg-purple-50 p-6 rounded-xl border border-purple-100">
+                                    <h3 className="text-lg font-bold text-purple-900 flex items-center gap-2 mb-3">
+                                        <span className="material-icons text-purple-600">psychology</span>
+                                        Strategic Fit Assessment
+                                    </h3>
+                                    <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed text-[15px]">
+                                        {project.project_summary.company_fit_assessment.split('\n').map((paragraph, i) => (
+                                            <p key={i} className="mb-2">{paragraph}</p>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Key Alignments & Benefits */}
+                            {((project.project_summary?.key_alignment_points && project.project_summary.key_alignment_points.length > 0) || (project.key_benefits && project.key_benefits.length > 0)) && (
+                                <div className="bg-green-50 rounded-xl p-6 border border-green-100">
+                                    <h3 className="text-lg font-bold text-green-800 flex items-center gap-2 mb-4">
+                                        <span className="material-icons">check_circle</span>
+                                        Key Strengths & Benefits
+                                    </h3>
+                                    <ul className="space-y-3">
+                                        {(project.project_summary?.key_alignment_points || project.key_benefits || []).map((item, i) => (
+                                            <li key={i} className="flex items-start gap-3">
+                                                <span className="material-icons text-green-600 text-sm mt-1">done</span>
+                                                <span className="text-slate-700">{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {/* Potential Challenges */}
+                            {project.project_summary?.potential_challenges && project.project_summary.potential_challenges.length > 0 && (
+                                <div className="bg-orange-50 rounded-xl p-6 border border-orange-100">
+                                    <h3 className="text-lg font-bold text-orange-800 flex items-center gap-2 mb-4">
+                                        <span className="material-icons text-orange-600">warning</span>
+                                        Potential Challenges & Risks
+                                    </h3>
+                                    <ul className="space-y-3">
+                                        {project.project_summary.potential_challenges.map((item, i) => (
+                                            <li key={i} className="flex items-start gap-3">
+                                                <span className="material-icons text-orange-500 text-sm mt-1">chevron_right</span>
+                                                <span className="text-slate-700">{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {/* Action Items */}
+                            {project.action_items && project.action_items.length > 0 && (
+                                <div className="bg-eu-blue/5 rounded-xl p-6 border border-eu-blue/10">
+                                    <h3 className="text-lg font-bold text-eu-blue flex items-center gap-2 mb-4">
+                                        <span className="material-icons">fact_check</span>
+                                        Recommended Actions
+                                    </h3>
+                                    <ul className="space-y-3">
+                                        {project.action_items.map((item, i) => (
+                                            <li key={i} className="flex items-start gap-3">
+                                                <span className="material-icons text-eu-blue text-sm mt-1">arrow_right</span>
+                                                <span className="text-slate-700">{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {/* Tags/Keywords */}
+                            {project.tags && project.tags.length > 0 && (
+                                <div>
+                                    <h3 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider flex items-center gap-2">
+                                        <span className="material-icons text-primary text-sm">local_offer</span>
+                                        Keywords
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {project.tags.map((tag, i) => (
+                                            <span key={i} className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-full text-sm font-medium border border-slate-200">
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Call to Action */}
+                            <div className="pt-6 border-t border-slate-200 flex justify-end">
+                                <a
+                                    href={project.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-6 py-3 bg-eu-blue text-white rounded-lg font-bold hover:bg-eu-blue/90 transition-colors shadow-md"
+                                >
+                                    View Official Call Page
+                                    <span className="material-icons text-sm">open_in_new</span>
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
             </div>
-          </SectionCard>
-        )}
-
-        {/* Footer */}
-        <div className="p-5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-            Share URL
-          </div>
-          <div className="font-mono text-xs text-slate-700 dark:text-slate-200 break-all">{shareUrl}</div>
         </div>
-      </div>
-    </div>
-  );
-}
+    );
+};
+
+export default SharedProjectView;
